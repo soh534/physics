@@ -1,3 +1,5 @@
+#include <FileIO.hpp>
+
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -23,7 +25,7 @@ namespace FileIO
 		}
 		else
 		{
-			std::cout << "WARNING: failed to read from " << srcPath << std::endl;
+			std::cout << "Warning: failed to read from " << srcPath << std::endl;
 
 			return -1;
 		}

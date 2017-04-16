@@ -20,7 +20,7 @@ namespace DemoUtils
 	};
 
 	// Allow key-framed control of bodies in world
-	void controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Point3 pos);
+	void controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos);
 	void releaseControl(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId);
 
 	// Create packed circles for mass simulation

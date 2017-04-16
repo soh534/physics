@@ -27,10 +27,10 @@ void physicsAabb::includeAabb(const physicsAabb& aabb)
 
 bool physicsAabb::overlaps(const physicsAabb& aabb)
 {
-    Point3 centerA; centerA.setAdd(m_max, m_min);
+    Vector3 centerA; centerA.setAdd(m_max, m_min);
 	centerA.setMul(centerA, 0.5f);
 
-    Point3 centerB; centerB.setAdd(aabb.m_max, aabb.m_min);
+    Vector3 centerB; centerB.setAdd(aabb.m_max, aabb.m_min);
     centerB.setMul(centerB, 0.5f);
 
     Real dx = abs(centerA(0) - centerB(0));

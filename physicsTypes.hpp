@@ -41,21 +41,21 @@ struct ContactPoint
 private:
 
 	Real m_depth;
-	Point3 m_posA; // Contact on A local to A
-	Point3 m_posB; // Contact on B local to B
+	Vector3 m_posA; // Contact on A local to A
+	Vector3 m_posB; // Contact on B local to B
 	Vector3 m_norm; // Pointing from B to A local to world
 
 public:
 
 	ContactPoint(
 		Real depth,
-		const Point3& posA,
-		const Point3& posB,
+		const Vector3& posA,
+		const Vector3& posB,
 		Vector3 norm)
 		: m_depth(depth), m_posA(posA), m_posB(posB), m_norm(norm) {}
 
 	inline const Real getDepth() const { return m_depth; }
-	inline const Point3& getContactA() const { return m_posA; }
-	inline const Point3& getContactB() const { return m_posB; }
+	inline const Vector3& getContactA() const { return m_posA; }
+	inline const Vector3& getContactB() const { return m_posB; }
 	inline const Vector3& getNormal() const { return m_norm; }
 };

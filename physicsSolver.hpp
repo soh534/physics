@@ -25,15 +25,15 @@ struct ConstrainedPair : public BodyIdPair
 class physicsSolver
 {
 public:
-	
-	physicsSolver(const Real deltaTime, const int numIterations);
+
+	physicsSolver( const Real deltaTime, const int numIterations );
 	~physicsSolver();
 
-	BodyId addSolverBody(physicsBody const * const body);
-	SolverBody& getSolverBody(const BodyId bodyId);
+	BodyId addSolverBody( physicsBody const * const body );
+	SolverBody& getSolverBody( const BodyId bodyId );
 
-	int addJointConstraint(const ConstrainedPair& joint);
-	void removeJointConstraint(JointId jointId);
+	int addJointConstraint( const ConstrainedPair& joint );
+	void removeJointConstraint( JointId jointId );
 
 	void addNewContacts( const std::vector<CollidedPair>& newCollisionsIn );
 	void updateContacts( const std::vector<CollidedPair>& remainingCollisionsIn );
@@ -44,14 +44,15 @@ public:
 		const std::vector<CollidedPair>& existingCollisionsIn,
 		const std::vector<CollidedPair>& newCollisionsIn,
 		const std::vector<BodyIdPair>& lostCollisionsIn,
-		const std::vector<physicsBody*>& bodies);
-	void solveConstraints(std::vector<physicsBody*>& updatedBodiesOut);
-	void solveConstraintPairs(std::vector<ConstrainedPair>& pairsIn, bool contact);
+		const std::vector<physicsBody*>& bodies );
+	void solveConstraints( std::vector<physicsBody*>& updatedBodiesOut );
+	void solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn, bool contact );
 
 	const Real getDeltaTime() { return m_deltaTime; }
 	const int getNumIterations() { return m_numIter; }
 
 private:
+
 	Real m_deltaTime;
 	int m_numIter;
 	std::vector<ConstrainedPair> m_contactConstraintPairs;

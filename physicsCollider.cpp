@@ -79,8 +79,8 @@ void physicsCircleCollider::collide(
 		Vector3 abHat = ab / len;
 		Vector3 baHat = abHat.getNegated();
 
-		Point3 cpA = posA + abHat * radA;
-		Point3 cpB = posB + baHat * radB;
+		Vector3 cpA = posA + abHat * radA;
+		Vector3 cpB = posB + baHat * radB;
 		Vector3 norm = cpB - cpA;
 		
 		if (norm.checkZero())
@@ -167,9 +167,9 @@ void physicsConvexCollider::getSimplexVertex(
 	const Vector3& direction,
 	physicsBody const * const bodyA,
 	physicsBody const * const bodyB,
-	Point3& vert,
-	Point3& supportA,
-	Point3& supportB) const
+	Vector3& vert,
+	Vector3& supportA,
+	Vector3& supportB) const
 {
 	Vector3 dirLocalA = direction.getRotatedDir(-1.f * bodyA->getRotation());
 	Vector3 dirLocalB = direction.getNegated().getRotatedDir(-1.f * bodyB->getRotation());
@@ -188,16 +188,16 @@ void physicsConvexCollider::getSimplexVertex(
     vert = supportA - supportB;
 }
 
-// bool physicsConvexConvexAgent::containsOrigin(std::vector<Point3f>& simplexVertices, Vector2f& direction) const
+// bool physicsConvexConvexAgent::containsOrigin(std::vector<Vector3f>& simplexVertices, Vector2f& direction) const
 // {
-//     Point3f A = simplexVertices.back();
+//     Vector3f A = simplexVertices.back();
 //     Vector3f AO = A.negated();
 
 //     int numSimplexVertices = (int)simplexVertices.size();
 //     if (numSimplexVertices == 3)
 //     {
-//         Point3f B = simplexVertices[0];
-//         Point3f C = simplexVertices[1];
+//         Vector3f B = simplexVertices[0];
+//         Vector3f C = simplexVertices[1];
         
 //         renderLine(A, B, Color::GREEN);
 //         renderLine(A, C, Color::GREEN);
@@ -238,7 +238,7 @@ void physicsConvexCollider::getSimplexVertex(
 
 struct SimplexVertex
 {
-	Point3 vert, p0, p1;
+	Vector3 vert, p0, p1;
 };
 
 struct SimplexEdge
@@ -253,8 +253,8 @@ void physicsConvexCollider::collide(
 	physicsBody const * const bodyB,
 	std::vector<ContactPoint>& contacts)
 {
-    Point3 posA = bodyA->getPosition();
-    Point3 posB = bodyB->getPosition();
+    Vector3 posA = bodyA->getPosition();
+    Vector3 posB = bodyB->getPosition();
 
     Vector3 direction = posB - posA;
 
@@ -266,13 +266,13 @@ void physicsConvexCollider::collide(
 	direction.setNormalized(direction);
 
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
-	std::vector< std::array<Point3, 3> > simplex(3);
+	std::vector< std::array<Vector3, 3> > simplex(3);
 
     getSimplexVertex(direction, bodyA, bodyB, simplex[0][0], simplex[0][1], simplex[0][2]);
 	direction.setNegated(direction);
     getSimplexVertex(direction, bodyA, bodyB, simplex[1][0], simplex[1][1], simplex[1][2]);
 
-    Point3 origin(0.0f, 0.0f);
+    Vector3 origin(0.0f, 0.0f);
 
 	physicsCd::calcClosestPointOnLine(simplex[0][0], simplex[1][0], origin, direction);
 
@@ -326,7 +326,7 @@ void physicsConvexCollider::collide(
 			/// Converged on closest feature on simplex
 			Vector3 L; L.setSub(simplex[1][0], simplex[0][0]);
 
-			Point3 pointA, pointB;
+			Vector3 pointA, pointB;
 			Vector3 normal;
 
             if (L.checkZero())
@@ -369,7 +369,7 @@ void physicsConvexCollider::collide(
         }
 
 		/// Drive simplex edge closer to origin
-		Point3 closest02, closest21;
+		Vector3 closest02, closest21;
 		if (simplex[0][0] == simplex[2][0])
 		{
 			closest02 = simplex[0][0];
@@ -417,7 +417,7 @@ void physicsConvexCollider::collide(
 	j = closest.index;
 	i = j == 0 ? szSimplex - 1 : j - 1;
 
-	Point3 pointA, pointB;
+	Vector3 pointA, pointB;
 
 	// Todo: Find out why two same vertices exist in simplex
 	Vector3 L = simplex[j][0] - simplex[i][0];
@@ -465,17 +465,17 @@ void physicsConvexCollider::collide(
 void physicsConvexCollider::expandingPolytopeAlgorithm(
 	physicsBody const * const bodyA,
 	physicsBody const * const bodyB,
-	std::vector< std::array<Point3, 3> >& simplex,
+	std::vector< std::array<Vector3, 3> >& simplex,
 	SimplexEdge& edge)
 {	
-	const Point3 origin(0.f, 0.f);
+	const Vector3 origin(0.f, 0.f);
 
 	while (true)
 	{
 		// TODO: freezes here in some collisions
 		getClosestEdgeToOrigin(simplex, edge);
 
-		Point3 vert, p0, p1;
+		Vector3 vert, p0, p1;
 		getSimplexVertex(edge.normal, bodyA, bodyB, vert, p0, p1);
 
 		Real dist = vert.dot(edge.normal);
@@ -488,14 +488,14 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 		else
 		{
 			// Expand simplex
-			std::array<Point3, 3> newSimplexVertex = { vert, p0, p1 };
-			std::vector< std::array<Point3, 3> >::iterator iter = simplex.begin();
+			std::array<Vector3, 3> newSimplexVertex = { vert, p0, p1 };
+			std::vector< std::array<Vector3, 3> >::iterator iter = simplex.begin();
 			simplex.insert(iter + edge.index, newSimplexVertex);
 		}
 	}
 }
 
-void physicsConvexCollider::getClosestEdgeToOrigin(const std::vector< std::array<Point3, 3> >& simplex, SimplexEdge& edge)
+void physicsConvexCollider::getClosestEdgeToOrigin(const std::vector< std::array<Vector3, 3> >& simplex, SimplexEdge& edge)
 {
 	edge.distSq = std::numeric_limits<Real>::max();
 	int szSimplex = (int)simplex.size();

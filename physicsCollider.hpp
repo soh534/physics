@@ -88,9 +88,9 @@ public:
 		const Vector3& direction,
 		physicsBody const * const bodyA,
 		physicsBody const * const bodyB,
-		Point3& vert,
-		Point3& supportA,
-		Point3& supportB) const;
+		Vector3& vert,
+		Vector3& supportA,
+		Vector3& supportB) const;
 
 	virtual void collide(
 		physicsBody const * const bodyA, 
@@ -100,10 +100,10 @@ public:
 	void expandingPolytopeAlgorithm(
 		physicsBody const * const bodyA,
 		physicsBody const * const bodyB,
-		std::vector< std::array<Point3, 3> >& simplex, 
+		std::vector< std::array<Vector3, 3> >& simplex, 
 		struct SimplexEdge& closest);
 
-	void getClosestEdgeToOrigin(const std::vector< std::array<Point3, 3> >& simplex, struct SimplexEdge& edge);
+	void getClosestEdgeToOrigin(const std::vector< std::array<Vector3, 3> >& simplex, struct SimplexEdge& edge);
 };
 
 #endif

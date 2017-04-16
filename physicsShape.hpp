@@ -39,11 +39,11 @@ class physicsShape : public physicsObject
 
 	virtual Real calculateInertia() const = 0;
 
-    virtual void render(const Point3& pos, const Real rot) const = 0;
+    virtual void render(const Vector3& pos, const Real rot) const = 0;
 
-    virtual bool containsPoint(const Point3& point) const = 0;
+    virtual bool containsPoint(const Vector3& point) const = 0;
 
-    virtual void getSupportingVertex(const Vector3& direction, Point3& point) const = 0;
+    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const = 0;
 
     virtual physicsAabb getAabb(const Real rot) const = 0;
 };
@@ -65,11 +65,11 @@ class physicsCircleShape : public physicsShape
 
 	virtual Real calculateInertia() const override;
  
-    virtual void render(const Point3& pos, const Real rot) const override;
+    virtual void render(const Vector3& pos, const Real rot) const override;
 
-    virtual bool containsPoint(const Point3& point) const override;
+    virtual bool containsPoint(const Vector3& point) const override;
 
-    virtual void getSupportingVertex(const Vector3& direction, Point3& point) const override;
+    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
@@ -97,18 +97,18 @@ class physicsBoxShape : public physicsShape
 
 	virtual Real calculateInertia() const override;
 
-    virtual void render(const Point3& pos, const Real rot) const override;
+    virtual void render(const Vector3& pos, const Real rot) const override;
 
-    virtual bool containsPoint(const Point3& point) const override;
+    virtual bool containsPoint(const Vector3& point) const override;
 
-    virtual void getSupportingVertex(const Vector3& direction, Point3& point) const override;
+    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
     inline const Vector3& getHalfExtents() const { return m_halfExtents; }
     
     // Determine edge facing point in this box's local coordinates
-    void getEdgeFacingPoint(const Point3& point, Point3& base, Vector3& edge);
+    void getEdgeFacingPoint(const Vector3& point, Vector3& base, Vector3& edge);
     
   protected:
 
@@ -126,7 +126,7 @@ public:
 
 	// Vertices passed can be unsorted
 	// Vertices have to be w.r.t local-space
-    physicsConvexShape(const std::vector<Point3>& vertices, const Real radius);
+    physicsConvexShape(const std::vector<Vector3>& vertices, const Real radius);
 
     virtual ~physicsConvexShape() override;
 
@@ -136,17 +136,17 @@ public:
 
 	virtual Real calculateInertia() const override;
 
-    virtual void render(const Point3& pos, const Real rot) const override;
+    virtual void render(const Vector3& pos, const Real rot) const override;
 
-    virtual bool containsPoint(const Point3& point) const override;
+    virtual bool containsPoint(const Vector3& point) const override;
 
-    virtual void getSupportingVertex(const Vector3& direction, Point3& point) const override;
+    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
 protected:
 
-    std::vector<Point3> m_vertices;
+    std::vector<Vector3> m_vertices;
 
     std::vector<int> m_connectivity;
 };

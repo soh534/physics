@@ -85,10 +85,10 @@ void physicsBody::render() const
     m_shape->render(m_pos, m_ori);
 }
 
-bool physicsBody::containsPoint(const Point3& point) const
+bool physicsBody::containsPoint(const Vector3& point) const
 {
 	// Convert point from global to body local
-	Point3 local;
+	Vector3 local;
 	local.setSub(point, m_pos);
 	local.setRotatedDir(local, -m_ori);
 
@@ -140,7 +140,7 @@ void physicsBody::applyPointImpulse(const Vector3& impulse, const Vector3& arm)
 	ss.precision(3);
 	ss << angSpeed << std::endl;
 	
-	drawText(ss.str(), Point3(200.f, 200.f));
+	drawText(ss.str(), Vector3(200.f, 200.f));
 }
 
 void physicsBody::getInvInertiaWorld(Matrix3& invInertiaWorld) const

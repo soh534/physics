@@ -53,7 +53,7 @@ public: // todo: make these private to prevent accidental change
     void render();
 
     // Utility funcs
-	void setPosition(BodyId bodyId, const Point3& point);
+	void setPosition(BodyId bodyId, const Vector3& point);
 	void setMotionType(BodyId bodyId, physicsMotionType type);
 
 	// Setters & getters

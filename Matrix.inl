@@ -1,5 +1,3 @@
-#include <cassert>
-
 inline unsigned int Matrix::getRows() const
 {
 	return m_rows;

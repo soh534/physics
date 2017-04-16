@@ -1,7 +1,7 @@
 #include <physicsCd.hpp>
 
 /// Finds closest point in line 'p1' to 'p2' from 'point'
-void physicsCd::calcClosestPointOnLine(const Point3& p1, const Point3& p2, const Point3& point, Point3& closest)
+void physicsCd::calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, const Vector3& point, Vector3& closest)
 {
 	Assert(p1 != p2, "Edge is a point");
 	Vector3 p1Point; p1Point.setSub(point, p1);
@@ -24,12 +24,12 @@ void physicsCd::calcClosestPointOnLine(const Point3& p1, const Point3& p2, const
 	}
 }
 
-void physicsCd::calcLineLineIntersection(const Point3& l0p0, const Point3& l0p1, const Point3& l1p0, const Point3& l1p1, Point3& intersection)
+void physicsCd::calcLineLineIntersection(const Vector3& l0p0, const Vector3& l0p1, const Vector3& l1p0, const Vector3& l1p1, Vector3& intersection)
 {
 
 }
 
-void physicsCd::castRay3DTri(const Point3& ra, const Point3& rb, const Point3& ta, const Point3& tb, const Point3& tc, Point3& res)
+void physicsCd::castRay3DTri(const Vector3& ra, const Vector3& rb, const Vector3& ta, const Vector3& tb, const Vector3& tc, Vector3& res)
 {
 	Vector3 norm = (tb - ta).cross(tc - ta);
 	Vector3 m = rb - ra;

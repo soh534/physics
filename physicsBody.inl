@@ -24,17 +24,17 @@ inline bool physicsBody::isStatic() const
 	return (m_type == physicsMotionType::STATIC);
 }
 
-inline const Point3& physicsBody::getPosition() const
+inline const Vector3& physicsBody::getPosition() const
 {
 	return m_pos;
 }
 
-inline Point3& physicsBody::getPosition()
+inline Vector3& physicsBody::getPosition()
 {
 	return m_pos;
 }
 
-inline void physicsBody::setPosition(const Point3& pos)
+inline void physicsBody::setPosition(const Vector3& pos)
 {
 	m_pos = pos;
 }
@@ -69,12 +69,12 @@ inline void physicsBody::setLinearVelocity(const Vector3& linearVel)
 	m_linearVelocity = linearVel;
 }
 
-inline const Point3& physicsBody::getCenterOfMass() const
+inline const Vector3& physicsBody::getCenterOfMass() const
 {
 	return m_com;
 }
 
-inline void physicsBody::setCenterOfMass(const Point3& com)
+inline void physicsBody::setCenterOfMass(const Vector3& com)
 {
 	m_com = com;
 }

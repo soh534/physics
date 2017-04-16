@@ -10,20 +10,20 @@ void DebugUtils::drawBpAabb(physicsBody const * const body)
 #endif
 }
 
-void DebugUtils::debug_print_line(const Point3& p0, const Point3& p1)
+void DebugUtils::debug_print_line(const Vector3& p0, const Vector3& p1)
 {
 #if defined (D_GJK_CONTACT_LENGTH)
 	drawLine(p0, p1);
 	std::stringstream ss;
 	ss << (p0 - p1).length() << std::endl;
-	Point3 pos;
+	Vector3 pos;
 	pos.setAdd(p0, p1);
 	pos.setDiv(pos, 2.f);
 	drawText(ss.str(), pos);
 #endif
 }
 
-void DebugUtils::debug_draw_triangle(const Point3& p0, const Point3& p1, const Point3& p2)
+void DebugUtils::debug_draw_triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2)
 {
 #if defined (D_GJK_CONTACT_LENGTH)
 	drawLine(p0, p1, RED);
@@ -35,7 +35,7 @@ void DebugUtils::debug_draw_triangle(const Point3& p0, const Point3& p1, const P
 void DebugUtils::drawMinkowskiDifference(physicsConvexCollider const * const agent)
 {
 #if defined D_GJK_MINKOWSKI
-	Point3 vertex0, vertex1, dummy0, dummy1;
+	Vector3 vertex0, vertex1, dummy0, dummy1;
 	Vector3 direction(1.0f, 0.0f);
 
 	agent->getSimplexVertex(direction, vertex0, dummy0, dummy1);
@@ -55,25 +55,25 @@ void DebugUtils::drawMinkowskiDifference(physicsConvexCollider const * const age
 #endif
 }
 
-void DebugUtils::drawContactLength(const Point3& pA, const Point3& pB, const Vector3& n)
+void DebugUtils::drawContactLength(const Vector3& pA, const Vector3& pB, const Vector3& n)
 {
 #if defined D_GJK_CONTACT_LENGTH
 	drawLine(pA, pB, BLUE);
 	std::stringstream ss;
 	ss << n.length() << std::endl;
-	Point3 pos = (pA + pB) * .5f;
+	Vector3 pos = (pA + pB) * .5f;
 	drawText(ss.str(), pos);
 #endif
 }
 
-void DebugUtils::drawTerminationSimplex(const std::vector< std::array<Point3, 3> >& simplex)
+void DebugUtils::drawTerminationSimplex(const std::vector< std::array<Vector3, 3> >& simplex)
 {
 #if defined (D_GJK_TERMINATION_SIMPLEX)	
 	debug_draw_triangle(simplex[0][0], simplex[1][0], simplex[2][0]);
 #endif
 }
 
-void DebugUtils::drawExpandedSimplex(const std::vector< std::array<Point3, 3> >& simplex)
+void DebugUtils::drawExpandedSimplex(const std::vector< std::array<Vector3, 3> >& simplex)
 {
 #if defined (D_GJK_EXPANDED_SIMPLEX)
 	int szSimplex = (int)simplex.size();

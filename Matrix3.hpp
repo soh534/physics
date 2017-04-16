@@ -1,5 +1,4 @@
-#ifndef MATRIX3_HPP
-#define MATRIX3_HPP
+#pragma once
 
 class Vector3;
 
@@ -63,5 +62,3 @@ public:
 };
 
 #include <Matrix3.inl>
-
-#endif

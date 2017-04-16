@@ -44,18 +44,18 @@ Real physicsShape::calculateInertia() const
 	return -1.f;
 }
 
-void physicsShape::render(const Point3& pos, const Real rot) const
+void physicsShape::render(const Vector3& pos, const Real rot) const
 {
     Assert(false, "Base shape class constructor shouldn't have been called");
 }
 
-bool physicsShape::containsPoint(const Point3& point) const
+bool physicsShape::containsPoint(const Vector3& point) const
 {
     Assert(false, "Base shape class containsPoint function shouldn't have been called");
     return false;
 }
 
-void physicsShape::getSupportingVertex(const Vector3& direction, Point3& point) const
+void physicsShape::getSupportingVertex(const Vector3& direction, Vector3& point) const
 {
     Assert(false, "Base shape class getSupportingVertex function shouldn't have been called");
 }
@@ -99,13 +99,13 @@ Real physicsCircleShape::calculateInertia() const
 #endif
 }
 
-void physicsCircleShape::render(const Point3& pos, const Real rot) const
+void physicsCircleShape::render(const Vector3& pos, const Real rot) const
 {
 	/// Circles don't need to have rotation taken into account
     drawCircle(pos, m_radius);
 }
 
-bool physicsCircleShape::containsPoint(const Point3& point) const
+bool physicsCircleShape::containsPoint(const Vector3& point) const
 {
     Real distSq = point.lengthSquared();
 
@@ -117,7 +117,7 @@ bool physicsCircleShape::containsPoint(const Point3& point) const
     return false;
 }
 
-void physicsCircleShape::getSupportingVertex(const Vector3& direction, Point3& point) const
+void physicsCircleShape::getSupportingVertex(const Vector3& direction, Vector3& point) const
 {
 	point.setMul(direction, m_radius);
 }
@@ -158,7 +158,7 @@ Real physicsBoxShape::calculateInertia() const
 #endif
 }
 
-void physicsBoxShape::render(const Point3& pos, const Real rot) const
+void physicsBoxShape::render(const Vector3& pos, const Real rot) const
 {
 	// Replace with multiplication by transformation matrix
 	Vector3 posNe, posNw, posSe, posSw;
@@ -183,7 +183,7 @@ void physicsBoxShape::render(const Point3& pos, const Real rot) const
 	drawLine(posSe, posNe);
 }
 
-bool physicsBoxShape::containsPoint(const Point3& point) const
+bool physicsBoxShape::containsPoint(const Vector3& point) const
 {
     if (-1.0f * m_halfExtents(0) <= point(0) && point(0) <= m_halfExtents(0) &&
         -1.0f * m_halfExtents(0) <= point(1) && point(1) <= m_halfExtents(1))
@@ -194,7 +194,7 @@ bool physicsBoxShape::containsPoint(const Point3& point) const
     return false;
 }
 
-void physicsBoxShape::getSupportingVertex(const Vector3& direction, Point3& point) const
+void physicsBoxShape::getSupportingVertex(const Vector3& direction, Vector3& point) const
 {
 	Vector3 dirNw(-m_halfExtents(0), m_halfExtents(1));
 	Vector3 dirSw(-m_halfExtents(0), -m_halfExtents(1));
@@ -245,7 +245,7 @@ physicsAabb physicsBoxShape::getAabb(const Real rot) const
 		Vector3(-w / 2.0f, -h / 2.0f));
 }
 
-void physicsBoxShape::getEdgeFacingPoint(const Point3& point, Point3& base, Vector3& edge)
+void physicsBoxShape::getEdgeFacingPoint(const Vector3& point, Vector3& base, Vector3& edge)
 {
 
 	Vector3 dirNe, dirSe;
@@ -282,7 +282,7 @@ void physicsBoxShape::getEdgeFacingPoint(const Point3& point, Point3& base, Vect
 //
 // Convex shape class functions
 //
-physicsConvexShape::physicsConvexShape(const std::vector<Point3>& vertices, const Real radius)
+physicsConvexShape::physicsConvexShape(const std::vector<Vector3>& vertices, const Real radius)
 { /// Get unsorted list of vertices, establish connections to treat as convex
 
 	/// TODO: Bug where code will fail if two same vertices exist in vertices array
@@ -352,7 +352,7 @@ Real physicsConvexShape::calculateMass() const
 {
 	Real area = 0.f;
 
-	const Point3& v0 = m_vertices[m_connectivity[0]];
+	const Vector3& v0 = m_vertices[m_connectivity[0]];
 
 	for (int i = 1; i < (int)m_vertices.size(); i++)
 	{
@@ -377,17 +377,17 @@ Real physicsConvexShape::calculateInertia() const
 #endif
 }
 
-void physicsConvexShape::render(const Point3& pos, const Real rot) const
+void physicsConvexShape::render(const Vector3& pos, const Real rot) const
 {
     int numConnectivity = (int)m_connectivity.size();
 
 	for (int i = 1; i < numConnectivity; i++)
     {
 		Vector3 dirV0; dirV0.setRotatedDir(m_vertices[m_connectivity[i-1]], rot);
-		Point3 v0; v0.setAdd(pos, dirV0);
+		Vector3 v0; v0.setAdd(pos, dirV0);
 
 		Vector3 dirV1; dirV1.setRotatedDir(m_vertices[m_connectivity[i]], rot);
-		Point3 v1; v1.setAdd(pos, dirV1);
+		Vector3 v1; v1.setAdd(pos, dirV1);
 
 		drawLine(v0, v1);
 
@@ -404,7 +404,7 @@ void physicsConvexShape::render(const Point3& pos, const Real rot) const
     }
 }
 
-bool physicsConvexShape::containsPoint(const Point3& point) const
+bool physicsConvexShape::containsPoint(const Vector3& point) const
 {
     Vector3 edge, normal, dirMpToPoint;
 
@@ -415,7 +415,7 @@ bool physicsConvexShape::containsPoint(const Point3& point) const
 		edge.setSub(m_vertices[m_connectivity[i + 1]], m_vertices[m_connectivity[i]]);
         normal.set(edge(1), -edge(0));
 		
-		Point3 midpoint; midpoint.setAddMul(m_vertices[m_connectivity[i]], edge, 0.5f);
+		Vector3 midpoint; midpoint.setAddMul(m_vertices[m_connectivity[i]], edge, 0.5f);
 		dirMpToPoint.setSub(point, midpoint);
 
 		if (normal.dot(dirMpToPoint) < 0.0f)
@@ -427,7 +427,7 @@ bool physicsConvexShape::containsPoint(const Point3& point) const
 	return true;
 }
 
-void physicsConvexShape::getSupportingVertex(const Vector3& direction, Point3& point) const
+void physicsConvexShape::getSupportingVertex(const Vector3& direction, Vector3& point) const
 {
     Real dotMax = std::numeric_limits<Real>::lowest();
     Real potentialMaxDot;

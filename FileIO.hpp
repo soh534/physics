@@ -1,9 +1,8 @@
-#ifndef FILEIO_HPP
-#define FILEIO_HPP
+#pragma once
+
+#include <string>
 
 namespace FileIO
 {
 	int loadFileStream(const char* srcPath, std::string& dstStr);
 }
-
-#endif

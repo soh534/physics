@@ -5,7 +5,7 @@
 #include <physicsShape.hpp>
 #include <physicsWorld.hpp>
 
-void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Point3 pos)
+void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos)
 {
 	// Grab bodies by attaching a dummy body to it using a joint constraint
 	if (controlInfo.dummyBodyId == invalidId &&

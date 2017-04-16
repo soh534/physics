@@ -16,12 +16,12 @@
 int g_widthWindow;
 int g_heightWindow;
 unsigned int g_framesPerSecond;
-Point3 g_topLeft;
+Vector3 g_topLeft;
 
 // Body holding
 bool g_bodyHeld = false;
 Vector3 g_arm; // Local
-Point3 g_cursor; // World
+Vector3 g_cursor; // World
 Vector3 g_cursorVel;
 int g_bodyId = -1;
 
@@ -41,7 +41,7 @@ static void error_callback(int error, const char* description)
 	fputs(description, stderr);
 }
 
-void transformGLFWToGLCoordinate(const Point3& pointGlut, Point3& pointGL)
+void transformGLFWToGLCoordinate(const Vector3& pointGlut, Vector3& pointGL)
 {
 	// Make transformation matrix inside constructor
 	Vector3 xShiftHalf(-1.f * g_widthWindow / 2.f, 0.f);
@@ -63,7 +63,7 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 	if (g_bodyId >= 0)
 	{
 		Vector3 currPos;
-		transformGLFWToGLCoordinate(Point3((Real)xpos, (Real)ypos), currPos);
+		transformGLFWToGLCoordinate(Vector3((Real)xpos, (Real)ypos), currPos);
 		g_cursorVel = (currPos - g_cursor) / g_world->getDeltaTime();
 		g_cursor = currPos;
 	}
@@ -74,7 +74,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 
-	transformGLFWToGLCoordinate(Point3((Real)x, (Real)y), g_cursor);
+	transformGLFWToGLCoordinate(Vector3((Real)x, (Real)y), g_cursor);
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld)
 	{

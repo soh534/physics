@@ -24,20 +24,20 @@
 #include <physicsCollider.hpp>
 
 class Vector3;
-typedef Vector3 Point3;
+typedef Vector3 Vector3;
 
 namespace DebugUtils
 {
 	// Broadphase
 	void drawBpAabb(physicsBody const * const body);
-	void debug_print_line(const Point3& p0, const Point3& p1);
-	void debug_draw_triangle(const Point3& p0, const Point3& p1, const Point3& p2);
+	void debug_print_line(const Vector3& p0, const Vector3& p1);
+	void debug_draw_triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2);
 
 	// Narrowphase
 	void drawMinkowskiDifference(physicsConvexCollider const * const agent);
-	void drawContactLength(const Point3& pA, const Point3& pB, const Vector3& n);
-	void drawTerminationSimplex(const std::vector< std::array<Point3, 3> >& simplex);
-	void drawExpandedSimplex(const std::vector< std::array<Point3, 3> >& simplex);
+	void drawContactLength(const Vector3& pA, const Vector3& pB, const Vector3& n);
+	void drawTerminationSimplex(const std::vector< std::array<Vector3, 3> >& simplex);
+	void drawExpandedSimplex(const std::vector< std::array<Vector3, 3> >& simplex);
 
 	// Solver
 	void drawBodyImpulse(physicsBody const * const body, const Vector3& arm, const Vector3& impulse);

@@ -20,9 +20,9 @@ class physicsBodyCinfo
 
 	physicsShape* m_shape;
 	physicsMotionType m_type;
-	Point3 m_pos;
+	Vector3 m_pos;
     Real m_ori;
-	Point3 m_com;
+	Vector3 m_com;
 	Vector3 m_linearVelocity;
     Real m_angularSpeed; /// In radians
     Real m_mass;
@@ -40,9 +40,9 @@ class physicsBody : public physicsObject
 
 	physicsShape* m_shape;
 	physicsMotionType m_type;
-	Point3 m_pos;
+	Vector3 m_pos;
 	Real m_ori;
-	Point3 m_com;
+	Vector3 m_com;
 	Vector3 m_linearVelocity;
 	Real m_angularSpeed; // Angular speed w in radians
 	Real m_mass;
@@ -62,7 +62,7 @@ class physicsBody : public physicsObject
 
     void render() const;
 
-	bool containsPoint(const Point3& point) const;
+	bool containsPoint(const Vector3& point) const;
 
     void updateAabb();
 
@@ -84,11 +84,11 @@ class physicsBody : public physicsObject
 
 	inline bool isStatic() const;
 
-	inline const Point3& getPosition() const;
+	inline const Vector3& getPosition() const;
 
-	inline Point3& getPosition();
+	inline Vector3& getPosition();
 
-	inline void setPosition(const Point3& pos);
+	inline void setPosition(const Vector3& pos);
 
 	inline const Real getRotation() const;
 
@@ -102,9 +102,9 @@ class physicsBody : public physicsObject
 
 	inline void setLinearVelocity(const Vector3& linearVel);
 
-	inline const Point3& getCenterOfMass() const;
+	inline const Vector3& getCenterOfMass() const;
 
-	inline void setCenterOfMass(const Point3& com);
+	inline void setCenterOfMass(const Vector3& com);
 
 	inline const Real getAngularSpeed() const;
 
