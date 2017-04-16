@@ -1,25 +1,16 @@
-//#version 120
+#version 400
 
-//varying vec2 uvFrag;
+in vec2 uvToFragmentShader;
+out vec4 fragmentColor;
 
-//uniform sampler2D texture;
+uniform sampler2D text;
+uniform vec3 textColor;
 
-//void main()
-//{
-//    gl_FragColor = texture2D(texture, uvFrag);
-//}
+void main()
+{
+	/// Only red-component is used by texture, use red-component as sampled alpha
+	vec4 sampled = vec4( 1.0, 1.0, 1.0, texure( text, uvToFragmentShader ).r );
 
-#version 120
-
-// Interpolated values from the vertex shaders
-varying vec2 UV;
-
-// Values that stay constant for the whole mesh.
-uniform sampler2D myTextureSampler;
-
-void main(){
-
-	gl_FragColor = texture2D( myTextureSampler, UV );
-	
-	
+	/// Multiply sampled color to desired text color
+	fragmentColor = vec4( textColor, 1.0 ) * sampled;
 }

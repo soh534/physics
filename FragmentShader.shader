@@ -1,8 +1,9 @@
-#version 120
+#version 400
 
-varying vec4 colFrag;
+in vec4 colorToFragmentShader;
+out vec4 fragmentColor;
 
 void main()
 {
-    gl_FragColor = colFrag;
+    fragmentColor = colorToFragmentShader;
 }

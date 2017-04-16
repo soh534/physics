@@ -1,12 +1,15 @@
-#version 120
+#version 400
 
-attribute vec2 pos;
-attribute vec4 col;
+layout (location = 0) in vec2 position;
+layout (location = 1) in vec4 color;
  
-varying vec4 colFrag;
+out vec4 colorToFragmentShader;
 
 void main()
 {
-    gl_Position	= vec4(pos, 0.0, 1.0);
-	colFrag = col;
+	/// todo: replace this part with a projection matrix
+	vec2 positionClipspace = position - vec2( 1024 / 2, 768 / 2 );
+	positionClipspace /= vec2( 1024 / 2, 768 / 2 );
+    gl_Position	= vec4(positionClipspace, 0, 1);
+	colorToFragmentShader = color;
 }
