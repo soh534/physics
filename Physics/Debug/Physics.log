@@ -1,0 +1,23 @@
+﻿  Vector3.cpp
+  Renderer.cpp
+  physicsWorld.cpp
+  physicsTypes.cpp
+c:\users\user\desktop\coding\physics\physics\physicstypes.cpp(10): warning C4293: '<<': shift count negative or too big, undefined behavior
+  physicsSolver.cpp
+  physicsShape.cpp
+  physicsObject.cpp
+  physicsCollider.cpp
+  physicsCd.cpp
+  physicsBody.cpp
+  physicsAabb.cpp
+  Matrix3.cpp
+  Matrix.cpp
+  main.cpp
+  Framework.cpp
+  FileIO.cpp
+  DemoUtils.cpp
+  DebugUtils.cpp
+  Generating Code...
+glew32sd.lib(glew.obj) : warning LNK4099: PDB 'glew_static.pdb' was not found with 'glew32sd.lib(glew.obj)' or at 'C:\Users\user\Desktop\coding\Physics\Debug\glew_static.pdb'; linking object as if no debug info
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\Debug\Physics.exe
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\Debug\Physics.pdb (Partial PDB)

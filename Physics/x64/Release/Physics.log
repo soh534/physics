@@ -1,0 +1,28 @@
+﻿  DebugUtils.cpp
+  DemoUtils.cpp
+  Framework.cpp
+  Matrix.cpp
+  Matrix3.cpp
+  Renderer.cpp
+  Vector3.cpp
+  main.cpp
+  physicsAabb.cpp
+  physicsBody.cpp
+  physicsCd.cpp
+  physicsCollider.cpp
+physicsCollider.cpp(418): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+  physicsShape.cpp
+  physicsSolver.cpp
+physicsSolver.cpp(48): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  physicsTypes.cpp
+physicsTypes.cpp(10): warning C4293: '<<': shift count negative or too big, undefined behavior
+  physicsWorld.cpp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Generating code
+  160 of 1960 functions ( 8.2%) were compiled, the rest were copied from previous compilation.
+    88 functions were new in current compilation
+    125 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'glew_static.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\user\Desktop\coding\Physics\x64\Release\glew_static.pdb'; linking object as if no debug info
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\x64\Release\Physics.exe
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\x64\Release\Physics.pdb (Full PDB)

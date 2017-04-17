@@ -1,0 +1,26 @@
+﻿  DebugUtils.cpp
+  DemoUtils.cpp
+  FileIO.cpp
+  Framework.cpp
+  main.cpp
+  Matrix.cpp
+  Matrix3.cpp
+  physicsAabb.cpp
+  physicsBody.cpp
+  physicsCd.cpp
+  physicsCollider.cpp
+  physicsObject.cpp
+  physicsShape.cpp
+  physicsSolver.cpp
+  physicsTypes.cpp
+physicsTypes.cpp(10): warning C4293: '<<': shift count negative or too big, undefined behavior
+  physicsWorld.cpp
+  Renderer.cpp
+  Vector3.cpp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Generating code
+  Finished generating code
+  All 1876 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'glew_static.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\user\Desktop\coding\Physics\Release\glew_static.pdb'; linking object as if no debug info
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\Release\Physics.exe
+  Physics.vcxproj -> C:\Users\user\Desktop\coding\Physics\Release\Physics.pdb (Full PDB)
