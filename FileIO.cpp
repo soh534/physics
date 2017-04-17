@@ -6,15 +6,15 @@
 
 namespace FileIO
 {
-	int loadFileStream(const char* srcPath, std::string& dstStr)
+	int loadFileStream( const char* srcPath, std::string& dstStr )
 	{
-		std::ifstream fileSrcStream(srcPath, std::ios::in);
+		std::ifstream fileSrcStream( srcPath, std::ios::in );
 
-		if (fileSrcStream.is_open())
+		if ( fileSrcStream.is_open() )
 		{
 			std::string Line = "";
 
-			while (getline(fileSrcStream, Line))
+			while ( getline( fileSrcStream, Line ) )
 			{
 				dstStr += "\n" + Line;
 			}

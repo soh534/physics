@@ -210,7 +210,6 @@ int initializeFreeType()
 	return 0;
 }
 
-
 int initializeRendering( int width, int height )
 {
 	GLenum err = glewInit();
@@ -220,10 +219,18 @@ int initializeRendering( int width, int height )
 	g_width = width;
 	g_height = height;
 
+#if defined FREETYPE_TEST
+	g_programID = LoadShaders( "../Physics/VertexShader.shader", "../Physics/FragmentShader.shader" );
+#else
 	g_programID = LoadShaders( "VertexShader.shader", "FragmentShader.shader" );
-
+#endif
 	initializeFreeType();
+
+#if defined FREETYPE_TEST
+	g_textProgramID = LoadShaders( "../Physics/TextVertexShader.shader", "../Physics/TextFragmentShader.shader" );
+#else
 	g_textProgramID = LoadShaders( "TextVertexShader.shader", "TextFragmentShader.shader" );
+#endif
 
 	/// glBindUniformLocation( g_textProgramID, "texture" );
 
@@ -424,6 +431,7 @@ Text::Text( const std::string& str, const Vector3& pos, unsigned int color )
 
 void Text::render() const
 {
+#if 0
     glUniform3f(glGetUniformLocation(s.Program, "textColor"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
@@ -462,6 +470,7 @@ void Text::render() const
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 }
 
 void drawText( const std::string& str, const Vector3& pos, unsigned int color )
