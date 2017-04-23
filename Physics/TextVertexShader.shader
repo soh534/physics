@@ -6,7 +6,7 @@ out vec2 uvToFragmentShader;
 void main()
 {
 	/// todo: replace this part with a projection matrix
-	vec2 positionClipspace = position - vec2(  1024 / 2, 768 / 2 );
+	vec2 positionClipspace = position.xy - vec2(  1024 / 2, 768 / 2 );
 	positionClipspace /= vec2(  1024 / 2, 768 / 2 );
 	gl_Position = vec4( positionClipspace, 0, 1 );
 	

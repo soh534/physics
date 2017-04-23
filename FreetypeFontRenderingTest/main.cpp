@@ -30,6 +30,7 @@ int main( int argc, char* argv[] )
 		glColor3f( 0.0f, 0.0f, 0.0f );
 
 		drawBox( Vector3( 500.f, 500.f ), Vector3( 100.f, 100.f ), RED );
+		drawText( "wow", Vector3( 250.f, 250.f ) );
 
 		clearDisplays();
 
