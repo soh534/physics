@@ -283,7 +283,7 @@ Line::Line( const Vector3& pointA, const Vector3& pointB, unsigned int color )
 		(GLfloat)( ( color >> 24 ) & 0xff ) / 255.f
 	};
 
-	glUseProgram( g_programID );
+	//glUseProgram( g_programID );
 
 	glGenVertexArrays( 1, &m_vao );
 	glBindVertexArray( m_vao );
@@ -305,6 +305,7 @@ Line::Line( const Vector3& pointA, const Vector3& pointB, unsigned int color )
 
 void Line::render() const
 {
+	//glUseProgram( g_textProgramID );
 	glUseProgram( g_programID );
 	glBindVertexArray( m_vao );
 	glDrawArrays( GL_LINE_STRIP, 0, 2 );
