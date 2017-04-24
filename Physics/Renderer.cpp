@@ -32,7 +32,8 @@ static int g_height = 0;
 
 class Line
 {
-  public:
+	
+public:
 
 	Line( const Vector3& pointA, const Vector3& pointB, unsigned int color );
 	void render() const;
@@ -43,7 +44,9 @@ class Line
 
 class Text
 {
+
 public:
+
 	Text( const std::string& str, const Vector3& pos, unsigned int color );
 	void render() const;
 
@@ -72,7 +75,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	printf( "Compiling vertex shader: %s\n", vertexShaderPath );
 	const char* vertShaderSrcPtr = vertShaderSrcStr.c_str();
 	GLuint vertShaderId = glCreateShader( GL_VERTEX_SHADER );
-	glShaderSource( vertShaderId, 1, &vertShaderSrcPtr, NULL );
+	glShaderSource( vertShaderId, 1, &vertShaderSrcPtr, nullptr );
 	glCompileShader( vertShaderId );
 
 	glGetShaderiv( vertShaderId, GL_COMPILE_STATUS, &Result );
@@ -80,7 +83,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	if ( InfoLogLength > 0 )
 	{
 		std::vector<char> VertexShaderErrorMessage( InfoLogLength + 1 );
-		glGetShaderInfoLog( vertShaderId, InfoLogLength, NULL, &VertexShaderErrorMessage[0] );
+		glGetShaderInfoLog( vertShaderId, InfoLogLength, nullptr, &VertexShaderErrorMessage[0] );
 		printf( "%s\n", &VertexShaderErrorMessage[0] );
 	}
 
@@ -88,7 +91,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	printf( "Compiling fragment shader: %s\n", fragmentShaderPath );
 	const char* fragShaderSrcPtr = fragShaderSrcStr.c_str();
 	GLuint fragShaderId = glCreateShader( GL_FRAGMENT_SHADER );
-	glShaderSource( fragShaderId, 1, &fragShaderSrcPtr, NULL );
+	glShaderSource( fragShaderId, 1, &fragShaderSrcPtr, nullptr );
 	glCompileShader( fragShaderId );
 
 	glGetShaderiv( fragShaderId, GL_COMPILE_STATUS, &Result );
@@ -96,7 +99,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	if ( InfoLogLength > 0 )
 	{
 		std::vector<char> FragmentShaderErrorMessage( InfoLogLength + 1 );
-		glGetShaderInfoLog( fragShaderId, InfoLogLength, NULL, &FragmentShaderErrorMessage[0] );
+		glGetShaderInfoLog( fragShaderId, InfoLogLength, nullptr, &FragmentShaderErrorMessage[0] );
 		printf( "%s\n", &FragmentShaderErrorMessage[0] );
 	}
 
@@ -112,7 +115,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	if ( InfoLogLength > 0 )
 	{
 		std::vector<char> ProgramErrorMessage( InfoLogLength + 1 );
-		glGetProgramInfoLog( programId, InfoLogLength, NULL, &ProgramErrorMessage[0] );
+		glGetProgramInfoLog( programId, InfoLogLength, nullptr, &ProgramErrorMessage[0] );
 		printf( "%s\n", &ProgramErrorMessage[0] );
 	}
 

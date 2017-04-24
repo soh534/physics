@@ -188,7 +188,7 @@ int initializeWindow(GLFWwindow*& window, const WindowCinfo& cinfo)
 		return -1;
 	}
 
-	window = glfwCreateWindow(cinfo.widthWindow, cinfo.heightWindow, "Simulation", NULL, NULL);
+	window = glfwCreateWindow(cinfo.widthWindow, cinfo.heightWindow, "Simulation", nullptr, nullptr);
 
 	Assert(window, "glfwCreateWindow failed");
 

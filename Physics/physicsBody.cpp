@@ -8,7 +8,7 @@
 physicsBodyCinfo::physicsBodyCinfo()
 { 
 	/// Default values if no settings are specified
-    m_shape = NULL;
+    m_shape = nullptr;
 	m_type = physicsMotionType::DYNAMIC;
     m_pos.set(0.0f, 0.0f);
     m_ori = 0.0f;

@@ -24,10 +24,10 @@ physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 {
 	m_solver = new physicsSolver( cinfo.m_deltaTime, cinfo.m_numIter );
 
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BASE, NULL );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CIRCLE, NULL );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BOX, NULL );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CONVEX, NULL );
+	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BASE, nullptr );
+	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CIRCLE, nullptr );
+	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BOX, nullptr );
+	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CONVEX, nullptr );
 	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::CIRCLE, physicsCircleCollider::create );
 	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::BOX, physicsCircleBoxCollider::create );
 	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::CONVEX, physicsConvexCollider::create );
@@ -135,7 +135,7 @@ void physicsWorld::removeBody( BodyId bodyId )
 {
 	physicsBody* body = getBody( bodyId );
 	delete body;
-	m_bodies[ bodyId ] = NULL;
+	m_bodies[ bodyId ] = nullptr;
 }
 
 void physicsWorld::removeJoint( JointId jointId )

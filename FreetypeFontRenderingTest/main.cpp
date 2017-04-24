@@ -13,7 +13,7 @@ int main( int argc, char* argv[] )
 	int width = 1024;
 	int height = 768;
 
-	window = glfwCreateWindow( width, height, "FreetypeTest", NULL, NULL );
+	window = glfwCreateWindow( width, height, "FreetypeTest", nullptr, nullptr );
 
 	Assert( window, "glfwCreateWindow failed" );
 
