@@ -12,13 +12,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-//#define GLEW_STATIC
 #include <GL/glew.h>
 
 std::vector<class Line> g_renderLines;
 std::vector<class Text> g_renderTexts;
 
-// For drawing shapes
+// For drawing lines
 static GLuint g_programID = 0;
 
 // For drawing text
@@ -432,7 +431,6 @@ Text::Text( const std::string& str, const Vector3& pos, unsigned int color )
 
 void Text::render() const
 {
-#if 1
 	glUseProgram( g_textProgramID );
 	glUniform3f( glGetUniformLocation( g_textProgramID, "textColor" ),
 				 (GLfloat)(m_color & 0xff) / 255.f,
@@ -482,7 +480,6 @@ void Text::render() const
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-#endif
 }
 
 void drawText( const std::string& str, const Vector3& pos, unsigned int color )
