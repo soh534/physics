@@ -11,8 +11,9 @@ void main()
 	/// todo:
 	/// replace this part with a projection matrix
 	/// pass screen dimensions properly
-	vec4 positionClipspace = position - vec4( 1024 / 2, 768 / 2, 0, 1 );
-	gl_Position = positionClipspace / vec4( 1024 / 2, 768 / 2, 0, 1 );
+	vec2 positionClipspace = position.xy - vec2(  1024 / 2, 768 / 2 );
+	positionClipspace /= vec2(  1024 / 2, 768 / 2 );
+	gl_Position = vec4( positionClipspace, 0, 1 );
 	
 	uvToFragmentShader = position.zw;
 	colorToFragmentShader = color;

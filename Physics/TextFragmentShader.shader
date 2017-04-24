@@ -9,7 +9,6 @@ uniform sampler2D text;
 
 void main()
 {
-	/// Multiply sampled color to desired text color
-	float alpha = texture(text, uvToFragmentShader).r;
-	fragmentColor = vec4( colorToFragmentShader.rgb , alpha );
+	/// Only red-component is used by texture, use red-component as sampled alpha
+	vec4 sampled = vec4( 1.0, 1.0, 1.0, texture( text, uvToFragmentShader ).r );
 }
