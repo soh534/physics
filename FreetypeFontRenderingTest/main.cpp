@@ -29,10 +29,12 @@ int main( int argc, char* argv[] )
 		glClear( GL_COLOR_BUFFER_BIT );
 		glColor3f( 0.0f, 0.0f, 0.0f );
 
-		//drawBox( Vector3( 500.f, 500.f ), Vector3( 100.f, 100.f ), RED );
+		drawBox( Vector3( 500.f, 500.f ), Vector3( 100.f, 100.f ), RED );
+		drawBox( Vector3( 250.f, 250.f ), Vector3( 50.f, 50.f ), BLUE );
 		drawText( "wow", Vector3( 250.f, 250.f ) );
+		drawText( "god", Vector3( 300.f, 300.f ) );
 
-		clearDisplays();
+		step();
 
 		glfwSwapBuffers( window );
 	}

@@ -17,7 +17,7 @@
 
 int initializeRendering(int width, int height);
 int closeRendering();
-int clearDisplays();
+int step();
 
 void drawLine(const Vector3& p1, const Vector3& p2, unsigned int = BLACK);
 void drawCross(const Vector3& pos, const Real rot, const Real len, unsigned int = BLACK);

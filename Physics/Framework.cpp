@@ -140,7 +140,7 @@ void stepRender(GLFWwindow* window)
 		}
 	}
 
-	clearDisplays();
+	step();
 
 	glfwSwapBuffers(window);
 }
