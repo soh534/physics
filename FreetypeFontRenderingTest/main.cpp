@@ -31,8 +31,12 @@ int main( int argc, char* argv[] )
 
 		drawBox( Vector3( 500.f, 500.f ), Vector3( 100.f, 100.f ), RED );
 		drawBox( Vector3( 250.f, 250.f ), Vector3( 50.f, 50.f ), BLUE );
+		drawText( "bbbbbbb", Vector3( 25.f, 25.f ), BLUE );
 		drawText( "wow", Vector3( 250.f, 250.f ) );
-		drawText( "god", Vector3( 300.f, 300.f ) );
+		drawText( "aaaaaaa", Vector3( 300.f, 300.f ) );
+		drawText( "ccccccc", Vector3( 0.f, 500.f ), RED );
+		drawText( "eeeeeee", Vector3( 0.f, 400.f ), GREEN );
+		drawText( "123456", Vector3( 0.f, 200.f ) );
 
 		step();
 

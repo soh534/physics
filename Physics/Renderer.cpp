@@ -14,6 +14,10 @@
 
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 std::vector<class Line> g_renderLines;
 std::vector<class Text> g_renderTexts;
 
@@ -146,12 +150,16 @@ int initializeFreeType()
 	Assert( !FT_New_Face( library, "C:\\Windows\\Fonts\\consola.ttf", 0, &face ),
 			"failed to load font face" );
 
-	Assert( !FT_Set_Char_Size( face, 0, 16 * 64, g_width, g_height ),
-			"failed to set font pixel size" );
+	//Assert( !FT_Set_Char_Size( face, 0, 16 * 64, g_width, g_height ),
+	//		"failed to set font pixel size" );
+
+	Assert( !FT_Set_Pixel_Sizes( face, 0, 48 ), "failed to define font size" );
 
 	/// Pre-load characters
 	/// Rendering technique taken from
 	/// https://learnopengl.com/#!In-Practice/Text-Rendering
+
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
 	for ( GLubyte c = 0; c < 128; c++ )
 	{
@@ -171,8 +179,8 @@ int initializeFreeType()
 					  GL_UNSIGNED_BYTE,
 					  face->glyph->bitmap.buffer);
 
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
@@ -186,8 +194,6 @@ int initializeFreeType()
 
 		Characters.insert( std::pair<GLchar, Character>( c, character ) );
 	}
-
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
 	FT_Done_Face( face );
 	FT_Done_FreeType( library );
@@ -437,10 +443,17 @@ void Text::render() const
 				 (GLfloat)(m_color >> 8 & 0xff) / 255.f,
 				 (GLfloat)(m_color >> 16 & 0xff) / 255.f );
 
+	// TODO: shouldn't need to do this every time
+	glm::mat4 projection = glm::ortho( 0.f, 1024.f, 0.f, 768.f );
+	glUniformMatrix4fv( glGetUniformLocation( g_txtProgramID, "projection" ), 
+						1, 
+						GL_FALSE, 
+						glm::value_ptr( projection ) );
+
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(g_txtVAO);
 
-	float scale = 1.0f;
+	float scale = .3f;
 
 	Real x = m_pos( 0 );
 	Real y = m_pos( 1 );
@@ -452,19 +465,19 @@ void Text::render() const
 		Character ch = Characters[*c];
 
         GLfloat xpos = x + ch.m_bearing.x * scale;
-        GLfloat ypos = y - (ch.m_bearing.y - ch.m_bearing.y) * scale;
+        GLfloat ypos = y - (ch.m_size.y - ch.m_bearing.y) * scale;
 
         GLfloat w = ch.m_size.x * scale;
         GLfloat h = ch.m_size.y * scale;
         // Update VBO for each character
         GLfloat vertices[6][4] = {
-            { xpos,     ypos + h,   0.0, 0.0 },            
+            { xpos,     ypos + h,   0.0, 0.0 },
             { xpos,     ypos,       0.0, 1.0 },
             { xpos + w, ypos,       1.0, 1.0 },
 
             { xpos,     ypos + h,   0.0, 0.0 },
             { xpos + w, ypos,       1.0, 1.0 },
-            { xpos + w, ypos + h,   1.0, 0.0 }           
+            { xpos + w, ypos + h,   1.0, 0.0 }
         };
         // Render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.m_textureId);
