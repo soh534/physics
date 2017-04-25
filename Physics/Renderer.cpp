@@ -453,7 +453,7 @@ void Text::render() const
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(g_txtVAO);
 
-	float scale = .3f;
+	float scale = .3f; // TODO: move this as a parameter
 
 	Real x = m_pos( 0 );
 	Real y = m_pos( 1 );

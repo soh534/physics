@@ -161,7 +161,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -40.0f, -40.0f ) );
 		vertices.push_back( Vector3( -40.0f, 40.0f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
-		cinfo.m_pos.set( 115.0f, 65.0f );
+		cinfo.m_pos.set( 512.f, 384.f );
 		//cinfo.m_ori = 77 * g_degToRad;
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
 		physicsBody* body = new physicsBody( cinfo );
@@ -290,7 +290,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 25.f, -200.f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
-		cinfo.m_pos.set( -425.f, 0.f );
+		cinfo.m_pos.set( 87.f, 384.f );
 		physicsBody* body = new physicsBody( cinfo );
 		world->addBody( body );
 	}
@@ -306,7 +306,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 400.f, -25.f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
-		cinfo.m_pos.set( 0.f, 225.f );
+		cinfo.m_pos.set( 512.f, 609.f );
 		physicsBody* body = new physicsBody( cinfo );
 		world->addBody( body );
 	}
@@ -322,7 +322,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -25.f, -200.f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
-		cinfo.m_pos.set( 425.f, 0.f );
+		cinfo.m_pos.set( 937.f, 384.f );
 		physicsBody* body = new physicsBody( cinfo );
 		world->addBody( body );
 	}
@@ -338,7 +338,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 400.f, 25.f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
-		cinfo.m_pos.set( 0.f, -225.f );
+		cinfo.m_pos.set( 512.f, 159.f );
 		physicsBody* body = new physicsBody( cinfo );
 		world->addBody( body );
 	}
