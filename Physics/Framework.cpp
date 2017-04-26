@@ -74,7 +74,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 
+	drawCross( Vector3( x, y ), 0.f, 10.f, RED ); // debug
+
 	transformGLFWToGLCoordinate(Vector3((Real)x, (Real)y), g_cursor);
+
+	drawCross( g_cursor, 0, 10.f, BLUE ); // debug
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld)
 	{

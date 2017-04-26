@@ -259,6 +259,7 @@ void physicsSolver::preSolve(
 	}
 	
 	/// Remove constrained pairs that have lost broadphase
+	/// TODO: replace this with O(N)
 	vector<ConstrainedPair>::iterator iter = m_contactConstraintPairs.begin();
 	while ( iter != m_contactConstraintPairs.end() )
 	{

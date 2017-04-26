@@ -39,7 +39,7 @@ class Line
 	
 public:
 
-	Line( const Vector3& pointA, const Vector3& pointB, unsigned int color );
+	Line( const Vector3& pointA, const Vector3& pointB, unsigned int color = BLACK);
 	void render() const;
 
 	Vector3 m_pointA, m_pointB;
@@ -51,11 +51,12 @@ class Text
 
 public:
 
-	Text( const std::string& str, const Vector3& pos, unsigned int color );
+	Text( const std::string& str, const Vector3& pos, const Real scale = 1.f, unsigned int color = BLACK);
 	void render() const;
 
 	std::string m_str;
 	Vector3 m_pos;
+	Real m_scale;
 	unsigned int m_color;
 };
 
@@ -150,10 +151,7 @@ int initializeFreeType()
 	Assert( !FT_New_Face( library, "C:\\Windows\\Fonts\\consola.ttf", 0, &face ),
 			"failed to load font face" );
 
-	//Assert( !FT_Set_Char_Size( face, 0, 16 * 64, g_width, g_height ),
-	//		"failed to set font pixel size" );
-
-	Assert( !FT_Set_Pixel_Sizes( face, 0, 48 ), "failed to define font size" );
+	Assert( !FT_Set_Pixel_Sizes( face, 0, 16 ), "failed to define font size" );
 
 	/// Pre-load characters
 	/// Rendering technique taken from
@@ -382,55 +380,32 @@ void drawCircle( const Vector3& pos, const Real radius, unsigned int color )
 	}
 }
 
-#define RENDER_AXIS_MARKERS
-
 void renderAxis()
-{ // Draw full-length cross in origin
-	drawLine( Vector3( -g_width / 2.f, 0.f ), Vector3( g_width / 2.f, 0.f ) );
-	drawLine( Vector3( 0.f, g_height / 2.f ), Vector3( 0.f, -g_height / 2.f ) );
+{ 
+	Vector3 offset(5.f, 5.f);
 
-#if defined(RENDER_AXIS_MARKERS)
-	int widthLimit = ( g_width / 20 ) * 10;
-	int heightLimit = ( g_height / 20 ) * 10;
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( g_width, 0.f ) + offset ); // X-axis
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, g_height ) + offset ); // Y-axis
 
 	const int interval = 50;
 
-	for ( int i = 0; i > -widthLimit; i -= interval )
-	{
-		std::stringstream ss;
-		ss << i;
-		drawText( ss.str(), Vector3( (Real)i, 5.0f ) );
-		drawLine( Vector3( (Real)i, 2.5f ), Vector3( (Real)i, -2.5f ) );
-	}
+	Vector3 textOffset = offset * 2;
 
-	for ( int i = interval; i < widthLimit; i += interval )
+	for (int i = 0; i < g_width; i += interval)
 	{
-		std::stringstream ss;
-		ss << i;
-		drawText( ss.str(), Vector3( (Real)i, 5.0f ) );
-		drawLine( Vector3( (Real)i, 2.5f ), Vector3( (Real)i, -2.5f ) );
+		drawLine( Vector3( i, 0.f ) + offset, Vector3( i, 10.f ) + offset );
+		drawText( std::to_string( i ), Vector3( i, 0.f ) + textOffset );
 	}
-
-	for ( int i = 0; i > -heightLimit; i -= interval )
+	
+	for (int i = 0; i < g_height; i += interval)
 	{
-		std::stringstream ss;
-		ss << i;
-		drawText( ss.str(), Vector3( 5.0f, (Real)i ) );
-		drawLine( Vector3( 2.5f, (Real)i ), Vector3( -2.5f, (Real)i ) );
+		drawLine( Vector3( 0.f, i ) + offset, Vector3( 10.f, i ) + offset );
+		drawText( std::to_string( i ), Vector3( 0.f, i ) + textOffset );
 	}
-
-	for ( int i = interval; i < heightLimit; i += interval )
-	{
-		std::stringstream ss;
-		ss << i;
-		drawText( ss.str(), Vector3( 5.0f, (Real)i ) );
-		drawLine( Vector3( 2.5f, (Real)i ), Vector3( -2.5f, (Real)i ) );
-	}
-#endif
 }
 
-Text::Text( const std::string& str, const Vector3& pos, unsigned int color )
-	: m_str( str ), m_pos( pos ), m_color( color )
+Text::Text( const std::string& str, const Vector3& pos, const Real scale, unsigned int color )
+	: m_str( str ), m_pos( pos ), m_scale( scale ), m_color( color )
 {
 
 }
@@ -453,8 +428,6 @@ void Text::render() const
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(g_txtVAO);
 
-	float scale = .3f; // TODO: move this as a parameter
-
 	Real x = m_pos( 0 );
 	Real y = m_pos( 1 );
 
@@ -464,11 +437,11 @@ void Text::render() const
 	{
 		Character ch = Characters[*c];
 
-        GLfloat xpos = x + ch.m_bearing.x * scale;
-        GLfloat ypos = y - (ch.m_size.y - ch.m_bearing.y) * scale;
+        GLfloat xpos = x + ch.m_bearing.x * m_scale;
+        GLfloat ypos = y - (ch.m_size.y - ch.m_bearing.y) * m_scale;
 
-        GLfloat w = ch.m_size.x * scale;
-        GLfloat h = ch.m_size.y * scale;
+        GLfloat w = ch.m_size.x * m_scale;
+        GLfloat h = ch.m_size.y * m_scale;
         // Update VBO for each character
         GLfloat vertices[6][4] = {
             { xpos,     ypos + h,   0.0, 0.0 },
@@ -489,13 +462,13 @@ void Text::render() const
         // Render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.m_advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+        x += (ch.m_advance >> 6) * m_scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void drawText( const std::string& str, const Vector3& pos, unsigned int color )
+void drawText( const std::string& str, const Vector3& pos, const Real scale, unsigned int color )
 {
-	g_renderTexts.push_back( Text( str, pos, color ) );
+	g_renderTexts.push_back( Text( str, pos, scale, color ) );
 }

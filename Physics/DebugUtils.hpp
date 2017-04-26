@@ -2,7 +2,7 @@
 #define DEBUG_UTILS_HPP
 
 // Debugging macros
-//#define D_BROADPHASE
+#define D_BROADPHASE
 
 //#define D_TANGENTIAL_IMPULSE
 //#define D_CONTACT_IMPULSE
@@ -24,7 +24,6 @@
 #include <physicsCollider.hpp>
 
 class Vector3;
-typedef Vector3 Vector3;
 
 namespace DebugUtils
 {

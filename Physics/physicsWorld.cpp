@@ -168,7 +168,7 @@ void physicsWorld::stepSolve(
 	const std::vector<CollidedPair>& newCollisionsIn,
 	const std::vector<BodyIdPair>& lostCollisionsIn )
 {
-	// Apply gravity, then solve constraints
+	/// Apply gravity, then solve constraints
 	int numBodies = (int)m_bodies.size();
 
 	for ( int i = 0; i < numBodies; i++ )
@@ -185,7 +185,7 @@ void physicsWorld::stepSolve(
 	m_solver->preSolve( existingCollisionsIn, newCollisionsIn, lostCollisionsIn, m_bodies );
 	m_solver->solveConstraints( m_bodies );
 
-	// Time integration
+	/// Time integration
 	for ( int i = 0; i < numBodies; i++ )
 	{
 		physicsBody* body = m_bodies[ i ];
@@ -315,7 +315,7 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 			collisionsOut.push_back( collision );
 		}
 
-		delete collider;
+		delete collider; /// TODO: don't delete, cache collision in collider maybe?
 	}
 }
 
@@ -330,28 +330,28 @@ void differentiateRemainedAndNewPairs(
 	while ( iterLast != lastPairs.end() || iterFound != foundPairs.end() )
 	{
 		if ( iterLast == lastPairs.end() )
-		{ // New pairs, add all
+		{ /// New pairs, add all
 			newPairs.insert( std::end( newPairs ), iterFound, std::end( foundPairs ) );
 			break;
 		}
 
 		if ( iterFound == foundPairs.end() )
-		{ // Deleted pairs, remove all i.e ignore
+		{ /// Deleted pairs, remove all i.e ignore
 			break;
 		}
 
 		if ( *iterLast == *iterFound )
-		{ // Remained pair, re-add
+		{ /// Remained pair, re-add
 			remainedPairs.push_back( *iterFound );
 			iterLast++;
 			iterFound++;
 		}
 		else if ( *iterLast < *iterFound )
-		{ // Deleted pair, remove
+		{ /// Deleted pair, remove
 			iterLast++;
 		}
 		else if ( *iterLast > *iterFound )
-		{ // New pair, add
+		{ /// New pair, add
 			newPairs.push_back( *iterFound );
 			iterFound++;
 		}
@@ -363,8 +363,8 @@ void physicsWorld::stepCollide(
 	std::vector<CollidedPair>& newCollisionsOut,
 	std::vector<BodyIdPair>& lostCollisionsOut )
 {
-	// 1. Add the pairs found in last frame to existing pairs
-	// 2. Look through existing pairs and pairs within this frame to classify new & existing pairs
+	/// 1. Add the pairs found in last frame to existing pairs
+	/// 2. Look through existing pairs and pairs within this frame to classify new & existing pairs
 
 	/// Broadphase
 	std::vector<BodyIdPair> bpPassedPairs;
@@ -381,6 +381,7 @@ void physicsWorld::stepCollide(
 	std::vector<BodyIdPair> bpRemainedPairs;
 	differentiateRemainedAndNewPairs( m_existingPairs, bpPassedPairs, bpRemainedPairs, m_newPairs );
 
+	/// TODO: replace this with O(N)
 	for ( int i = 0; i < (int)m_existingPairs.size(); i++ )
 	{
 		bool found = false;
@@ -412,6 +413,7 @@ void physicsWorld::stepCollide(
 	std::vector<CollidedPair> npRemainedPairs;
 	differentiateRemainedAndNewPairs( m_existingCollidedPairs, npPassedPairs, npRemainedPairs, m_newCollidedPairs );
 
+	/// TODO: replace this with O(N)
 	for ( int i = 0; i < (int)bpRemainedPairs.size(); i++ )
 	{
 		for ( int j = 0; j < (int)npRemainedPairs.size(); j++ )

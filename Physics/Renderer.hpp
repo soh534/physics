@@ -26,4 +26,4 @@ void drawBox(const Vector3& max, const Vector3& min, unsigned int = BLACK);
 void drawCircle(const Vector3& pos, const Real radius, unsigned int = BLACK);
 void renderAxis();
 
-void drawText(const std::string& str, const Vector3& pos, unsigned int = BLACK);
+void drawText(const std::string& str, const Vector3& pos, const Real scale = 1.f, unsigned int = BLACK);

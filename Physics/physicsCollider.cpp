@@ -102,7 +102,7 @@ void physicsCircleCollider::collide(
     }
 }
 
-// Circle-box collision agent class functions
+/// Circle-box collision agent class functions
 physicsCircleBoxCollider::physicsCircleBoxCollider()
 {
 
@@ -113,7 +113,7 @@ physicsCollider* physicsCircleBoxCollider::create()
 	return new physicsCircleBoxCollider;
 }
 
-// A: Circle, B: Box
+/// A: Circle, B: Box
 void physicsCircleBoxCollider::collide(
 	physicsBody const * const bodyA,
 	physicsBody const * const bodyB,
@@ -127,7 +127,7 @@ void physicsCircleBoxCollider::collide(
 	}
 }
 
-// Box-box collision agent class functions
+/// Box-box collision agent class functions
 physicsBoxCollider::physicsBoxCollider()
 {
 
