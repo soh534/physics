@@ -39,6 +39,7 @@ physicsCircleCollider::physicsCircleCollider()
 
 physicsCollider* physicsCircleCollider::create()
 {
+	/// TODO: ref pointer
 	return new physicsCircleCollider;
 }
 
@@ -75,7 +76,7 @@ void physicsCircleCollider::collide(
 
 	if (depth > 0.f)
     {
-		/// Todo: has problem when a circle is exactly overlapping another
+		/// TODO: has problem when a circle is exactly overlapping another
 		Vector3 abHat = ab / len;
 		Vector3 baHat = abHat.getNegated();
 
@@ -85,7 +86,7 @@ void physicsCircleCollider::collide(
 		
 		if (norm.checkZero())
 		{
-			/// Todo: Treated as touching due to numerical error
+			/// TODO: Treated as touching due to numerical error
 			return;
 		}
 		

@@ -2,6 +2,9 @@
 
 #include <DebugUtils.hpp>
 
+/// TODO: these debug macros should be checked for in the calling function
+/// instead of having these functions being called @ default
+
 void DebugUtils::drawBpAabb(physicsBody const * const body)
 {
 #if defined D_BROADPHASE
@@ -14,12 +17,8 @@ void DebugUtils::debug_print_line(const Vector3& p0, const Vector3& p1)
 {
 #if defined (D_GJK_CONTACT_LENGTH)
 	drawLine(p0, p1);
-	std::stringstream ss;
-	ss << (p0 - p1).length() << std::endl;
-	Vector3 pos;
-	pos.setAdd(p0, p1);
-	pos.setDiv(pos, 2.f);
-	drawText(ss.str(), pos);
+	Vector3 pos = p0 + p1;
+	drawText( std::to_string( (p0 - p1).length() ), pos / 2.f );
 #endif
 }
 
@@ -59,10 +58,8 @@ void DebugUtils::drawContactLength(const Vector3& pA, const Vector3& pB, const V
 {
 #if defined D_GJK_CONTACT_LENGTH
 	drawLine(pA, pB, BLUE);
-	std::stringstream ss;
-	ss << n.length() << std::endl;
 	Vector3 pos = (pA + pB) * .5f;
-	drawText(ss.str(), pos);
+	drawText( std::to_string( n.length() ), pos );
 #endif
 }
 

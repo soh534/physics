@@ -296,12 +296,12 @@ void physicsWorld::broadPhase( std::vector<BodyIdPair>& broadPhasePassedPairsOut
 
 void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedPairs, std::vector<CollidedPair>& collisionsOut )
 {
-	for ( int i = 0; i < (int)broadPhasePassedPairs.size(); i++ )
+	for ( auto bodyIdPair = broadPhasePassedPairs.begin();
+		  bodyIdPair != broadPhasePassedPairs.end();
+		  bodyIdPair++ )
 	{
-		const BodyIdPair& pair = broadPhasePassedPairs[ i ];
-
-		physicsBody const * bodyA = getBody( pair.bIdA );
-		physicsBody const * bodyB = getBody( pair.bIdB );
+		physicsBody const * bodyA = getBody( bodyIdPair->bIdA );
+		physicsBody const * bodyB = getBody( bodyIdPair->bIdB );
 
 		physicsCollider* collider = createCollider( bodyA, bodyB );
 
@@ -310,8 +310,8 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 
 		if ( collision.cp.size() > 0 )
 		{
-			collision.bIdA = pair.bIdA;
-			collision.bIdB = pair.bIdB;
+			collision.bIdA = bodyIdPair->bIdA;
+			collision.bIdB = bodyIdPair->bIdB;
 			collisionsOut.push_back( collision );
 		}
 
@@ -319,41 +319,60 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 	}
 }
 
-template<typename Type>
-void differentiateRemainedAndNewPairs(
-	const std::vector<Type>& lastPairs, const std::vector<Type>& foundPairs,
-	std::vector<Type>& remainedPairs, std::vector<Type>& newPairs )
+
+namespace BodyIdPairsUtils
 {
-	std::vector<Type>::const_iterator iterLast = lastPairs.begin();
-	std::vector<Type>::const_iterator iterFound = foundPairs.begin();
-
-	while ( iterLast != lastPairs.end() || iterFound != foundPairs.end() )
+	/// Add contents of vector B to vector A, clear B after, implemented just to improve readability
+	template <typename T>
+	inline void moveVecBtoA( std::vector<T>& a, std::vector<T>& b )
 	{
-		if ( iterLast == lastPairs.end() )
-		{ /// New pairs, add all
-			newPairs.insert( std::end( newPairs ), iterFound, std::end( foundPairs ) );
-			break;
-		}
+		a.insert( std::end( a ), std::begin( b ), std::end( b ) );
+		b.clear();
+	}
 
-		if ( iterFound == foundPairs.end() )
-		{ /// Deleted pairs, remove all i.e ignore
-			break;
-		}
+	/// Classifies contents of a and b into intersection and relative complements
+	/// i.e. c = ab', d = ab, e = a'b
+	/// Contents of a and b must be sorted in same order
+	template<typename T>
+	void classifySets(
+		const std::vector<T>& a,
+		const std::vector<T>& b,
+		std::vector<T>& c,
+		std::vector<T>& d,
+		std::vector<T>& e )
+	{
+		auto iterA = a.begin();
+		auto iterB = b.begin();
 
-		if ( *iterLast == *iterFound )
-		{ /// Remained pair, re-add
-			remainedPairs.push_back( *iterFound );
-			iterLast++;
-			iterFound++;
-		}
-		else if ( *iterLast < *iterFound )
-		{ /// Deleted pair, remove
-			iterLast++;
-		}
-		else if ( *iterLast > *iterFound )
-		{ /// New pair, add
-			newPairs.push_back( *iterFound );
-			iterFound++;
+		while (iterA != a.end() || iterB != b.end())
+		{
+			if (iterA == a.end())
+			{
+				e.insert( std::end( e ), iterB, std::end( b ) );
+				break;
+			}
+			if (iterB == b.end())
+			{
+				c.insert( std::end( c ), iterA, std::end( a ) );
+				break;
+			}
+
+			if (*iterA == *iterB)
+			{
+				d.push_back( *iterB );
+				iterA++;
+				iterB++;
+			}
+			else if (*iterA < *iterB)
+			{
+				c.push_back( *iterA );
+				iterA++;
+			}
+			else if (*iterA > *iterB)
+			{
+				e.push_back( *iterB );
+				iterB++;
+			}
 		}
 	}
 }
@@ -371,47 +390,27 @@ void physicsWorld::stepCollide(
 	broadPhase( bpPassedPairs );
 	std::sort( bpPassedPairs.begin(), bpPassedPairs.end(), bodyIdPairLess );
 
-	m_existingPairs.insert(
-		std::end( m_existingPairs ),
-		std::begin( m_newPairs ),
-		std::end( m_newPairs )
-	);
-	m_newPairs.clear();
+	BodyIdPairsUtils::moveVecBtoA( m_existingPairs, m_newPairs );
 
-	std::vector<BodyIdPair> bpRemainedPairs;
-	differentiateRemainedAndNewPairs( m_existingPairs, bpPassedPairs, bpRemainedPairs, m_newPairs );
-
-	/// TODO: replace this with O(N)
-	for ( int i = 0; i < (int)m_existingPairs.size(); i++ )
-	{
-		bool found = false;
-		for ( int j = 0; j < (int)bpRemainedPairs.size(); j++ )
-		{
-			if ( m_existingPairs[ i ] == bpRemainedPairs[ j ] )
-			{
-				found = true;
-			}
-		}
-
-		if ( !found )
-		{
-			lostCollisionsOut.push_back( m_existingPairs[ i ] );
-		}
-	}
+	std::vector<BodyIdPair> bpRemainedPairs, bpLostPairs;
+	BodyIdPairsUtils::classifySets( m_existingPairs, 
+									bpPassedPairs, 
+									lostCollisionsOut, 
+									bpRemainedPairs,
+									m_newPairs );
 
 	/// Narrowphase
 	std::vector<CollidedPair> npPassedPairs;
 	narrowPhase( bpPassedPairs, npPassedPairs );
 
-	m_existingCollidedPairs.insert(
-		std::end( m_existingCollidedPairs ),
-		std::begin( m_newCollidedPairs ),
-		std::end( m_newCollidedPairs )
-	);
-	m_newCollidedPairs.clear();
+	BodyIdPairsUtils::moveVecBtoA( m_existingCollidedPairs, m_newCollidedPairs );
 
-	std::vector<CollidedPair> npRemainedPairs;
-	differentiateRemainedAndNewPairs( m_existingCollidedPairs, npPassedPairs, npRemainedPairs, m_newCollidedPairs );
+	std::vector<CollidedPair> npRemainedPairs, npLostPairs;
+	BodyIdPairsUtils::classifySets( m_existingCollidedPairs, 
+									npPassedPairs, 
+									npLostPairs,
+									npRemainedPairs,
+									m_newCollidedPairs );
 
 	/// TODO: replace this with O(N)
 	for ( int i = 0; i < (int)bpRemainedPairs.size(); i++ )
@@ -442,11 +441,12 @@ bool physicsWorld::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
 	return false;
 }
 
+/// TODO: move this function outside of physics
 void physicsWorld::render()
 {
-	for ( int i = 0; i < (int)m_bodies.size(); i++ )
+	for (auto body = m_bodies.begin(); body != m_bodies.end(); body++)
 	{
-		m_bodies[ i ]->render();
+		(*body)->render();
 	}
 }
 
