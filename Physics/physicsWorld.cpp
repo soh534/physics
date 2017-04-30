@@ -24,16 +24,16 @@ physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 {
 	m_solver = new physicsSolver( cinfo.m_deltaTime, cinfo.m_numIter );
 
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BASE, nullptr );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CIRCLE, nullptr );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::BOX, nullptr );
-	registerColliderCreateFunc( physicsShape::BASE, physicsShape::CONVEX, nullptr );
-	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::CIRCLE, physicsCircleCollider::create );
-	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::BOX, physicsCircleBoxCollider::create );
-	registerColliderCreateFunc( physicsShape::CIRCLE, physicsShape::CONVEX, physicsConvexCollider::create );
-	registerColliderCreateFunc( physicsShape::BOX, physicsShape::BOX, physicsBoxCollider::create );
-	registerColliderCreateFunc( physicsShape::BOX, physicsShape::CONVEX, physicsConvexCollider::create );
-	registerColliderCreateFunc( physicsShape::CONVEX, physicsShape::CONVEX, physicsConvexCollider::create );
+	registerColliderFunc( physicsShape::BASE, physicsShape::BASE, nullptr );
+	registerColliderFunc( physicsShape::BASE, physicsShape::CIRCLE, nullptr );
+	registerColliderFunc( physicsShape::BASE, physicsShape::BOX, nullptr );
+	registerColliderFunc( physicsShape::BASE, physicsShape::CONVEX, nullptr );
+	registerColliderFunc( physicsShape::CIRCLE, physicsShape::CIRCLE, physicsCircleCollider::collide );
+	registerColliderFunc( physicsShape::CIRCLE, physicsShape::BOX, physicsCircleBoxCollider::collide );
+	registerColliderFunc( physicsShape::CIRCLE, physicsShape::CONVEX, physicsConvexCollider::collide );
+	registerColliderFunc( physicsShape::BOX, physicsShape::BOX, physicsBoxCollider::collide );
+	registerColliderFunc( physicsShape::BOX, physicsShape::CONVEX, physicsConvexCollider::collide );
+	registerColliderFunc( physicsShape::CONVEX, physicsShape::CONVEX, physicsConvexCollider::collide );
 }
 
 physicsWorld::~physicsWorld()
@@ -42,7 +42,7 @@ physicsWorld::~physicsWorld()
 	m_bodies.clear();
 }
 
-void physicsWorld::registerColliderCreateFunc( physicsShape::Type typeA, physicsShape::Type typeB, CreateColliderFunc func )
+void physicsWorld::registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func )
 {
 	m_dispatchTable[ typeA ][ typeB ] = func;
 	m_dispatchTable[ typeB ][ typeA ] = func;
@@ -61,13 +61,13 @@ static void sortBodyByType( physicsBody const *& bodyA, physicsBody const *& bod
 	}
 }
 
-physicsCollider* physicsWorld::createCollider( physicsBody const * bodyA, physicsBody const * bodyB )
+ColliderFuncPtr physicsWorld::getCollisionFunc( physicsBody const * bodyA, physicsBody const * bodyB )
 {
 	sortBodyByType( bodyA, bodyB );
 	physicsShape::Type typeA = bodyA->getShapeType();
 	physicsShape::Type typeB = bodyB->getShapeType();
-	CreateColliderFunc func = m_dispatchTable[ typeA ][ typeB ];
-	return func();
+	ColliderFuncPtr func = m_dispatchTable[ typeA ][ typeB ];
+	return func;
 }
 
 BodyId physicsWorld::addBody( physicsBody* const body )
@@ -85,13 +85,10 @@ BodyId physicsWorld::addBody( physicsBody* const body )
 
 int physicsWorld::addJoint( const JointConfig& config )
 {
-	ConstrainedPair joint;
+	ConstrainedPair joint(config.bodyIdA, config.bodyIdB);
 	{
-		joint.bIdA = config.bodyIdA;
-		joint.bIdB = config.bodyIdB;
-
-		physicsBody* bodyA = m_bodies[ joint.bIdA ];
-		physicsBody* bodyB = m_bodies[ joint.bIdB ];
+		physicsBody* bodyA = m_bodies[ joint.bodyIdA ];
+		physicsBody* bodyB = m_bodies[ joint.bodyIdB ];
 
 		Vector3 rAworld = config.pivot - bodyA->getPosition();
 		Vector3 rBworld = config.pivot - bodyB->getPosition();
@@ -280,11 +277,7 @@ void physicsWorld::broadPhase( std::vector<BodyIdPair>& broadPhasePassedPairsOut
 
 			if ( aabbA.overlaps( aabbB ) )
 			{
-				BodyIdPair pair;
-				{
-					pair.bIdA = bodyA->getBodyId();
-					pair.bIdB = bodyB->getBodyId();
-				}
+				BodyIdPair pair( bodyA->getBodyId(), bodyB->getBodyId() );
 
 				broadPhasePassedPairsOut.push_back( pair );
 
@@ -300,22 +293,17 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 		  bodyIdPair != broadPhasePassedPairs.end();
 		  bodyIdPair++ )
 	{
-		physicsBody const * bodyA = getBody( bodyIdPair->bIdA );
-		physicsBody const * bodyB = getBody( bodyIdPair->bIdB );
+		physicsBody const * bodyA = getBody( bodyIdPair->bodyIdA );
+		physicsBody const * bodyB = getBody( bodyIdPair->bodyIdB );
 
-		physicsCollider* collider = createCollider( bodyA, bodyB );
+		ColliderFuncPtr collide = getCollisionFunc( bodyA, bodyB );
+		CollidedPair collidedPair( &*bodyIdPair );
+		collide( bodyA, bodyB, collidedPair.contactPoints );
 
-		CollidedPair collision;
-		collider->collide( bodyA, bodyB, collision.cp );
-
-		if ( collision.cp.size() > 0 )
+		if ( collidedPair.contactPoints.size() > 0 )
 		{
-			collision.bIdA = bodyIdPair->bIdA;
-			collision.bIdB = bodyIdPair->bIdB;
-			collisionsOut.push_back( collision );
+			collisionsOut.push_back( collidedPair );
 		}
-
-		delete collider; /// TODO: don't delete, cache collision in collider maybe?
 	}
 }
 
@@ -324,7 +312,7 @@ namespace BodyIdPairsUtils
 {
 	/// Add contents of vector B to vector A, clear B after, implemented just to improve readability
 	template <typename T>
-	inline void moveVecBtoA( std::vector<T>& a, std::vector<T>& b )
+	inline void movePairsBtoA( std::vector<T>& a, std::vector<T>& b )
 	{
 		a.insert( std::end( a ), std::begin( b ), std::end( b ) );
 		b.clear();
@@ -334,7 +322,7 @@ namespace BodyIdPairsUtils
 	/// i.e. c = ab', d = ab, e = a'b
 	/// Contents of a and b must be sorted in same order
 	template<typename T>
-	void classifySets(
+	void classifyPairSets(
 		const std::vector<T>& a,
 		const std::vector<T>& b,
 		std::vector<T>& c,
@@ -378,54 +366,75 @@ namespace BodyIdPairsUtils
 }
 
 void physicsWorld::stepCollide(
-	std::vector<CollidedPair>& sustainedCollisionsOut,
-	std::vector<CollidedPair>& newCollisionsOut,
-	std::vector<BodyIdPair>& lostCollisionsOut )
+	std::vector<CollidedPair>& sustainedCollisionsOut, /// cached narrowphase collisions
+	std::vector<CollidedPair>& newCollisionsOut, /// uncached narrowphase collisions
+	std::vector<BodyIdPair>& lostCollisionsOut ) /// lost pairs, rid caches
 {
 	/// 1. Add the pairs found in last frame to existing pairs
 	/// 2. Look through existing pairs and pairs within this frame to classify new & existing pairs
 
 	/// Broadphase
-	std::vector<BodyIdPair> bpPassedPairs;
-	broadPhase( bpPassedPairs );
-	std::sort( bpPassedPairs.begin(), bpPassedPairs.end(), bodyIdPairLess );
+	std::vector<BodyIdPair> bpPassed;
+	broadPhase( bpPassed );
+	std::sort( bpPassed.begin(), bpPassed.end(), bodyIdPairLess );
 
-	BodyIdPairsUtils::moveVecBtoA( m_existingPairs, m_newPairs );
+	BodyIdPairsUtils::movePairsBtoA( m_existingPairs, m_lastFrameNewPairs );
 
-	std::vector<BodyIdPair> bpRemainedPairs, bpLostPairs;
-	BodyIdPairsUtils::classifySets( m_existingPairs, 
-									bpPassedPairs, 
-									lostCollisionsOut, 
-									bpRemainedPairs,
-									m_newPairs );
+	std::sort( m_existingPairs.begin(), m_existingPairs.end(), bodyIdPairLess );
 
-	/// Narrowphase
-	std::vector<CollidedPair> npPassedPairs;
-	narrowPhase( bpPassedPairs, npPassedPairs );
+	std::vector<BodyIdPair> bpRemained;
+	BodyIdPairsUtils::classifyPairSets( m_existingPairs, bpPassed, lostCollisionsOut, bpRemained, m_lastFrameNewPairs );
 
-	BodyIdPairsUtils::moveVecBtoA( m_existingCollidedPairs, m_newCollidedPairs );
-
-	std::vector<CollidedPair> npRemainedPairs, npLostPairs;
-	BodyIdPairsUtils::classifySets( m_existingCollidedPairs, 
-									npPassedPairs, 
-									npLostPairs,
-									npRemainedPairs,
-									m_newCollidedPairs );
-
-	/// TODO: replace this with O(N)
-	for ( int i = 0; i < (int)bpRemainedPairs.size(); i++ )
+	/// TODO: Replace with O(N)
+	auto existingIter = m_existingPairs.begin();
+	while ( existingIter != m_existingPairs.end() )
 	{
-		for ( int j = 0; j < (int)npRemainedPairs.size(); j++ )
+		bool erased = false;
+		for ( auto bpLostIter = lostCollisionsOut.begin();
+			  bpLostIter != lostCollisionsOut.end();
+			  bpLostIter++ )
 		{
-			if ( bpRemainedPairs[ i ] == npRemainedPairs[ j ] )
+			if ( *existingIter == *bpLostIter )
 			{
-				sustainedCollisionsOut.push_back( npRemainedPairs[ j ] );
+				existingIter = m_existingPairs.erase( existingIter );
+				erased = true;
+				break;
 			}
+		}
+		if ( !erased )
+		{
+			existingIter++;
 		}
 	}
 
-	m_existingCollidedPairs = sustainedCollisionsOut;
-	newCollisionsOut = m_newCollidedPairs;
+	/// Narrowphase
+	std::vector<CollidedPair> npPassed;
+	narrowPhase( bpPassed, npPassed );
+
+	BodyIdPairsUtils::movePairsBtoA( m_existingCollidedPairs, m_newCollidedPairs );
+
+	std::vector<CollidedPair> npLost, npRemained, npNew;
+	BodyIdPairsUtils::classifyPairSets( m_existingCollidedPairs, npPassed, npLost, npRemained, npNew );
+
+	/// Split new collisions that may have been cached and not cached
+	/// TODO: replace with O(N)
+	for ( auto npNewIter = npNew.begin(); npNewIter != npNew.end(); npNewIter++ )
+	{
+		bool erased = false;
+		for ( auto bpRemainedIter = bpRemained.begin(); bpRemainedIter != bpRemained.end(); bpRemainedIter++ )
+		{
+			if ( *npNewIter == *bpRemainedIter)
+			{
+				sustainedCollisionsOut.push_back(*npNewIter);
+				erased = true;
+				break;
+			}
+		}
+		if ( !erased )
+		{
+			newCollisionsOut.push_back( *npNewIter );
+		}
+	}
 }
 
 bool physicsWorld::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )

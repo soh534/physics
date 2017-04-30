@@ -24,8 +24,8 @@ physicsCollider::physicsCollider()
 }
 
 void physicsCollider::collide(
-	physicsBody const * const bodyA, 
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA, 
+	const physicsBody* bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 
@@ -37,15 +37,9 @@ physicsCircleCollider::physicsCircleCollider()
 
 }
 
-physicsCollider* physicsCircleCollider::create()
-{
-	/// TODO: ref pointer
-	return new physicsCircleCollider;
-}
-
 void physicsCircleCollider::collide(
-	physicsBody const * const bodyA, 
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA, 
+	const physicsBody* bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
@@ -109,15 +103,10 @@ physicsCircleBoxCollider::physicsCircleBoxCollider()
 
 }
 
-physicsCollider* physicsCircleBoxCollider::create()
-{
-	return new physicsCircleBoxCollider;
-}
-
 /// A: Circle, B: Box
 void physicsCircleBoxCollider::collide(
-	physicsBody const * const bodyA,
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA,
+	const physicsBody* bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
@@ -134,14 +123,9 @@ physicsBoxCollider::physicsBoxCollider()
 
 }
 
-physicsCollider* physicsBoxCollider::create()
-{
-	return new physicsBoxCollider;
-}
-
 void physicsBoxCollider::collide(
-	physicsBody const * const bodyA, 
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA, 
+	const physicsBody* bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
@@ -158,19 +142,13 @@ physicsConvexCollider::physicsConvexCollider()
 
 }
 
-
-physicsCollider* physicsConvexCollider::create()
-{
-	return new physicsConvexCollider;
-}
-
 void physicsConvexCollider::getSimplexVertex(
 	const Vector3& direction,
-	physicsBody const * const bodyA,
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA,
+	const physicsBody* bodyB,
 	Vector3& vert,
 	Vector3& supportA,
-	Vector3& supportB) const
+	Vector3& supportB)
 {
 	Vector3 dirLocalA = direction.getRotatedDir(-1.f * bodyA->getRotation());
 	Vector3 dirLocalB = direction.getNegated().getRotatedDir(-1.f * bodyB->getRotation());
@@ -250,8 +228,8 @@ struct SimplexEdge
 };
 
 void physicsConvexCollider::collide(
-	physicsBody const * const bodyA,
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA,
+	const physicsBody* bodyB,
 	std::vector<ContactPoint>& contacts)
 {
     Vector3 posA = bodyA->getPosition();
@@ -283,7 +261,8 @@ void physicsConvexCollider::collide(
     
     for (int i = 0; i < g_gjkMaxIter; i++)
     {
-		DebugUtils::drawMinkowskiDifference(this);
+		/// TODO: fix
+		/// DebugUtils::drawMinkowskiDifference(this);
 
 		/// TODO: Fix bug where direction becomes IND000
 
@@ -464,8 +443,8 @@ void physicsConvexCollider::collide(
 }
 
 void physicsConvexCollider::expandingPolytopeAlgorithm(
-	physicsBody const * const bodyA,
-	physicsBody const * const bodyB,
+	const physicsBody* bodyA,
+	const physicsBody* bodyB,
 	std::vector< std::array<Vector3, 3> >& simplex,
 	SimplexEdge& edge)
 {	
@@ -496,7 +475,9 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 	}
 }
 
-void physicsConvexCollider::getClosestEdgeToOrigin(const std::vector< std::array<Vector3, 3> >& simplex, SimplexEdge& edge)
+void physicsConvexCollider::getClosestEdgeToOrigin(
+	const std::vector< std::array<Vector3, 3> >&  simplex,
+	SimplexEdge& edge )
 {
 	edge.distSq = std::numeric_limits<Real>::max();
 	int szSimplex = (int)simplex.size();

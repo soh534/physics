@@ -1,5 +1,4 @@
-#ifndef PHYSICS_WORLD_HPP
-#define PHYSICS_WORLD_HPP
+#pragma once
 
 #include <vector>
 #include <Base.hpp>
@@ -8,7 +7,7 @@
 #include <physicsShape.hpp> // For physicsShape::NUM_SHAPES
 #include <physicsTypes.hpp>
 
-typedef class physicsCollider* (*CreateColliderFunc)();
+typedef void ( *ColliderFuncPtr )( const physicsBody*, const physicsBody*, std::vector<ContactPoint>& );
 
 struct physicsWorldCinfo
 {
@@ -65,16 +64,16 @@ private:
 	Real m_cor;
 	std::vector<physicsBody*> m_bodies;
 	class physicsSolver* m_solver;
-	CreateColliderFunc m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
+	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
 	std::vector<BodyIdPair> m_existingPairs; // Broadphase existing pairs
-	std::vector<BodyIdPair> m_newPairs; // Broadphase new pairs
+	std::vector<BodyIdPair> m_lastFrameNewPairs; // Broadphase new pairs
 	std::vector<CollidedPair> m_existingCollidedPairs;
 	std::vector<CollidedPair> m_newCollidedPairs;
 
 private:
 
-	void registerColliderCreateFunc(physicsShape::Type typeA, physicsShape::Type typeB, CreateColliderFunc func);
-	physicsCollider* createCollider(physicsBody const * const bodyA, physicsBody const * const bodyB);
+	void registerColliderFunc(physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func);
+	ColliderFuncPtr getCollisionFunc(physicsBody const * const bodyA, physicsBody const * const bodyB);
 
 	void stepSolve(
 		const std::vector<CollidedPair>& existingCollisionsIn,
@@ -91,5 +90,3 @@ private:
 
 	bool checkCollidable(BodyId bodyIdA, BodyId bodyIdB);
 };
-
-#endif

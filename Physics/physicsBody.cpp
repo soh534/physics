@@ -5,6 +5,9 @@
 
 #include <Renderer.hpp>
 
+#include <sstream>
+
+
 physicsBodyCinfo::physicsBodyCinfo()
 { 
 	/// Default values if no settings are specified
@@ -125,8 +128,6 @@ void physicsBody::dampVelocity(const Real& damping)
 	setLinearVelocity(getLinearVelocity() * damping);
 	setAngularSpeed(getAngularSpeed() * damping);
 }
-
-#include <sstream>
 
 void physicsBody::applyPointImpulse(const Vector3& impulse, const Vector3& arm)
 {

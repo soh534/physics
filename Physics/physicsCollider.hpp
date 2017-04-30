@@ -1,5 +1,4 @@
-#ifndef PHYSICS_AGENT_HPP
-#define PHYSICS_AGENT_HPP
+#pragma once
 
 #include <Base.hpp>
 
@@ -7,6 +6,8 @@
 
 #include <vector>
 #include <array>
+
+/// TODO: since no more agents make these not a class?
 
 class physicsCollider : public physicsObject
 {
@@ -25,10 +26,10 @@ public:
 
     physicsCollider();
 
-	virtual void collide(
-		physicsBody const * const bodyA,
-		physicsBody const * const bodyB, 
-		std::vector<struct ContactPoint>& contacts) = 0;
+	static void collide(
+		const physicsBody* bodyA,
+		const physicsBody* bodyB, 
+		std::vector<struct ContactPoint>& contacts);
 };
 
 class physicsCircleCollider : public physicsCollider
@@ -37,13 +38,9 @@ private:
     physicsCircleCollider();
 
 public:
-
-	static physicsCollider* create();
-
-    virtual void collide(
-		physicsBody const * const bodyA, 
-		physicsBody const * const bodyB,
-		std::vector<ContactPoint>& contacts) override;
+	static void collide( const physicsBody* bodyA,
+						 const physicsBody* bodyB,
+						 std::vector<ContactPoint>& contacts );
 };
 
 class physicsCircleBoxCollider : public physicsCollider
@@ -52,28 +49,20 @@ private:
     physicsCircleBoxCollider();
 
 public:
-    static physicsCollider* create();
-
-    virtual void collide(
-		physicsBody const * const bodyA,
-		physicsBody const * const bodyB,
-		std::vector<ContactPoint>& contacts
-	) override;
+	static void collide( const physicsBody* bodyA,
+						 const physicsBody* bodyB,
+						 std::vector<ContactPoint>& contacts );
 };
 
 class physicsBoxCollider : public physicsCollider
 {
 private:
-	  physicsBoxCollider();
+	physicsBoxCollider();
 
 public:
-	static physicsCollider* create();
-
-    virtual void collide(
-		physicsBody const * const bodyA, 
-		physicsBody const * const bodyB,
-		std::vector<ContactPoint>& contacts
-	) override;
+	static void collide( const physicsBody* bodyA,
+						 const physicsBody* bodyB,
+						 std::vector<ContactPoint>& contacts );
 };
 
 class physicsConvexCollider: public physicsCollider
@@ -82,28 +71,22 @@ private:
 	physicsConvexCollider();
 
 public:
-	static physicsCollider* create();
+	static void collide( const physicsBody* bodyA,
+						 const physicsBody* bodyB,
+						 std::vector<ContactPoint>& contacts );
 
-    void getSimplexVertex(
-		const Vector3& direction,
-		physicsBody const * const bodyA,
-		physicsBody const * const bodyB,
-		Vector3& vert,
-		Vector3& supportA,
-		Vector3& supportB) const;
+	static void getSimplexVertex( const Vector3& direction,
+								  const physicsBody* bodyA,
+								  const physicsBody* bodyB,
+								  Vector3& vert,
+								  Vector3& supportA,
+								  Vector3& supportB );
 
-	virtual void collide(
-		physicsBody const * const bodyA, 
-		physicsBody const * const bodyB,
-		std::vector<ContactPoint>& contacts) override;
-
-	void expandingPolytopeAlgorithm(
-		physicsBody const * const bodyA,
-		physicsBody const * const bodyB,
-		std::vector< std::array<Vector3, 3> >& simplex, 
-		struct SimplexEdge& closest);
-
-	void getClosestEdgeToOrigin(const std::vector< std::array<Vector3, 3> >& simplex, struct SimplexEdge& edge);
+	static void expandingPolytopeAlgorithm( const physicsBody* bodyA,
+											const physicsBody* bodyB,
+											std::vector< std::array<Vector3, 3> >& simplex,
+											struct SimplexEdge& closest );
+	
+	static void getClosestEdgeToOrigin( const std::vector< std::array<Vector3, 3> >& simplex,
+										struct SimplexEdge& edge );
 };
-
-#endif

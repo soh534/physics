@@ -7,10 +7,17 @@ typedef unsigned int BodyId;
 typedef unsigned int JointId;
 const BodyId invalidId = -1;
 
+/// TODO: these shouldn't be included for api users
+
 struct BodyIdPair
 {
-	BodyId bIdA;
-	BodyId bIdB;
+	BodyId bodyIdA;
+	BodyId bodyIdB;
+
+	BodyIdPair( const BodyId a = invalidId, const BodyId b = invalidId );
+	BodyIdPair( BodyIdPair const* other );
+	void set( const BodyId a, const BodyId b );
+	void set( BodyIdPair const* other );
 };
 
 bool operator == (const BodyIdPair& pairA, const BodyIdPair& pairB);
@@ -20,20 +27,24 @@ bool bodyIdPairLess(const BodyIdPair& pairA, const BodyIdPair& pairB);
 
 struct Jacobian
 {
-	Vector3 vA, wA, vB, wB; // World
+	Vector3 vA, wA, vB, wB; /// World
 };
 
 struct Constraint
 {
-	Vector3 rA, rB; // Local
+	Vector3 rA, rB; /// Local
 	Real accumImp;
 	Real error;
 	Jacobian jac;
+	bool apply; /// TODO: do this properly, make struct for caches specifically
 };
 
 struct CollidedPair : public BodyIdPair
 {
-	std::vector<struct ContactPoint> cp;
+	std::vector<struct ContactPoint> contactPoints;
+
+	CollidedPair( const BodyId a, const BodyId b );
+	CollidedPair( BodyIdPair const * other );
 };
 
 struct ContactPoint
@@ -41,9 +52,9 @@ struct ContactPoint
 private:
 
 	Real m_depth;
-	Vector3 m_posA; // Contact on A local to A
-	Vector3 m_posB; // Contact on B local to B
-	Vector3 m_norm; // Pointing from B to A local to world
+	Vector3 m_posA; /// Contact on A local to A
+	Vector3 m_posB; /// Contact on B local to B
+	Vector3 m_norm; /// Pointing from B to A local to world
 
 public:
 

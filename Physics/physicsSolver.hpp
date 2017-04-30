@@ -1,5 +1,4 @@
-#ifndef PHYSICS_SOLVER_HPP
-#define PHYSICS_SOLVER_HPP
+#pragma once
 
 #include <vector>
 
@@ -17,9 +16,13 @@ struct SolverBody
 	Real iInv;
 };
 
+/// TODO: think of more appropriate places to put this
 struct ConstrainedPair : public BodyIdPair
 {
 	std::vector<Constraint> constraints;
+
+	ConstrainedPair( const BodyId a, const BodyId b );
+	ConstrainedPair( BodyIdPair const * other );
 };
 
 class physicsSolver
@@ -60,4 +63,3 @@ private:
 	std::vector<SolverBody> m_solverBodies;
 };
 
-#endif

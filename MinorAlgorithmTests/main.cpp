@@ -60,17 +60,17 @@ void printVector( const std::vector<T>& v )
 	std::cout << std::endl;
 }
 
-int main( int argc, char* argv[] )
+void classifySetsTest()
 {
 	std::vector<int> a, b, c, d, e;
-	
-	for (int i = 0; i < 100; i++)
+
+	for ( int i = 0; i < 100; i++ )
 	{
-		if (i % 3 == 0)
+		if ( i % 3 == 0 )
 		{
 			a.push_back( i );
 		}
-		if (i % 5 == 0)
+		if ( i % 5 == 0 )
 		{
 			b.push_back( i );
 		}
@@ -81,6 +81,38 @@ int main( int argc, char* argv[] )
 	printVector( c );
 	printVector( d );
 	printVector( e );
+}
+
+#include <physicsTypes.hpp>
+#include <algorithm>
+
+void bodyIdPairSortTest()
+{
+	std::vector<unsigned int> v;
+	for ( int i = 0; i < 100; i++ )
+	{
+		v.push_back( i );
+	}
+
+	std::vector<BodyIdPair> pairs;
+
+	for ( int i = 0; i < v.size(); i++ )
+	{
+		for ( int j = i + 1; j < v.size(); j++ )
+		{
+			BodyIdPair pair( i, j );
+			pairs.push_back(pair);
+		}
+	}
+
+	std::sort(pairs.begin(), pairs.end(), bodyIdPairLess);
+}
+
+int main( int argc, char* argv[] )
+{
+	classifySetsTest();
+
+	bodyIdPairSortTest();
 
 	__debugbreak();
 
