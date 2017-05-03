@@ -14,10 +14,6 @@
 
 #include <GL/glew.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 std::vector<class Line> g_renderLines;
 std::vector<class Text> g_renderTexts;
 
@@ -417,13 +413,6 @@ void Text::render() const
 				 (GLfloat)(m_color & 0xff) / 255.f,
 				 (GLfloat)(m_color >> 8 & 0xff) / 255.f,
 				 (GLfloat)(m_color >> 16 & 0xff) / 255.f );
-
-	// TODO: shouldn't need to do this every time
-	glm::mat4 projection = glm::ortho( 0.f, 1024.f, 0.f, 768.f );
-	glUniformMatrix4fv( glGetUniformLocation( g_txtProgramID, "projection" ), 
-						1, 
-						GL_FALSE, 
-						glm::value_ptr( projection ) );
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(g_txtVAO);

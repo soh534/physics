@@ -231,7 +231,7 @@ void physicsWorld::broadPhase( std::vector<BodyIdPair>& broadPhasePassedPairsOut
 
 		body->updateAabb();
 
-		DebugUtils::drawBpAabb( body );
+		DebugUtils::drawBpAabb( body ); /// TODO: move this out
 	}
 
 	for ( int i = 0; i < (int)m_bodies.size(); i++ )
@@ -308,7 +308,6 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 		}
 	}
 }
-
 
 namespace BodyIdPairsUtils
 {

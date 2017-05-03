@@ -27,8 +27,6 @@ struct JointConfig
 {
 	int bodyIdA;
 	int bodyIdB;
-	Vector3 armA;
-	Vector3 armB;
 	Vector3 pivot;
 };
 
