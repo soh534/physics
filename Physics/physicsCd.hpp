@@ -1,5 +1,4 @@
-#ifndef PHYSICS_CD_HPP
-#define PHYSICS_CD_HPP
+#pragma once
 
 #include <Base.hpp>
 
@@ -14,5 +13,3 @@ namespace physicsCd
 	/// Cast ray against triangle
 	void castRay3DTri(const Vector3& ra, const Vector3& rb, const Vector3& ta, const Vector3& tb, const Vector3& tc, Vector3& res);
 }
-
-#endif

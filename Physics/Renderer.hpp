@@ -6,14 +6,26 @@
 // Accuracy for drawing circle
 #define STEP_RENDER_CIRCLE 0.05f
 
-#define BLACK (0 | (0 << 8) | (0 << 16) | (255 << 24))
-#define RED (255 | (0 << 8) | (0 << 16) | (255 << 24))
-#define GREEN (0 | (255 << 8) | (0 << 16) | (255 << 24))
-#define BLUE (0 | (0 << 8) | (255 << 16) | (255 << 24))
-#define WHITE (255 | (255 << 8) | (255 << 16) | (255 << 24))
-#define YELLOW (255 | (255 << 8) | (0 << 16) | (255 << 24))
-#define ORANGE (255 | (127 << 8) | (0 << 16) | (255 << 24))
-#define PURPLE (255 | (0 << 8) | (255 << 16) | (255 << 24))
+#define COLOR_IN_RGB(R, G, B) (R | (G << 8) | (B << 16) | (255 << 24))
+
+/// Color tables obtained from
+/// www.rapidtables.com/web/color/RGB_Color.htm
+#define BLACK COLOR_IN_RGB(0, 0, 0)
+#define WHITE COLOR_IN_RGB(255, 255, 255)
+#define RED COLOR_IN_RGB(255, 0, 0)
+#define LIME COLOR_IN_RGB(0, 255, 0)
+#define BLUE COLOR_IN_RGB(0, 0, 255)
+#define YELLOW COLOR_IN_RGB(255, 255, 0)
+#define CYAN COLOR_IN_RGB(0, 255, 255)
+#define MAGENTA COLOR_IN_RGB(255, 0, 255)
+#define SILVER COLOR_IN_RGB(192, 192, 192)
+#define GRAY COLOR_IN_RGB(128, 128, 128)
+#define MAROON COLOR_IN_RGB(128, 0, 0)
+#define OLIVE COLOR_IN_RGB(128, 128, 0)
+#define GREEN COLOR_IN_RGB(0, 128, 0)
+#define PURPLE COLOR_IN_RGB(128, 0, 128)
+#define TEAL COLOR_IN_RGB(0, 128, 128)
+#define NAVY COLOR_IN_RGB(0, 0, 128)
 
 int initializeRendering(int width, int height);
 int closeRendering();

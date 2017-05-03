@@ -134,6 +134,7 @@ void physicsSolver::addNewContacts(const vector<CollidedPair>& collisionsIn)
 
 void physicsSolver::updateContacts( const vector<CollidedPair>& remainingCollisionsIn )
 {
+	/// TODO: need massive cleanup
 	vector<CollidedPair>::const_iterator remainedCollision = remainingCollisionsIn.begin();
 	vector<ConstrainedPair>::iterator lastFrameCollision = m_contactConstraintPairs.begin();
 
@@ -156,17 +157,20 @@ void physicsSolver::updateContacts( const vector<CollidedPair>& remainingCollisi
 			{
 				Constraint& constraint = m_contactConstraintPairs[j].constraints[0];
 
-				const ContactPoint& contactPoint = remainedCollision->contactPoints[0];
+				const ContactPoint& contactPoint = remainingCollisionsIn[i].contactPoints[0];
 
 				constraint.rA = contactPoint.getContactA();
 				constraint.rB = contactPoint.getContactB();
 				constraint.error = contactPoint.getDepth();
 
 				const Vector3& norm = contactPoint.getNormal();
-				const SolverBody& bodyA = getSolverBody(remainedCollision->bodyIdA);
-				const SolverBody& bodyB = getSolverBody(remainedCollision->bodyIdB);
+				const SolverBody& bodyA = getSolverBody(remainingCollisionsIn[i].bodyIdA);
+				const SolverBody& bodyB = getSolverBody(remainingCollisionsIn[i].bodyIdB);
 				const Vector3& rA_world = constraint.rA.getRotatedDir(bodyA.ori);
 				const Vector3& rB_world = constraint.rB.getRotatedDir(bodyB.ori);
+
+				//drawArrow(bodyA.pos, rA_world, TEAL);
+				//drawArrow(bodyB.pos, rB_world, TEAL);
 
 				constraint.jac.vA = norm;
 				constraint.jac.vB = norm.getNegated();
@@ -384,6 +388,7 @@ void physicsSolver::solveConstraints( vector<physicsBody*>& updatedBodiesOut )
 
 void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn, bool contact )
 {
+
 	for ( int i = 0; i < (int)pairsIn.size(); i++ )
 	{
 		ConstrainedPair& constraintPair = pairsIn[ i ];
@@ -392,7 +397,9 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 		SolverBody& bodyB = m_solverBodies[ constraintPair.bodyIdB ];
 		std::vector<Constraint>& constraints = constraintPair.constraints;
 
-		for ( int j = 0; j < (int)constraints.size(); j++ )
+		int ctr = 0;
+		int numConstraints = (int)constraints.size();
+		for ( int j = 0; j < numConstraints; j++ )
 		{
 			Constraint& constraint = constraints[ j ];
 			
@@ -401,12 +408,19 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 				continue;
 			}
 
+			ctr++;
+
 			Vector3 rA_world = constraint.rA.getRotatedDir( bodyA.ori );
 			Vector3 rB_world = constraint.rB.getRotatedDir( bodyB.ori );
 
 			Real error = constraint.error;
 
 			const Jacobian& jac = constraint.jac;
+
+			//bodyA.v *= 0.8f;
+			//bodyB.v *= 0.8f;
+			//bodyA.w *= 0.8f;
+			//bodyB.w *= 0.8f;
 
 			Vector3 vab = bodyA.v + bodyA.w.cross( rA_world ) - bodyB.v - bodyB.w.cross( rB_world );
 
@@ -422,13 +436,13 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 
 			Real imp = -1.f * ( Jv - error / m_deltaTime ) / JmJ;
 			
-#if 1
+#if 0
 			if ( contact )
 			{ // Accumulate impulse method for contact constraints
 				Real newImpulse = std::max( constraint.accumImp + imp, 0.f );
 				imp = newImpulse - constraint.accumImp;
 				constraint.accumImp = newImpulse;
-				drawText(std::to_string(constraint.accumImp), bodyA.pos + rA_world);
+				//drawText(std::to_string(constraint.accumImp), bodyA.pos + rA_world);
 			}
 #endif
 			/// Contact point arms
@@ -436,8 +450,10 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
-			drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
+			//drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
+			//drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
+			//drawArrow( bodyA.pos, rA_world, RED );
+			//drawArrow( bodyB.pos, rB_world, BLUE );
 
 			bodyA.v += jac.vA * imp * bodyA.mInv;
 			bodyB.v += jac.vB * imp * bodyB.mInv;

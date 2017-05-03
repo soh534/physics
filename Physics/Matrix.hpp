@@ -1,5 +1,4 @@
-#ifndef MATRIXF_HPP
-#define MATRIXF_HPP
+#pragma once
 
 #include <ostream> /// For ostream
 
@@ -59,5 +58,3 @@ public:
 };
 
 #include <Matrix.inl>
-
-#endif

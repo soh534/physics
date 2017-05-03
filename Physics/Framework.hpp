@@ -1,5 +1,4 @@
-#ifndef FRAMEWORK_HPP
-#define FRAMEWORK_HPP
+#pragma once
 
 class physicsWorld;
 
@@ -12,5 +11,3 @@ struct WindowCinfo
 };
 
 void BeginGraphics(const WindowCinfo& cinfo);
-
-#endif

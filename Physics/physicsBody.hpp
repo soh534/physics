@@ -1,5 +1,4 @@
-#ifndef PHYSICS_BODY_HPP
-#define PHYSICS_BODY_HPP
+#pragma once
 
 #include <physicsObject.hpp>
 #include <physicsAabb.hpp>
@@ -144,5 +143,3 @@ class physicsBody : public physicsObject
 };
 
 #include <physicsBody.inl>
-
-#endif

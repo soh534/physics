@@ -36,85 +36,76 @@ enum State
 
 static State g_state;
 
-static void error_callback(int error, const char* description)
+static void error_callback( int error, const char* description )
 {
-	fputs(description, stderr);
+	fputs( description, stderr );
 }
 
-void transformGLFWToGLCoordinate(const Vector3& pointGlut, Vector3& pointGL)
+void txGlfwToOgl( const Vector3& pointGlfw, Vector3& pointOgl )
 {
-	// Make transformation matrix inside constructor
-	Vector3 xShiftHalf(-1.f * g_widthWindow / 2.f, 0.f);
-	Matrix3 t0; t0.setTranslation(xShiftHalf);
+	Vector3 yAxis( 1.f, 0.f );
+	Matrix3 yAxisReflection; yAxisReflection.setReflection( yAxis );
 
-	Vector3 yAxis(1.f, 0.f);
-	Matrix3 t1; t1.setReflection(yAxis);
+	Vector3 windowHeight( 0.f, g_heightWindow );
+	Matrix3 shiftWindowHeight; shiftWindowHeight.setTranslation( windowHeight );
 
-	Vector3 yShiftHalf(0.f, g_heightWindow / 2.f);
-	Matrix3 t2; t2.setTranslation(yShiftHalf);
-
-	pointGL.setTransformedPos(t0, pointGlut);
-	pointGL.setTransformedPos(t1, pointGL);
-	pointGL.setTransformedPos(t2, pointGL);
+	pointOgl.setTransformedPos( yAxisReflection, pointGlfw );
+	pointOgl.setTransformedPos( shiftWindowHeight, pointOgl );
 }
 
-static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
+static void cursor_pos_callback( GLFWwindow* window, double xpos, double ypos )
 {
-	if (g_bodyId >= 0)
+	if ( g_bodyId >= 0 )
 	{
 		Vector3 currPos;
-		transformGLFWToGLCoordinate(Vector3((Real)xpos, (Real)ypos), currPos);
-		g_cursorVel = (currPos - g_cursor) / g_world->getDeltaTime();
+		txGlfwToOgl( Vector3( (Real)xpos, (Real)ypos ), currPos );
+		g_cursorVel = ( currPos - g_cursor ) / g_world->getDeltaTime();
 		g_cursor = currPos;
 	}
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback( GLFWwindow* window, int button, int action, int mods )
 {
 	double x, y;
-	glfwGetCursorPos(window, &x, &y);
+	glfwGetCursorPos( window, &x, &y );
 
-	drawCross( Vector3( x, y ), 0.f, 10.f, RED ); // debug
+	txGlfwToOgl( Vector3( (Real)x, (Real)y ), g_cursor );
 
-	transformGLFWToGLCoordinate(Vector3((Real)x, (Real)y), g_cursor);
-
-	drawCross( g_cursor, 0, 10.f, BLUE ); // debug
-
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld)
+	if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld )
 	{
 		const std::vector<physicsBody*>& bodies = g_world->getBodies();
-		
-		for (int i = 0; i < (int)bodies.size(); ++i)
-		{
-			if (!bodies[i]) continue;
 
-			physicsBody const * const body = bodies[i];
-			
-			if (body->isStatic()) continue;
-			
-			if (body->containsPoint(g_cursor))
+		for ( int i = 0; i < (int)bodies.size(); ++i )
+		{
+			if ( !bodies[i] ) continue;
+
+			physicsBody const* body = bodies[i];
+
+			if ( body->isStatic() ) continue;
+
+			if ( body->containsPoint( g_cursor ) )
 			{
 				g_bodyId = body->getBodyId();
-				g_arm.setSub(g_cursor, body->getPosition());
+				g_arm.setSub( g_cursor, body->getPosition() );
 				g_bodyHeld = true;
 				break;
 			}
 		}
 	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && g_bodyHeld)
+	else if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && g_bodyHeld )
 	{
-		DemoUtils::releaseControl(g_controlInfo, g_world, g_bodyId);
+		DemoUtils::releaseControl( g_controlInfo, g_world, g_bodyId );
 		g_bodyId = -1;
 		g_arm.setZero();
 		g_bodyHeld = false;
 	}
 }
 
-void stepRender(GLFWwindow* window)
+void stepRender( GLFWwindow* window )
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(0.0f, 0.0f, 0.0f);
+	glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+	glClear( GL_COLOR_BUFFER_BIT );
+	glColor3f( 0.0f, 0.0f, 0.0f );
 
 	renderAxis();
 
@@ -123,60 +114,60 @@ void stepRender(GLFWwindow* window)
 
 	// Print total momentum
 	const std::vector<physicsBody*> bodies = g_world->getBodies();
-	Vector3 totLinMomentum(0.f, 0.f, 0.f);
+	Vector3 totLinMomentum( 0.f, 0.f, 0.f );
 
-	for (int i = 0; i < (int)bodies.size(); i++)
+	for ( int i = 0; i < (int)bodies.size(); i++ )
 	{
-		if (!bodies[i]) continue;
+		if ( !bodies[i] ) continue;
 		totLinMomentum += bodies[i]->getLinearVelocity() * bodies[i]->getMass();
 	}
 
 	std::stringstream ss;
-	ss << totLinMomentum(0) << ", " << totLinMomentum(1) << std::endl;
-	drawText(ss.str(), g_topLeft);
+	ss << totLinMomentum( 0 ) << ", " << totLinMomentum( 1 ) << std::endl;
+	drawText( ss.str(), g_topLeft );
 
 	// Add body held line
-	if (g_bodyHeld)
+	if ( g_bodyHeld )
 	{
-		if (g_bodyId > -1)
+		if ( g_bodyId > -1 )
 		{
-			DemoUtils::controlBody(g_controlInfo, g_world, g_bodyId, g_cursor);
+			DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursor );
 		}
 	}
 
 	step();
 
-	glfwSwapBuffers(window);
+	glfwSwapBuffers( window );
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-	if (action == GLFW_PRESS)
+	if ( action == GLFW_PRESS )
 	{
-		if (key == GLFW_KEY_ESCAPE)
+		if ( key == GLFW_KEY_ESCAPE )
 		{
-			glfwSetWindowShouldClose(window, GL_TRUE);
+			glfwSetWindowShouldClose( window, GL_TRUE );
 			return;
 		}
 
-		if (key == GLFW_KEY_SPACE)
+		if ( key == GLFW_KEY_SPACE )
 		{
-			if (g_state == Paused)
+			if ( g_state == Paused )
 			{
-				stepRender(window);
+				stepRender( window );
 			}
 			return;
 		}
 
-		if (key == GLFW_KEY_ENTER)
+		if ( key == GLFW_KEY_ENTER )
 		{
-			if (g_state == Running)
+			if ( g_state == Running )
 			{
 				g_state = Paused;
 				return;
 			}
 
-			if (g_state = Paused)
+			if ( g_state = Paused )
 			{
 				g_state = Running;
 				return;
@@ -185,39 +176,39 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-int initializeWindow(GLFWwindow*& window, const WindowCinfo& cinfo)
+int initializeWindow( GLFWwindow*& window, const WindowCinfo& cinfo )
 {
-	if (!glfwInit())
+	if ( !glfwInit() )
 	{
 		return -1;
 	}
 
-	window = glfwCreateWindow(cinfo.widthWindow, cinfo.heightWindow, "Simulation", nullptr, nullptr);
+	window = glfwCreateWindow( cinfo.widthWindow, cinfo.heightWindow, "Simulation", nullptr, nullptr );
 
-	Assert(window, "glfwCreateWindow failed");
+	Assert( window, "glfwCreateWindow failed" );
 
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent( window );
 
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetCursorPosCallback(window, cursor_pos_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetKeyCallback( window, key_callback );
+	glfwSetCursorPosCallback( window, cursor_pos_callback );
+	glfwSetMouseButtonCallback( window, mouse_button_callback );
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint( GLFW_SAMPLES, 4 );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 1 );
 
 	return 0;
 }
 
-void BeginGraphics(const WindowCinfo& cinfo)
+void BeginGraphics( const WindowCinfo& cinfo )
 {
-	Assert(cinfo.widthWindow > 0, "Width of window is negative");
-	Assert(cinfo.heightWindow > 0, "Height of window is negative");
+	Assert( cinfo.widthWindow > 0, "Width of window is negative" );
+	Assert( cinfo.heightWindow > 0, "Height of window is negative" );
 
 	g_widthWindow = cinfo.widthWindow;
 	g_heightWindow = cinfo.heightWindow;
 	g_framesPerSecond = cinfo.framesPerSecond;
-	g_topLeft.set(-g_widthWindow / 3.f, g_heightWindow / 3.f);
+	g_topLeft.set( -g_widthWindow / 3.f, g_heightWindow / 3.f );
 	g_world = cinfo.world;
 	g_state = Running;
 	g_controlInfo.dummyBodyId = -1;
@@ -225,18 +216,18 @@ void BeginGraphics(const WindowCinfo& cinfo)
 
 	GLFWwindow* window;
 
-	initializeWindow(window, cinfo);
+	initializeWindow( window, cinfo );
 
-	initializeRendering(cinfo.widthWindow, cinfo.heightWindow);
+	initializeRendering( cinfo.widthWindow, cinfo.heightWindow );
 
-	while (!glfwWindowShouldClose(window))
+	while ( !glfwWindowShouldClose( window ) )
 	{
-		if (g_state == Running)
+		if ( g_state == Running )
 		{
 			glfwPollEvents();
-			stepRender(window);
+			stepRender( window );
 		}
-		else if (g_state == Paused)
+		else if ( g_state == Paused )
 		{
 			glfwWaitEvents();
 		}
@@ -244,9 +235,9 @@ void BeginGraphics(const WindowCinfo& cinfo)
 
 	closeRendering();
 
-	glfwDestroyWindow(window);
+	glfwDestroyWindow( window );
 
 	glfwTerminate();
 
-	exit(EXIT_SUCCESS);
+	exit( EXIT_SUCCESS );
 }

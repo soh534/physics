@@ -12,6 +12,7 @@ BodyIdPair::BodyIdPair( BodyIdPair const * other )
 
 void BodyIdPair::set( const BodyId a, const BodyId b )
 {
+	Assert(a != b, "BodyIdPair must consist of IDs for two different bodies");
 	bodyIdA = ( a > b ) ? a : b;
 	bodyIdB = ( a > b ) ? b : a;
 }
@@ -28,7 +29,18 @@ bool operator == ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 
 bool operator < ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 {
-	return ( ( ( pairA.bodyIdA << 32 ) | pairA.bodyIdB ) < ( ( pairB.bodyIdA << 32 ) | pairB.bodyIdB ) );
+//	return ( ( ( pairA.bodyIdA << 16 ) | pairA.bodyIdB ) < ( ( pairB.bodyIdA << 16 ) | pairB.bodyIdB ) );
+	if ( pairA.bodyIdA < pairB.bodyIdA )
+	{
+		return true;
+	}
+
+	if ( pairA.bodyIdA == pairB.bodyIdA )
+	{
+		return ( pairA.bodyIdB < pairB.bodyIdB );
+	}
+
+	return false;
 }
 
 bool operator > ( const BodyIdPair& pairA, const BodyIdPair& pairB )

@@ -3,8 +3,8 @@
 #include <Base.hpp>
 #include <vector>
 
-typedef unsigned int BodyId;
-typedef unsigned int JointId;
+typedef unsigned short BodyId;
+typedef unsigned short JointId;
 const BodyId invalidId = -1;
 
 /// TODO: these shouldn't be included for api users

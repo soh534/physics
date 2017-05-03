@@ -1,5 +1,4 @@
-#ifndef PHYSICS_OBJECT_HPP
-#define PHYSICS_OBJECT_HPP
+#pragma once
 
 static int ctr = 0;
 
@@ -14,5 +13,3 @@ class physicsObject
 	int m_id;
 	
 };
-
-#endif

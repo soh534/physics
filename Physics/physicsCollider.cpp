@@ -439,6 +439,9 @@ void physicsConvexCollider::collide(
 		normal.getNormalized()
 	);
 
+	//drawCross( pointA, 45.f * g_degToRad, 20.f, RED );
+	//drawCross( pointB, 45.f * g_degToRad, 20.f, BLUE );
+
 	contacts.push_back(contact);
 }
 

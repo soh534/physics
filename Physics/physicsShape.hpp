@@ -1,5 +1,4 @@
-#ifndef PHYSICS_SHAPE_HPP
-#define PHYSICS_SHAPE_HPP
+#pragma once
 
 #include <Base.hpp>
 
@@ -150,5 +149,3 @@ protected:
 
     std::vector<int> m_connectivity;
 };
-
-#endif

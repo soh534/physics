@@ -47,7 +47,7 @@ void DebugUtils::drawMinkowskiDifference(physicsConvexCollider const * const age
 		direction.setRotatedDir(direction, degPerInterval);
 		agent->getSimplexVertex(direction, vertex1, dummy0, dummy1);
 
-		drawLine(vertex0, vertex1, GREEN);
+		drawLine(vertex0, vertex1, LIME);
 
 		vertex0 = vertex1;
 	}

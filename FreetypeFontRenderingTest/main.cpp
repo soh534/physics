@@ -35,7 +35,7 @@ int main( int argc, char* argv[] )
 		drawText( "wow", Vector3( 250.f, 250.f ) );
 		drawText( "aaaaaaa", Vector3( 300.f, 300.f ) );
 		drawText( "ccccccc", Vector3( 0.f, 500.f ), RED );
-		drawText( "eeeeeee", Vector3( 0.f, 400.f ), GREEN );
+		drawText( "eeeeeee", Vector3( 0.f, 400.f ), LIME );
 		drawText( "123456", Vector3( 0.f, 200.f ) );
 
 		step();

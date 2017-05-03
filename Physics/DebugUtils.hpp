@@ -1,8 +1,7 @@
-#ifndef DEBUG_UTILS_HPP
-#define DEBUG_UTILS_HPP
+#pragma once
 
 // Debugging macros
-#define D_BROADPHASE
+//#define D_BROADPHASE
 
 //#define D_TANGENTIAL_IMPULSE
 //#define D_CONTACT_IMPULSE
@@ -41,5 +40,3 @@ namespace DebugUtils
 	// Solver
 	void drawBodyImpulse(physicsBody const * const body, const Vector3& arm, const Vector3& impulse);
 }
-
-#endif

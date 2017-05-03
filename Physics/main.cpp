@@ -17,8 +17,10 @@ physicsWorld* world;
 int Simulation( int argc, char* argv[] )
 {
 	/// Raise floating point exceptions
-	unsigned int currentState;
-	_controlfp_s( &currentState, 0, _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID );
+	unsigned int currentState = 0;
+	_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN);
+	_controlfp_s( &currentState, _EM_UNDERFLOW | _EM_INEXACT | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
+	//_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN );
 
 	physicsWorldCinfo cinfo;
 	//cinfo.m_gravity.setZero();
@@ -87,7 +89,7 @@ int Simulation( int argc, char* argv[] )
 #endif
 
 #if 1
-#if 0
+#if 1
 	int bIdA, bIdB;
 	{
 		physicsBodyCinfo cinfo;
@@ -99,7 +101,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 12.0f, -60.0f ) );
 		vertices.push_back( Vector3( 30.0f, 18.0f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
-		cinfo.m_pos.set( -50.0f, -50.0f );
+		cinfo.m_pos.set( 462.0f, 334.0f );
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
@@ -117,7 +119,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 12.0f, -60.0f ) );
 		vertices.push_back( Vector3( 30.0f, 18.0f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
-		cinfo.m_pos.set( 50.0f, 50.0f );
+		cinfo.m_pos.set( 562.0f, 434.0f );
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
@@ -126,7 +128,7 @@ int Simulation( int argc, char* argv[] )
 	}
 
 	JointConfig config;
-	config.pivot.setZero();
+	config.pivot.set(512.f, 384.f);
 	config.bodyIdA = bIdA;
 	config.bodyIdB = bIdB;
 	world->addJoint( config );
@@ -161,7 +163,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -40.0f, -40.0f ) );
 		vertices.push_back( Vector3( -40.0f, 40.0f ) );
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
-		cinfo.m_pos.set( 512.f, 384.f );
+		cinfo.m_pos.set( 712.f, 384.f );
 		cinfo.m_ori = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.f, 0. );
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
@@ -169,6 +171,25 @@ int Simulation( int argc, char* argv[] )
 		world->addBody( body );
 	}
 
+#endif
+#if 1
+	{
+		physicsBodyCinfo cinfo;
+		vector<Vector3> vertices;
+		vertices.push_back( Vector3( -18.0f, 36.0f ) );
+		vertices.push_back( Vector3( -30.0f, 6.0f ) );
+		vertices.push_back( Vector3( 42.0, -6.0 ) );
+		vertices.push_back( Vector3( -30.0f, -30.0f ) );
+		vertices.push_back( Vector3( 12.0f, -60.0f ) );
+		vertices.push_back( Vector3( 30.0f, 18.0f ) );
+		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_pos.set( 462.0f, 434.0f );
+		/// cinfo.m_rot = 45.0f * g_degToRad;
+		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
+		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
+		physicsBody* body = new physicsBody( cinfo );
+		world->addBody( body );
+	}
 #endif
 #if 0
 	{

@@ -1,5 +1,4 @@
-#ifndef PHYSICS_AABB_HPP
-#define PHYSICS_AABB_HPP
+#pragma once
 
 #include <Base.hpp>
 
@@ -16,5 +15,3 @@ class physicsAabb
     Vector3 m_max;
     Vector3 m_min;
 };
-
-#endif

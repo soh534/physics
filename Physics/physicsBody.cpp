@@ -13,10 +13,10 @@ physicsBodyCinfo::physicsBodyCinfo()
 	/// Default values if no settings are specified
     m_shape = nullptr;
 	m_type = physicsMotionType::DYNAMIC;
-    m_pos.set(0.0f, 0.0f);
+	m_pos.setZero();
     m_ori = 0.0f;
 	m_com = m_pos;
-    m_linearVelocity.set(0.0f, 0.0f);
+	m_linearVelocity.setZero();
     m_angularSpeed = 0.0f;
     m_mass = -1.0f;
 	m_inertia = -1.0f;

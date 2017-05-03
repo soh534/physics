@@ -196,6 +196,8 @@ void physicsWorld::stepSolve(
 			const Real& w = body->getAngularSpeed();
 			Real& rot = body->getRotation();
 			rot += w * m_solver->getDeltaTime();
+
+			//body->dampVelocity(0.95f);
 		}
 	}
 }
@@ -297,7 +299,7 @@ void physicsWorld::narrowPhase( const std::vector<BodyIdPair>& broadPhasePassedP
 		physicsBody const * bodyB = getBody( bodyIdPair->bodyIdB );
 
 		ColliderFuncPtr collide = getCollisionFunc( bodyA, bodyB );
-		CollidedPair collidedPair( &*bodyIdPair );
+		CollidedPair collidedPair( &*bodyIdPair ); /// TODO: fix this syntax
 		collide( bodyA, bodyB, collidedPair.contactPoints );
 
 		if ( collidedPair.contactPoints.size() > 0 )
