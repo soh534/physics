@@ -14,6 +14,16 @@ struct SolverBody
 	Real ori;
 	Real mInv;
 	Real iInv;
+
+	void setFromBody(const physicsBody& body)
+	{
+		v = body.getLinearVelocity();
+		w( 2 ) = body.getAngularSpeed();
+		pos = body.getPosition();
+		ori = body.getRotation();
+		mInv = body.getInvMass();
+		iInv = body.getInvInertia();
+	}
 };
 
 /// TODO: think of more appropriate places to put this
@@ -47,7 +57,7 @@ public:
 		const std::vector<CollidedPair>& existingCollisionsIn,
 		const std::vector<CollidedPair>& newCollisionsIn,
 		const std::vector<BodyIdPair>& lostCollisionsIn,
-		const std::vector<physicsBody*>& bodies );
+		const std::vector<SolverBody>& bodies );
 	void solveConstraints( std::vector<physicsBody*>& updatedBodiesOut );
 	void solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn, bool contact );
 
@@ -60,6 +70,5 @@ private:
 	int m_numIter;
 	std::vector<ConstrainedPair> m_contactConstraintPairs;
 	std::vector<ConstrainedPair> m_jointConstraintPairs;
-	std::vector<SolverBody> m_solverBodies;
 };
 

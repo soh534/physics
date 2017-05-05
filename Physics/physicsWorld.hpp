@@ -69,7 +69,7 @@ private:
 	std::vector<CollidedPair> m_newCollidedPairs;
 
 	std::vector<BodyId> m_activeBodyIds; /// Simulated body Ids
-
+	std::vector<SolverBody> m_solverBodies;
 	BodyId m_firstFreeBodyId;
 
 private:

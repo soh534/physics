@@ -66,7 +66,11 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 		FreeBody& freeBody = *reinterpret_cast<FreeBody*>( &body );
 		m_firstFreeBodyId = freeBody.m_nextFreeBodyIdx;
 		body = physicsBody( cinfo );
-		body.setBodyId(freeId);
+
+		body.setBodyId( freeId );
+		m_activeBodyIds.push_back( body.getBodyId() );
+
+		return body.getBodyId();
 	}
 	else
 	{
@@ -76,13 +80,10 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 		physicsBody& body = m_bodies.back();
 
 		body.setBodyId( m_bodies.size() - 1 );
-		BodyId solverBodyId = m_solver->addSolverBody( body );
 		m_activeBodyIds.push_back( body.getBodyId() );
-	}
-	
-	Assert( solverBodyId == body.getBodyId(), "mismatching body IDs" );
 
-	return body.getBodyId();
+		return body.getBodyId();
+	}
 }
 
 void physicsWorld::removeBody( BodyId bodyId )
@@ -179,22 +180,29 @@ void physicsWorld::stepSolve(
 	const std::vector<CollidedPair>& newCollisionsIn,
 	const std::vector<BodyIdPair>& lostCollisionsIn )
 {
-	/// Apply gravity
-	for ( int i = 0; i < (int)m_activeBodyIds.size(); i++ )
+	int numActiveBodies = (int)m_activeBodyIds.size();
+
+	m_solverBodies.resize( numActiveBodies );
+
+	for ( int i = 0; i < numActiveBodies; i++ )
 	{
 		int activeBodyId = m_activeBodyIds[i];
 		physicsBody& body = m_bodies[activeBodyId];
 
+		/// Apply gravity
 		if ( !body.isStatic() )
 		{
 			Vector3& v = body.getLinearVelocity();
 			v += m_gravity * m_solver->getDeltaTime();
 		}
+
+		/// Prepare solver bodies
+		m_solverBodies[i].setFromBody( body );
 	}
 
 	/// Solve constraints
-	m_solver->preSolve( existingCollisionsIn, newCollisionsIn, lostCollisionsIn, m_bodies );
-	m_solver->solveConstraints( m_bodies );
+	m_solver->preSolve( existingCollisionsIn, newCollisionsIn, lostCollisionsIn, m_solverBodies );
+	m_solver->solveConstraints( m_solverBodies );
 
 	/// Integrate time
 	for ( int i = 0; i < (int)m_activeBodyIds.size(); i++ )

@@ -266,23 +266,8 @@ void physicsSolver::preSolve(
 	const vector<CollidedPair>& remainingCollisionsIn,
 	const vector<CollidedPair>& newCollisionsIn,
 	const vector<BodyIdPair>& lostCollisionsIn,
-	const vector<physicsBody*>& bodies )
+	const vector<SolverBody>& bodies )
 {
-	// Set solver body velocities, update constraints
-	for ( int i = 0; i < (int)bodies.size(); i++ )
-	{
-		physicsBody const * const body = bodies[ i ];
-
-		if ( body == nullptr ) continue;
-
-		SolverBody& solverBody = getSolverBody( body->getBodyId() );
-		
-		solverBody.v = body->getLinearVelocity();
-		solverBody.w( 2 ) = body->getAngularSpeed();
-		solverBody.pos = body->getPosition();
-		solverBody.ori = body->getRotation();
-	}
-	
 	/// Remove constrained pairs that have lost broadphase
 	/// TODO: replace this with O(N)
 	auto constraintIter = m_contactConstraintPairs.begin();
@@ -339,7 +324,7 @@ void physicsSolver::preSolve(
 	std::sort( m_jointConstraintPairs.begin(), m_jointConstraintPairs.end(), bodyIdPairLess );
 }
 
-void physicsSolver::solveConstraints( vector<physicsBody*>& updatedBodiesOut )
+void physicsSolver::solveConstraints( vector<SolverBody>& updatedBodiesOut )
 {
 	/// Solve joint and contact constraints, update velocities of constrained bodies
 	for ( int i = 0; i < m_numIter; i++ )
