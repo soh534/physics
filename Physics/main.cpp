@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include <physicsWorld.hpp>
-#include <physicsBody.hpp>
 #include <physicsShape.hpp>
 
 #include <DemoUtils.hpp>
@@ -105,8 +104,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		bIdA = world->addBody( body );
+		bIdA = world->createBody( cinfo );
 	}
 
 	{
@@ -123,8 +121,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		bIdB = world->addBody( body );
+		bIdB = world->createBody( cinfo );
 	}
 
 	JointConfig config;
@@ -150,8 +147,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_pos.set( 627.0f, 449.0f );
 		cinfo.m_ori = 77 * g_degToRad;
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 1
@@ -167,8 +163,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_ori = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.f, 0. );
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 #endif
@@ -187,8 +182,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 0
@@ -209,8 +203,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 		cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 0
@@ -231,8 +224,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 		cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 	{
@@ -252,8 +244,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 		cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 	{
@@ -273,8 +264,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 		cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 	{
@@ -294,8 +284,7 @@ int Simulation( int argc, char* argv[] )
 		/// cinfo.m_rot = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 		cinfo.m_angularSpeed = -50.0f * g_degToRad;
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 #endif
@@ -313,8 +302,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 87.f, 384.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 1
@@ -329,8 +317,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 609.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 1
@@ -345,8 +332,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 937.f, 384.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 #if 1
@@ -361,8 +347,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 159.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 

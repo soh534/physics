@@ -22,7 +22,7 @@ struct ConstrainedPair : public BodyIdPair
 	std::vector<Constraint> constraints;
 
 	ConstrainedPair( const BodyId a, const BodyId b );
-	ConstrainedPair( BodyIdPair const * other );
+	ConstrainedPair( const BodyIdPair& other );
 };
 
 class physicsSolver
@@ -32,7 +32,7 @@ public:
 	physicsSolver( const Real deltaTime, const int numIterations );
 	~physicsSolver();
 
-	BodyId addSolverBody( physicsBody const * const body );
+	BodyId addSolverBody( const physicsBody& body );
 	SolverBody& getSolverBody( const BodyId bodyId );
 
 	int addJointConstraint( const ConstrainedPair& joint );

@@ -15,7 +15,7 @@ ConstrainedPair::ConstrainedPair( const BodyId a, const BodyId b ) :
 
 }
 
-ConstrainedPair::ConstrainedPair( BodyIdPair const * other ) :
+ConstrainedPair::ConstrainedPair( const BodyIdPair& other ) :
 	BodyIdPair( other )
 {
 
@@ -32,16 +32,16 @@ physicsSolver::~physicsSolver()
 
 }
 
-BodyId physicsSolver::addSolverBody(physicsBody const * const body)
+BodyId physicsSolver::addSolverBody(const physicsBody& body)
 {
 	SolverBody solverBody;
 	{
-		solverBody.v = body->getLinearVelocity();
-		solverBody.w(2) = body->getAngularSpeed();
-		solverBody.pos = body->getPosition();
-		solverBody.ori = body->getRotation();
-		solverBody.mInv = body->getInvMass();
-		solverBody.iInv = body->getInvInertia();
+		solverBody.v = body.getLinearVelocity();
+		solverBody.w(2) = body.getAngularSpeed();
+		solverBody.pos = body.getPosition();
+		solverBody.ori = body.getRotation();
+		solverBody.mInv = body.getInvMass();
+		solverBody.iInv = body.getInvInertia();
 	}
 
 	m_solverBodies.push_back(solverBody);
@@ -62,10 +62,14 @@ int physicsSolver::addJointConstraint(const ConstrainedPair& joint)
 
 void physicsSolver::removeJointConstraint(JointId jointId)
 {
-	ConstrainedPair& joint = m_jointConstraintPairs[jointId];
-	joint.bodyIdA = invalidId;
-	joint.bodyIdB = invalidId;
-	joint.constraints.clear();
+	//ConstrainedPair& joint = m_jointConstraintPairs[jointId];
+	//joint.bodyIdA = invalidId;
+	//joint.bodyIdB = invalidId;
+	//joint.constraints.clear();
+
+	/// TODO: think about what to do with this
+	auto jiter = m_jointConstraintPairs.begin();
+	m_jointConstraintPairs.erase( jiter + jointId );
 }
 
 void physicsSolver::addNewContacts(const vector<CollidedPair>& collisionsIn)
@@ -76,7 +80,7 @@ void physicsSolver::addNewContacts(const vector<CollidedPair>& collisionsIn)
 		const CollidedPair& collidedPair = collisionsIn[i];
 		const vector<ContactPoint>& contacts = collidedPair.contactPoints;
 
-		ConstrainedPair constrainedPair( &collidedPair );
+		ConstrainedPair constrainedPair( collidedPair );
 
 		for (int i = 0; i < (int)contacts.size(); i++)
 		{
@@ -268,6 +272,9 @@ void physicsSolver::preSolve(
 	for ( int i = 0; i < (int)bodies.size(); i++ )
 	{
 		physicsBody const * const body = bodies[ i ];
+
+		if ( body == nullptr ) continue;
+
 		SolverBody& solverBody = getSolverBody( body->getBodyId() );
 		
 		solverBody.v = body->getLinearVelocity();
@@ -388,7 +395,6 @@ void physicsSolver::solveConstraints( vector<physicsBody*>& updatedBodiesOut )
 
 void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn, bool contact )
 {
-
 	for ( int i = 0; i < (int)pairsIn.size(); i++ )
 	{
 		ConstrainedPair& constraintPair = pairsIn[ i ];
@@ -397,7 +403,6 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 		SolverBody& bodyB = m_solverBodies[ constraintPair.bodyIdB ];
 		std::vector<Constraint>& constraints = constraintPair.constraints;
 
-		int ctr = 0;
 		int numConstraints = (int)constraints.size();
 		for ( int j = 0; j < numConstraints; j++ )
 		{
@@ -407,8 +412,6 @@ void physicsSolver::solveConstraintPairs( std::vector<ConstrainedPair>& pairsIn,
 			{
 				continue;
 			}
-
-			ctr++;
 
 			Vector3 rA_world = constraint.rA.getRotatedDir( bodyA.ori );
 			Vector3 rB_world = constraint.rB.getRotatedDir( bodyB.ori );

@@ -27,8 +27,8 @@ public:
     physicsCollider();
 
 	static void collide(
-		const physicsBody* bodyA,
-		const physicsBody* bodyB, 
+		const physicsBody& bodyA,
+		const physicsBody& bodyB, 
 		std::vector<struct ContactPoint>& contacts);
 };
 
@@ -38,8 +38,8 @@ private:
     physicsCircleCollider();
 
 public:
-	static void collide( const physicsBody* bodyA,
-						 const physicsBody* bodyB,
+	static void collide( const physicsBody& bodyA,
+						 const physicsBody& bodyB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -49,8 +49,8 @@ private:
     physicsCircleBoxCollider();
 
 public:
-	static void collide( const physicsBody* bodyA,
-						 const physicsBody* bodyB,
+	static void collide( const physicsBody& bodyA,
+						 const physicsBody& bodyB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -60,8 +60,8 @@ private:
 	physicsBoxCollider();
 
 public:
-	static void collide( const physicsBody* bodyA,
-						 const physicsBody* bodyB,
+	static void collide( const physicsBody& bodyA,
+						 const physicsBody& bodyB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -71,19 +71,19 @@ private:
 	physicsConvexCollider();
 
 public:
-	static void collide( const physicsBody* bodyA,
-						 const physicsBody* bodyB,
+	static void collide( const physicsBody& bodyA,
+						 const physicsBody& bodyB,
 						 std::vector<ContactPoint>& contacts );
 
 	static void getSimplexVertex( const Vector3& direction,
-								  const physicsBody* bodyA,
-								  const physicsBody* bodyB,
+								  const physicsBody& bodyA,
+								  const physicsBody& bodyB,
 								  Vector3& vert,
 								  Vector3& supportA,
 								  Vector3& supportB );
 
-	static void expandingPolytopeAlgorithm( const physicsBody* bodyA,
-											const physicsBody* bodyB,
+	static void expandingPolytopeAlgorithm( const physicsBody& bodyA,
+											const physicsBody& bodyB,
 											std::vector< std::array<Vector3, 3> >& simplex,
 											struct SimplexEdge& closest );
 	

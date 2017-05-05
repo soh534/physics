@@ -1,7 +1,7 @@
 #pragma once
 
 // Debugging macros
-//#define D_BROADPHASE
+#define D_BROADPHASE
 
 //#define D_TANGENTIAL_IMPULSE
 //#define D_CONTACT_IMPULSE
@@ -27,7 +27,7 @@ class Vector3;
 namespace DebugUtils
 {
 	// Broadphase
-	void drawBpAabb(physicsBody const * const body);
+	void drawBpAabb(const physicsBody& body);
 	void debug_print_line(const Vector3& p0, const Vector3& p1);
 	void debug_draw_triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2);
 

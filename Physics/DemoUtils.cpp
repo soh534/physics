@@ -21,7 +21,7 @@ void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyI
 			cinfo.m_collidable = false;
 		}
 
-		controlInfo.dummyBodyId = world->addBody(new physicsBody(cinfo));
+		controlInfo.dummyBodyId = world->createBody( cinfo );
 
 		JointConfig config;
 		{

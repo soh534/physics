@@ -5,10 +5,10 @@
 /// TODO: these debug macros should be checked for in the calling function
 /// instead of having these functions being called @ default
 
-void DebugUtils::drawBpAabb(physicsBody const * const body)
+void DebugUtils::drawBpAabb(const physicsBody& body)
 {
 #if defined D_BROADPHASE
-	const physicsAabb& aabb = body->getAabb();
+	const physicsAabb& aabb = body.getAabb();
 	drawBox(aabb.m_max, aabb.m_min, RED);
 #endif
 }

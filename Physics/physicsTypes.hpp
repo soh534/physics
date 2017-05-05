@@ -15,9 +15,9 @@ struct BodyIdPair
 	BodyId bodyIdB;
 
 	BodyIdPair( const BodyId a = invalidId, const BodyId b = invalidId );
-	BodyIdPair( BodyIdPair const* other );
+	BodyIdPair( const BodyIdPair& other );
 	void set( const BodyId a, const BodyId b );
-	void set( BodyIdPair const* other );
+	void set( const BodyIdPair& other );
 };
 
 bool operator == (const BodyIdPair& pairA, const BodyIdPair& pairB);
@@ -44,7 +44,7 @@ struct CollidedPair : public BodyIdPair
 	std::vector<struct ContactPoint> contactPoints;
 
 	CollidedPair( const BodyId a, const BodyId b );
-	CollidedPair( BodyIdPair const * other );
+	CollidedPair( const BodyIdPair& other );
 };
 
 struct ContactPoint

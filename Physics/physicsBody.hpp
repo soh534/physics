@@ -33,9 +33,14 @@ class physicsBodyCinfo
 	std::string m_name;
 };
 
+struct FreeBody
+{
+	int m_nextFreeBodyIdx;
+};
+
 class physicsBody : public physicsObject
 {
-  protected:
+  public:
 
 	physicsShape* m_shape;
 	physicsMotionType m_type;
@@ -43,7 +48,7 @@ class physicsBody : public physicsObject
 	Real m_ori;
 	Vector3 m_com;
 	Vector3 m_linearVelocity;
-	Real m_angularSpeed; // Angular speed w in radians
+	Real m_angularSpeed; /// Angular speed in radians
 	Real m_mass;
 	Real m_invMass;
 	Real m_inertia;
@@ -52,8 +57,9 @@ class physicsBody : public physicsObject
 	physicsAabb m_aabb;
 	std::string m_name;
 
-	unsigned int m_bodyId;
+	BodyId m_bodyId;
 	unsigned int m_bodyFilter;
+	unsigned int m_activeListIdx;
 
   public:
     physicsBody(const physicsBodyCinfo& bodyCinfo);

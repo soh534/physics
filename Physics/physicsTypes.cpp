@@ -5,7 +5,7 @@ BodyIdPair::BodyIdPair( const BodyId a, const BodyId b )
 	set( a, b );
 }
 
-BodyIdPair::BodyIdPair( BodyIdPair const * other )
+BodyIdPair::BodyIdPair( const BodyIdPair& other )
 {
 	set( other );
 }
@@ -17,9 +17,9 @@ void BodyIdPair::set( const BodyId a, const BodyId b )
 	bodyIdB = ( a > b ) ? b : a;
 }
 
-void BodyIdPair::set( BodyIdPair const * other )
+void BodyIdPair::set( const BodyIdPair& other )
 {
-	set( other->bodyIdA, other->bodyIdB );
+	set( other.bodyIdA, other.bodyIdB );
 }
 
 bool operator == ( const BodyIdPair& pairA, const BodyIdPair& pairB )
@@ -59,7 +59,7 @@ CollidedPair::CollidedPair( const BodyId a, const BodyId b )
 
 }
 
-CollidedPair::CollidedPair(BodyIdPair const * other)
+CollidedPair::CollidedPair(const BodyIdPair& other)
 	: BodyIdPair( other )
 {
 

@@ -7,7 +7,7 @@
 #include <physicsShape.hpp> // For physicsShape::NUM_SHAPES
 #include <physicsTypes.hpp>
 
-typedef void ( *ColliderFuncPtr )( const physicsBody*, const physicsBody*, std::vector<ContactPoint>& );
+typedef void ( *ColliderFuncPtr )( const physicsBody&, const physicsBody&, std::vector<ContactPoint>& );
 
 struct physicsWorldCinfo
 {
@@ -23,7 +23,7 @@ struct physicsWorldCinfo
 		m_numIter(8) {}
 };
 
-struct JointConfig
+struct JointCinfo
 {
 	int bodyIdA;
 	int bodyIdB;
@@ -37,15 +37,15 @@ public: // todo: make these private to prevent accidental change
 	physicsWorld(const physicsWorldCinfo& cinfo);
 	~physicsWorld();
 
-	BodyId addBody(physicsBody* const body);
-	int addJoint(const JointConfig& config);
+	BodyId createBody( const physicsBodyCinfo& cinfo );
 	void removeBody(BodyId bodyId);
+	int addJoint(const JointCinfo& config);
 	void removeJoint(JointId jointId);
     void step();
 	
-	physicsBody const * const getBody(BodyId bodyId) const;
-	physicsBody* getBody(BodyId bodyId);
-	const std::vector<physicsBody*>& getBodies() { return m_bodies; }
+	const physicsBody& getBody(BodyId bodyId) const;
+	physicsBody& getBody(BodyId bodyId);
+	const std::vector<physicsBody>& getBodies() { return m_bodies; }
 
     void render();
 
@@ -60,18 +60,22 @@ private:
 
 	Vector3 m_gravity;
 	Real m_cor;
-	std::vector<physicsBody*> m_bodies;
+	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
 	class physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
-	std::vector<BodyIdPair> m_existingPairs; // Broadphase existing pairs
-	std::vector<BodyIdPair> m_lastFrameNewPairs; // Broadphase new pairs
+	std::vector<BodyIdPair> m_existingPairs; /// Broadphase existing pairs
+	std::vector<BodyIdPair> m_lastFrameNewPairs; /// Broadphase new pairs
 	std::vector<CollidedPair> m_existingCollidedPairs;
 	std::vector<CollidedPair> m_newCollidedPairs;
+
+	std::vector<BodyId> m_activeBodyIds; /// Simulated body Ids
+
+	BodyId m_firstFreeBodyId;
 
 private:
 
 	void registerColliderFunc(physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func);
-	ColliderFuncPtr getCollisionFunc(physicsBody const * const bodyA, physicsBody const * const bodyB);
+	ColliderFuncPtr getCollisionFunc(const physicsBody& bodyA, const physicsBody& bodyB);
 
 	void stepSolve(
 		const std::vector<CollidedPair>& existingCollisionsIn,

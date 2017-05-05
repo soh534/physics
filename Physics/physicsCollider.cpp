@@ -24,8 +24,8 @@ physicsCollider::physicsCollider()
 }
 
 void physicsCollider::collide(
-	const physicsBody* bodyA, 
-	const physicsBody* bodyB,
+	const physicsBody& bodyA, 
+	const physicsBody& bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 
@@ -38,25 +38,25 @@ physicsCircleCollider::physicsCircleCollider()
 }
 
 void physicsCircleCollider::collide(
-	const physicsBody* bodyA, 
-	const physicsBody* bodyB,
+	const physicsBody& bodyA, 
+	const physicsBody& bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
-		physicsShape* shapeA = bodyA->getShape();
-		physicsShape* shapeB = bodyB->getShape();
+		physicsShape* shapeA = bodyA.getShape();
+		physicsShape* shapeB = bodyB.getShape();
 		Assert(shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider");
 		Assert(shapeB->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider");
 	}
 
-	physicsCircleShape* shapeA = (physicsCircleShape*)bodyA->getShape();
-    physicsCircleShape* shapeB = (physicsCircleShape*)bodyB->getShape();
+	physicsCircleShape* shapeA = (physicsCircleShape*)bodyA.getShape();
+    physicsCircleShape* shapeB = (physicsCircleShape*)bodyB.getShape();
 
     Real radA = shapeA->getRadius();
     Real radB = shapeB->getRadius();
 
-	Vector3 posA = bodyA->getPosition();
-	Vector3 posB = bodyB->getPosition();
+	Vector3 posA = bodyA.getPosition();
+	Vector3 posB = bodyB.getPosition();
 
 	Vector3 ab = posB - posA;
 
@@ -105,13 +105,13 @@ physicsCircleBoxCollider::physicsCircleBoxCollider()
 
 /// A: Circle, B: Box
 void physicsCircleBoxCollider::collide(
-	const physicsBody* bodyA,
-	const physicsBody* bodyB,
+	const physicsBody& bodyA,
+	const physicsBody& bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
-		physicsShape* shapeA = bodyA->getShape();
-		physicsShape* shapeB = bodyB->getShape();
+		physicsShape* shapeA = bodyA.getShape();
+		physicsShape* shapeB = bodyB.getShape();
 		Assert(shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle-box collider 1st param");
 		Assert(shapeB->getType() == physicsShape::BOX, "non-box shape sent to circle-box collider 2nd param");
 	}
@@ -124,13 +124,13 @@ physicsBoxCollider::physicsBoxCollider()
 }
 
 void physicsBoxCollider::collide(
-	const physicsBody* bodyA, 
-	const physicsBody* bodyB,
+	const physicsBody& bodyA, 
+	const physicsBody& bodyB,
 	std::vector<ContactPoint>& contacts)
 {
 	{
-		physicsShape* shapeA = bodyA->getShape();
-		physicsShape* shapeB = bodyB->getShape();
+		physicsShape* shapeA = bodyA.getShape();
+		physicsShape* shapeB = bodyB.getShape();
 		Assert(shapeA->getType() == physicsShape::BOX, "non-box shape sent to box collider");
 		Assert(shapeB->getType() == physicsShape::BOX, "non-box shape sent to box collider");
 	}
@@ -144,23 +144,23 @@ physicsConvexCollider::physicsConvexCollider()
 
 void physicsConvexCollider::getSimplexVertex(
 	const Vector3& direction,
-	const physicsBody* bodyA,
-	const physicsBody* bodyB,
+	const physicsBody& bodyA,
+	const physicsBody& bodyB,
 	Vector3& vert,
 	Vector3& supportA,
 	Vector3& supportB)
 {
-	Vector3 dirLocalA = direction.getRotatedDir(-1.f * bodyA->getRotation());
-	Vector3 dirLocalB = direction.getNegated().getRotatedDir(-1.f * bodyB->getRotation());
+	Vector3 dirLocalA = direction.getRotatedDir(-1.f * bodyA.getRotation());
+	Vector3 dirLocalB = direction.getNegated().getRotatedDir(-1.f * bodyB.getRotation());
 
-	physicsShape* shapeA = bodyA->getShape();
-	physicsShape* shapeB = bodyB->getShape();
+	physicsShape* shapeA = bodyA.getShape();
+	physicsShape* shapeB = bodyB.getShape();
 	shapeA->getSupportingVertex(dirLocalA, supportA);
 	shapeB->getSupportingVertex(dirLocalB, supportB);
 
 	Matrix3 localAtoWorld, localBtoWorld;
-	localAtoWorld.setTransform(bodyA->getPosition(), bodyA->getRotation());
-	localBtoWorld.setTransform(bodyB->getPosition(), bodyB->getRotation());
+	localAtoWorld.setTransform(bodyA.getPosition(), bodyA.getRotation());
+	localBtoWorld.setTransform(bodyB.getPosition(), bodyB.getRotation());
 
 	supportA.setTransformedPos(localAtoWorld, supportA);
 	supportB.setTransformedPos(localBtoWorld, supportB);
@@ -228,12 +228,12 @@ struct SimplexEdge
 };
 
 void physicsConvexCollider::collide(
-	const physicsBody* bodyA,
-	const physicsBody* bodyB,
+	const physicsBody& bodyA,
+	const physicsBody& bodyB,
 	std::vector<ContactPoint>& contacts)
 {
-    Vector3 posA = bodyA->getPosition();
-    Vector3 posB = bodyB->getPosition();
+    Vector3 posA = bodyA.getPosition();
+    Vector3 posB = bodyB.getPosition();
 
     Vector3 direction = posB - posA;
 
@@ -336,8 +336,8 @@ void physicsConvexCollider::collide(
 			/// TODO: Implement convex radius here
 			ContactPoint contact(
 				0.f, 
-				(pointA - posA).getRotatedDir(-bodyA->getRotation()),
-				(pointB - posB).getRotatedDir(-bodyB->getRotation()),
+				(pointA - posA).getRotatedDir(-bodyA.getRotation()),
+				(pointB - posB).getRotatedDir(-bodyB.getRotation()),
 				//pointA - posA,
 				//pointB - posB,
 				normal
@@ -432,8 +432,8 @@ void physicsConvexCollider::collide(
 
 	ContactPoint contact(
 		normal.length(),
-		(pointA - posA).getRotatedDir(-bodyA->getRotation()),
-		(pointB - posB).getRotatedDir(-bodyB->getRotation()),
+		(pointA - posA).getRotatedDir(-bodyA.getRotation()),
+		(pointB - posB).getRotatedDir(-bodyB.getRotation()),
 		//pointA - posA,
 		//pointB - posB,
 		normal.getNormalized()
@@ -446,8 +446,8 @@ void physicsConvexCollider::collide(
 }
 
 void physicsConvexCollider::expandingPolytopeAlgorithm(
-	const physicsBody* bodyA,
-	const physicsBody* bodyB,
+	const physicsBody& bodyA,
+	const physicsBody& bodyB,
 	std::vector< std::array<Vector3, 3> >& simplex,
 	SimplexEdge& edge)
 {	
