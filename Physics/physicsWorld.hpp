@@ -3,11 +3,13 @@
 #include <vector>
 #include <Base.hpp>
 
-#include <physicsBody.hpp> // For physicsMotionType
-#include <physicsShape.hpp> // For physicsShape::NUM_SHAPES
-#include <physicsTypes.hpp>
+#include <physicsBody.hpp> /// For physicsMotionType
+#include <physicsShape.hpp> /// For physicsShape::NUM_SHAPES
+#include <physicsSolver.hpp>
 
-typedef void ( *ColliderFuncPtr )( const physicsBody&, const physicsBody&, std::vector<ContactPoint>& );
+struct ContactPoint;
+
+typedef void( *ColliderFuncPtr )( const physicsBody&, const physicsBody&, std::vector<ContactPoint>& );
 
 struct physicsWorldCinfo
 {
@@ -17,10 +19,10 @@ struct physicsWorldCinfo
 	int m_numIter;
 
 	physicsWorldCinfo() :
-		m_gravity(0.f, -98.f),
-		m_deltaTime(.016f),
-		m_cor(1.f),
-		m_numIter(8) {}
+		m_gravity( 0.f, -98.f ),
+		m_deltaTime( .016f ),
+		m_cor( 1.f ),
+		m_numIter( 8 ) {}
 };
 
 struct JointCinfo
@@ -30,65 +32,77 @@ struct JointCinfo
 	Vector3 pivot;
 };
 
+struct CachedPair : public BodyIdPair
+{
+	CachedPair( const BodyId a, const BodyId b ) : BodyIdPair( a, b ) {}
+	CachedPair( const BodyIdPair& other ) : BodyIdPair( other ) {}
+};
+
 class physicsWorld : public physicsObject
 {
-public: // todo: make these private to prevent accidental change
+public:
 
-	physicsWorld(const physicsWorldCinfo& cinfo);
+	physicsWorld( const physicsWorldCinfo& cinfo );
+
 	~physicsWorld();
 
 	BodyId createBody( const physicsBodyCinfo& cinfo );
-	void removeBody(BodyId bodyId);
-	int addJoint(const JointCinfo& config);
-	void removeJoint(JointId jointId);
-    void step();
+
+	void removeBody( BodyId bodyId );
+
+	int addJoint( const JointCinfo& config );
+
+	void removeJoint( JointId jointId );
+
+	void step();
 	
-	const physicsBody& getBody(BodyId bodyId) const;
-	physicsBody& getBody(BodyId bodyId);
-	const std::vector<physicsBody>& getBodies() { return m_bodies; }
+	int getNumActiveBodies() const { return m_activeBodyIds.size(); };
 
-    void render();
+	void getActiveBodies( std::vector<physicsBody>& activeBodies ) const;
 
-    // Utility funcs
-	void setPosition(BodyId bodyId, const Vector3& point);
-	void setMotionType(BodyId bodyId, physicsMotionType type);
+	void render();
 
-	// Setters & getters
+	/// Utility funcs
+	void setPosition( BodyId bodyId, const Vector3& point );
+
+	void setMotionType( BodyId bodyId, physicsMotionType type );
+
 	const Real getDeltaTime();
+
+
+private:
+
+	void registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func );
+
+	ColliderFuncPtr getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB );
+
+	void updateJointConstraints();
+
+	void solve();
+
+	void collideCachedAndNewPairs(
+		std::vector<ConstrainedPair>& cachedPairs,
+		const std::vector<BodyIdPair>& newPairs );
+
+	void collide();
+
+	void collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut );
+
+	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB );
 
 private:
 
 	Vector3 m_gravity;
 	Real m_cor;
 	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
+	SolverInfo m_solverInfo;
 	class physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
-	std::vector<BodyIdPair> m_existingPairs; /// Broadphase existing pairs
-	std::vector<BodyIdPair> m_lastFrameNewPairs; /// Broadphase new pairs
-	std::vector<CollidedPair> m_existingCollidedPairs;
-	std::vector<CollidedPair> m_newCollidedPairs;
-
+	std::vector<BodyIdPair> m_newPairs; /// New broadphase pairs
+	std::vector<ConstrainedPair> m_cachedContactPairs;
+	std::vector<ConstrainedPair> m_jointSolvePairs;
+	std::vector<ConstrainedPair> m_contactSolvePairs;
 	std::vector<BodyId> m_activeBodyIds; /// Simulated body Ids
 	std::vector<SolverBody> m_solverBodies;
 	BodyId m_firstFreeBodyId;
-
-private:
-
-	void registerColliderFunc(physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func);
-	ColliderFuncPtr getCollisionFunc(const physicsBody& bodyA, const physicsBody& bodyB);
-
-	void stepSolve(
-		const std::vector<CollidedPair>& existingCollisionsIn,
-		const std::vector<CollidedPair>& newCollisionsIn,
-		const std::vector<BodyIdPair>& lostCollisionsIn);
-
-	void stepCollide(
-		std::vector<CollidedPair>& existingCollisionsOut,
-		std::vector<CollidedPair>& newCollisionsOut,
-		std::vector<BodyIdPair>& lostCollisionsOut
-	);
-	void broadPhase(std::vector<BodyIdPair>& broadPhasePassedPairsOut);
-	void narrowPhase(const std::vector<BodyIdPair>& bbPassedPairsIn, std::vector<CollidedPair>& collisionsOut);
-
-	bool checkCollidable(BodyId bodyIdA, BodyId bodyIdB);
 };

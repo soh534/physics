@@ -99,7 +99,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -30.0f, -30.0f ) );
 		vertices.push_back( Vector3( 12.0f, -60.0f ) );
 		vertices.push_back( Vector3( 30.0f, 18.0f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 462.0f, 334.0f );
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
@@ -116,7 +116,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -30.0f, -30.0f ) );
 		vertices.push_back( Vector3( 12.0f, -60.0f ) );
 		vertices.push_back( Vector3( 30.0f, 18.0f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 562.0f, 434.0f );
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
@@ -124,7 +124,7 @@ int Simulation( int argc, char* argv[] )
 		bIdB = world->createBody( cinfo );
 	}
 
-	JointConfig config;
+	JointCinfo config;
 	config.pivot.set(512.f, 384.f);
 	config.bodyIdA = bIdA;
 	config.bodyIdB = bIdB;
@@ -143,7 +143,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -40.0f, 10.0f ) );
 		vertices.push_back( Vector3( -40.0f, -30.0f ) );
 		vertices.push_back( Vector3( -30.0f, -40.0f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 627.0f, 449.0f );
 		cinfo.m_ori = 77 * g_degToRad;
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
@@ -158,7 +158,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 40.0f, 40.0f ) );
 		vertices.push_back( Vector3( -40.0f, -40.0f ) );
 		vertices.push_back( Vector3( -40.0f, 40.0f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 712.f, 384.f );
 		cinfo.m_ori = 77 * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.f, 0. );
@@ -177,7 +177,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -30.0f, -30.0f ) );
 		vertices.push_back( Vector3( 12.0f, -60.0f ) );
 		vertices.push_back( Vector3( 30.0f, 18.0f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 462.0f, 434.0f );
 		/// cinfo.m_rot = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
@@ -299,7 +299,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -25.f, 250.f ) );
 		vertices.push_back( Vector3( -25.f, -250.f ) );
 		vertices.push_back( Vector3( 25.f, -200.f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 87.f, 384.f );
 		world->createBody( cinfo );
@@ -314,7 +314,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -450.f, 25.f ) );
 		vertices.push_back( Vector3( 450.f, 25.f ) );
 		vertices.push_back( Vector3( 400.f, -25.f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 609.f );
 		world->createBody( cinfo );
@@ -329,7 +329,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 25.f, 250.f ) );
 		vertices.push_back( Vector3( 25.f, -250.f ) );
 		vertices.push_back( Vector3( -25.f, -200.f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 937.f, 384.f );
 		world->createBody( cinfo );
@@ -344,7 +344,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -450.f, -25.f ) );
 		vertices.push_back( Vector3( 450.f, -25.f ) );
 		vertices.push_back( Vector3( 400.f, 25.f ) );
-		cinfo.m_shape = new physicsConvexShape( vertices, .1f );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_type = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 159.f );
 		world->createBody( cinfo );

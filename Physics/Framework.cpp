@@ -1,17 +1,12 @@
-#include <Framework.hpp>
-
-#include <Base.hpp>
-
-#include <physicsWorld.hpp>
-#include <physicsBody.hpp>
-
-#include <Renderer.hpp>
-#include <DemoUtils.hpp>
-
-#include <GLFW/glfw3.h>
-
 #include <sstream>
 #include <algorithm> // For using std::max
+#include <GLFW/glfw3.h>
+
+#include <Base.hpp>
+#include <physicsWorld.hpp>
+#include <Renderer.hpp>
+#include <DemoUtils.hpp>
+#include <Framework.hpp>
 
 int g_widthWindow;
 int g_heightWindow;
@@ -41,7 +36,7 @@ static void error_callback( int error, const char* description )
 	fputs( description, stderr );
 }
 
-void txGlfwToOgl( const Vector3& pointGlfw, Vector3& pointOgl )
+void transformGLFWtoGL( const Vector3& pointGlfw, Vector3& pointOgl )
 {
 	Vector3 yAxis( 1.f, 0.f );
 	Matrix3 yAxisReflection; yAxisReflection.setReflection( yAxis );
@@ -58,7 +53,7 @@ static void cursor_pos_callback( GLFWwindow* window, double xpos, double ypos )
 	if ( g_bodyId >= 0 )
 	{
 		Vector3 currPos;
-		txGlfwToOgl( Vector3( (Real)xpos, (Real)ypos ), currPos );
+		transformGLFWtoGL( Vector3( (Real)xpos, (Real)ypos ), currPos );
 		g_cursorVel = ( currPos - g_cursor ) / g_world->getDeltaTime();
 		g_cursor = currPos;
 	}
@@ -69,24 +64,25 @@ void mouse_button_callback( GLFWwindow* window, int button, int action, int mods
 	double x, y;
 	glfwGetCursorPos( window, &x, &y );
 
-	txGlfwToOgl( Vector3( (Real)x, (Real)y ), g_cursor );
+	transformGLFWtoGL( Vector3( (Real)x, (Real)y ), g_cursor );
 
 	if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld )
 	{
-		const std::vector<physicsBody*>& bodies = g_world->getBodies();
+		std::vector<physicsBody> bodies;
+		int numActiveBodies = g_world->getNumActiveBodies();
+		bodies.reserve( numActiveBodies ); /// TODO: store this bodies array in limited scope
+		g_world->getActiveBodies( bodies );
 
 		for ( int i = 0; i < (int)bodies.size(); ++i )
 		{
-			if ( !bodies[i] ) continue;
+			const physicsBody& body = bodies[i];
 
-			physicsBody const* body = bodies[i];
+			if ( body.isStatic() ) continue;
 
-			if ( body->isStatic() ) continue;
-
-			if ( body->containsPoint( g_cursor ) )
+			if ( body.containsPoint( g_cursor ) )
 			{
-				g_bodyId = body->getBodyId();
-				g_arm.setSub( g_cursor, body->getPosition() );
+				g_bodyId = body.getBodyId();
+				g_arm.setSub( g_cursor, body.getPosition() );
 				g_bodyHeld = true;
 				break;
 			}
@@ -112,14 +108,16 @@ void stepRender( GLFWwindow* window )
 	g_world->step();
 	g_world->render();
 
-	// Print total momentum
-	const std::vector<physicsBody*> bodies = g_world->getBodies();
+	/// Print total momentum
+	/// TODO: store this bodies array in limited scope
+	std::vector<physicsBody> bodies;
+	bodies.reserve( g_world->getNumActiveBodies() );
+	g_world->getActiveBodies( bodies );
 	Vector3 totLinMomentum( 0.f, 0.f, 0.f );
 
 	for ( int i = 0; i < (int)bodies.size(); i++ )
 	{
-		if ( !bodies[i] ) continue;
-		totLinMomentum += bodies[i]->getLinearVelocity() * bodies[i]->getMass();
+		totLinMomentum += bodies[i].getLinearVelocity() * bodies[i].getMass();
 	}
 
 	std::stringstream ss;

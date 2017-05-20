@@ -1,4 +1,4 @@
-inline physicsShape* physicsBody::getShape() const
+inline std::shared_ptr<physicsShape> physicsBody::getShape() const
 {
 	return m_shape;
 }

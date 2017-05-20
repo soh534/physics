@@ -1,16 +1,13 @@
 #pragma once
 
-#include <Base.hpp>
-
-#include <physicsObject.hpp>
-
+#include <memory>
 #include <vector>
+#include <Base.hpp>
+#include <physicsObject.hpp>
 
 class physicsAabb;
 
-//
-// Base class for all shapes
-//
+/// Base class for all shapes
 class physicsShape : public physicsObject
 {
   public:
@@ -47,14 +44,11 @@ class physicsShape : public physicsObject
     virtual physicsAabb getAabb(const Real rot) const = 0;
 };
 
-//
-// Circle shape
-//
+/// Circle shape
 class physicsCircleShape : public physicsShape
 {
-  public:
-
-    physicsCircleShape(Real radius);
+public:
+	static std::shared_ptr<physicsShape> create( const Real radius );
 
     virtual ~physicsCircleShape() override;
 
@@ -74,14 +68,14 @@ class physicsCircleShape : public physicsShape
 
     inline Real getRadius() const { return m_radius; }
 
-  protected:
+protected:
+
+	physicsCircleShape( const Real radius );
 
     Real m_radius;
 };
 
-//
-// Box shape
-//
+/// Box shape
 class physicsBoxShape : public physicsShape
 {
   public:
@@ -106,7 +100,7 @@ class physicsBoxShape : public physicsShape
 
     inline const Vector3& getHalfExtents() const { return m_halfExtents; }
     
-    // Determine edge facing point in this box's local coordinates
+    /// Determine edge facing point in this box's local coordinates
     void getEdgeFacingPoint(const Vector3& point, Vector3& base, Vector3& edge);
     
   protected:
@@ -114,18 +108,15 @@ class physicsBoxShape : public physicsShape
     Vector3 m_halfExtents;
 };
 
-//
-// Convex shape
-//
+/// Convex shape
 class physicsConvexShape : public physicsShape
 {
 	static const unsigned int maxVertices = 20;
 
 public:
 
-	// Vertices passed can be unsorted
-	// Vertices have to be w.r.t local-space
-    physicsConvexShape(const std::vector<Vector3>& vertices, const Real radius);
+	static std::shared_ptr<physicsShape> create( const std::vector<Vector3>& vertices, 
+												 const Real radius );
 
     virtual ~physicsConvexShape() override;
 
@@ -144,6 +135,10 @@ public:
     virtual physicsAabb getAabb(const Real rot) const override;
 
 protected:
+
+	/// Vertices passed can be unsorted
+	/// Vertices have to be w.r.t local-space
+	physicsConvexShape( const std::vector<Vector3>& vertices, const Real radius );
 
     std::vector<Vector3> m_vertices;
 

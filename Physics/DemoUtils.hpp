@@ -1,9 +1,10 @@
 #pragma once
 
+#include <vector>
+#include <physicsTypes.hpp>
+
 class physicsBody;
 class physicsWorld;
-
-#include <physicsTypes.hpp>
 
 namespace DemoUtils
 {
@@ -19,10 +20,10 @@ namespace DemoUtils
 		}
 	};
 
-	// Allow key-framed control of bodies in world
+	/// Allow key-framed control of bodies in world
 	void controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos);
 	void releaseControl(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId);
 
-	// Create packed circles for mass simulation
-	void createPackedCircles(std::vector<physicsBody*>& bodies, int numCircles);
+	/// Create packed circles for mass simulation
+	void createPackedCircles(std::vector<physicsBody>& bodies, int numCircles);
 }

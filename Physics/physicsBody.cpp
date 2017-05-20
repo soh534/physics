@@ -1,5 +1,6 @@
 #include <Base.hpp>
 
+#include <physicsTypes.hpp>
 #include <physicsBody.hpp>
 #include <physicsObject.hpp>
 
@@ -22,6 +23,11 @@ physicsBodyCinfo::physicsBodyCinfo()
 	m_inertia = -1.0f;
 	m_friction = 0.5f;
 	m_collidable = true;
+}
+
+physicsBodyCinfo::~physicsBodyCinfo()
+{
+
 }
 
 physicsBody::physicsBody(const physicsBodyCinfo& bodyCinfo) :
@@ -78,14 +84,14 @@ physicsBody::physicsBody(const physicsBodyCinfo& bodyCinfo) :
 
 physicsBody::~physicsBody()
 {
-    delete m_shape;
+
 }
 
 void physicsBody::render() const
 { 
 	/// TODO: move this function outside of physics
 
-	// Mark central point and lines constructing body's shape
+	/// Mark central point and lines constructing body's shape
 	drawArrow( m_pos, Vector3( 0.f, 10.f ).getRotatedDir( m_ori ) );
 
 	Vector3 offset( 5.f, 5.f );
@@ -95,7 +101,7 @@ void physicsBody::render() const
 
 bool physicsBody::containsPoint(const Vector3& point) const
 {
-	// Convert point from global to body local
+	/// Convert point from global to body local
 	Vector3 local;
 	local.setSub(point, m_pos);
 	local.setRotatedDir(local, -m_ori);
@@ -112,13 +118,13 @@ void physicsBody::updateAabb()
 
 void physicsBody::getPointVelocity(const Vector3& arm, Vector3& vel) const
 {
-	// TODO: Test
+	/// TODO: Test
 	Vector3 w(0.f, 0.f, m_angularSpeed);
 	Vector3 tangentVel = w.cross(arm.getRotatedDir(m_ori));
 	vel = tangentVel + m_linearVelocity;
 	if (vel.length() > 400.f)
 	{
-		//vel.setZero();
+		// vel.setZero();
 	}
 }
 

@@ -1,4 +1,5 @@
-#include <physicsTypes.hpp>
+#include <vector>
+#include <physicsInternalTypes.hpp>
 
 BodyIdPair::BodyIdPair( const BodyId a, const BodyId b )
 {
@@ -12,7 +13,7 @@ BodyIdPair::BodyIdPair( const BodyIdPair& other )
 
 void BodyIdPair::set( const BodyId a, const BodyId b )
 {
-	Assert(a != b, "BodyIdPair must consist of IDs for two different bodies");
+	Assert( a != b, "BodyIdPair must consist of IDs for two different bodies" );
 	bodyIdA = ( a > b ) ? a : b;
 	bodyIdB = ( a > b ) ? b : a;
 }
@@ -29,7 +30,7 @@ bool operator == ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 
 bool operator < ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 {
-//	return ( ( ( pairA.bodyIdA << 16 ) | pairA.bodyIdB ) < ( ( pairB.bodyIdA << 16 ) | pairB.bodyIdB ) );
+	//	return ( ( ( pairA.bodyIdA << 16 ) | pairA.bodyIdB ) < ( ( pairB.bodyIdA << 16 ) | pairB.bodyIdB ) );
 	if ( pairA.bodyIdA < pairB.bodyIdA )
 	{
 		return true;
@@ -45,22 +46,10 @@ bool operator < ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 
 bool operator > ( const BodyIdPair& pairA, const BodyIdPair& pairB )
 {
-	return !(pairA < pairB);
+	return !( pairA < pairB );
 }
 
 bool bodyIdPairLess( const BodyIdPair& pairA, const BodyIdPair& pairB )
 {
 	return pairA < pairB;
-}
-
-CollidedPair::CollidedPair( const BodyId a, const BodyId b )
-	: BodyIdPair( a, b )
-{
-
-}
-
-CollidedPair::CollidedPair(const BodyIdPair& other)
-	: BodyIdPair( other )
-{
-
 }

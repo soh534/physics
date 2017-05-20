@@ -1,6 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include <physicsObject.hpp>
+#include <physicsTypes.hpp>
 #include <physicsAabb.hpp>
 #include <physicsShape.hpp>
 
@@ -13,11 +16,14 @@ enum class physicsMotionType
 
 class physicsBodyCinfo
 {
-  public:
+public:
 
     physicsBodyCinfo();
+	~physicsBodyCinfo();
 
-	physicsShape* m_shape;
+public:
+
+	std::shared_ptr<physicsShape> m_shape;
 	physicsMotionType m_type;
 	Vector3 m_pos;
     Real m_ori;
@@ -41,28 +47,8 @@ struct FreeBody
 class physicsBody : public physicsObject
 {
   public:
-
-	physicsShape* m_shape;
-	physicsMotionType m_type;
-	Vector3 m_pos;
-	Real m_ori;
-	Vector3 m_com;
-	Vector3 m_linearVelocity;
-	Real m_angularSpeed; /// Angular speed in radians
-	Real m_mass;
-	Real m_invMass;
-	Real m_inertia;
-	Real m_invInertia;
-	Real m_friction;
-	physicsAabb m_aabb;
-	std::string m_name;
-
-	BodyId m_bodyId;
-	unsigned int m_bodyFilter;
-	unsigned int m_activeListIdx;
-
-  public:
     physicsBody(const physicsBodyCinfo& bodyCinfo);
+
     ~physicsBody();
 
     void render() const;
@@ -81,7 +67,7 @@ class physicsBody : public physicsObject
 
 	void calcEffectiveMassMatrixAt(const Vector3& ptWorld, Matrix3& effMassMatrix) const;
 
-	inline physicsShape* getShape() const;
+	inline std::shared_ptr<physicsShape> getShape() const;
 
 	inline physicsMotionType getMotionType() const;
 
@@ -146,6 +132,27 @@ class physicsBody : public physicsObject
 	inline unsigned int getBodyFilter() const;
 
 	physicsShape::Type getShapeType() const;
+
+public:
+
+	std::shared_ptr<physicsShape> m_shape;
+	physicsMotionType m_type;
+	Vector3 m_pos;
+	Real m_ori;
+	Vector3 m_com;
+	Vector3 m_linearVelocity;
+	Real m_angularSpeed; /// Angular speed in radians
+	Real m_mass;
+	Real m_invMass;
+	Real m_inertia;
+	Real m_invInertia;
+	Real m_friction;
+	physicsAabb m_aabb;
+	std::string m_name;
+
+	BodyId m_bodyId;
+	unsigned int m_bodyFilter;
+	unsigned int m_activeListIdx; /// Index of this body in physicsWorld::m_activeBodyIds
 };
 
 #include <physicsBody.inl>

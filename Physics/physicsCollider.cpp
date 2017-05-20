@@ -1,8 +1,8 @@
-#include <Base.hpp>
-#include <physicsTypes.hpp>
-
+#include <memory>
 #include <cassert>
 #include <iostream>
+#include <Base.hpp>
+#include <physicsTypes.hpp>
 #include <physicsCd.hpp>
 #include <physicsBody.hpp>
 #include <physicsShape.hpp>
@@ -23,10 +23,10 @@ physicsCollider::physicsCollider()
 
 }
 
-void physicsCollider::collide(
-	const physicsBody& bodyA, 
-	const physicsBody& bodyB,
-	std::vector<ContactPoint>& contacts)
+/// TODO: instead of passing physicsBody, pass physicsShape and Matrix3 transform
+void physicsCollider::collide( const physicsBody& bodyA,
+							   const physicsBody& bodyB,
+							   std::vector<ContactPoint>& contacts )
 {
 
 }
@@ -37,20 +37,19 @@ physicsCircleCollider::physicsCircleCollider()
 
 }
 
-void physicsCircleCollider::collide(
-	const physicsBody& bodyA, 
-	const physicsBody& bodyB,
-	std::vector<ContactPoint>& contacts)
+void physicsCircleCollider::collide( const physicsBody& bodyA,
+									 const physicsBody& bodyB,
+									 std::vector<ContactPoint>& contacts )
 {
 	{
-		physicsShape* shapeA = bodyA.getShape();
-		physicsShape* shapeB = bodyB.getShape();
+		physicsShape* shapeA = bodyA.getShape().get();
+		physicsShape* shapeB = bodyB.getShape().get();
 		Assert(shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider");
 		Assert(shapeB->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider");
 	}
 
-	physicsCircleShape* shapeA = (physicsCircleShape*)bodyA.getShape();
-    physicsCircleShape* shapeB = (physicsCircleShape*)bodyB.getShape();
+	physicsCircleShape* shapeA = static_cast<physicsCircleShape*>( bodyA.getShape().get() );
+	physicsCircleShape* shapeB = static_cast<physicsCircleShape*>( bodyB.getShape().get() );
 
     Real radA = shapeA->getRadius();
     Real radB = shapeB->getRadius();
@@ -104,14 +103,13 @@ physicsCircleBoxCollider::physicsCircleBoxCollider()
 }
 
 /// A: Circle, B: Box
-void physicsCircleBoxCollider::collide(
-	const physicsBody& bodyA,
-	const physicsBody& bodyB,
-	std::vector<ContactPoint>& contacts)
+void physicsCircleBoxCollider::collide( const physicsBody& bodyA,
+										const physicsBody& bodyB,
+										std::vector<ContactPoint>& contacts )
 {
 	{
-		physicsShape* shapeA = bodyA.getShape();
-		physicsShape* shapeB = bodyB.getShape();
+		physicsShape* shapeA = bodyA.getShape().get();
+		physicsShape* shapeB = bodyB.getShape().get();
 		Assert(shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle-box collider 1st param");
 		Assert(shapeB->getType() == physicsShape::BOX, "non-box shape sent to circle-box collider 2nd param");
 	}
@@ -123,14 +121,13 @@ physicsBoxCollider::physicsBoxCollider()
 
 }
 
-void physicsBoxCollider::collide(
-	const physicsBody& bodyA, 
-	const physicsBody& bodyB,
-	std::vector<ContactPoint>& contacts)
+void physicsBoxCollider::collide( const physicsBody& bodyA,
+								  const physicsBody& bodyB,
+								  std::vector<ContactPoint>& contacts )
 {
 	{
-		physicsShape* shapeA = bodyA.getShape();
-		physicsShape* shapeB = bodyB.getShape();
+		physicsShape* shapeA = bodyA.getShape().get();
+		physicsShape* shapeB = bodyB.getShape().get();
 		Assert(shapeA->getType() == physicsShape::BOX, "non-box shape sent to box collider");
 		Assert(shapeB->getType() == physicsShape::BOX, "non-box shape sent to box collider");
 	}
@@ -142,19 +139,19 @@ physicsConvexCollider::physicsConvexCollider()
 
 }
 
-void physicsConvexCollider::getSimplexVertex(
-	const Vector3& direction,
-	const physicsBody& bodyA,
-	const physicsBody& bodyB,
-	Vector3& vert,
-	Vector3& supportA,
-	Vector3& supportB)
+void physicsConvexCollider::getSimplexVertex( const Vector3& direction,
+											  const physicsBody& bodyA,
+											  const physicsBody& bodyB,
+											  Vector3& vert,
+											  Vector3& supportA,
+											  Vector3& supportB )
 {
+	/// TODO: optimize by colliding in A space instead of world
 	Vector3 dirLocalA = direction.getRotatedDir(-1.f * bodyA.getRotation());
 	Vector3 dirLocalB = direction.getNegated().getRotatedDir(-1.f * bodyB.getRotation());
 
-	physicsShape* shapeA = bodyA.getShape();
-	physicsShape* shapeB = bodyB.getShape();
+	physicsConvexShape* shapeA = static_cast<physicsConvexShape*>( bodyA.getShape().get() );
+	physicsConvexShape* shapeB = static_cast<physicsConvexShape*>( bodyB.getShape().get() );
 	shapeA->getSupportingVertex(dirLocalA, supportA);
 	shapeB->getSupportingVertex(dirLocalB, supportB);
 

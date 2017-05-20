@@ -69,6 +69,12 @@ physicsAabb physicsShape::getAabb(const Real rot) const
 //
 // Circle shape class functions
 //
+
+std::shared_ptr<physicsShape> physicsCircleShape::create( const Real radius )
+{
+	return std::shared_ptr<physicsShape>( static_cast<physicsShape*>( new physicsCircleShape( radius ) ) );
+}
+
 physicsCircleShape::physicsCircleShape(const Real radius)
     : m_radius(radius)
 {
@@ -282,6 +288,13 @@ void physicsBoxShape::getEdgeFacingPoint(const Vector3& point, Vector3& base, Ve
 //
 // Convex shape class functions
 //
+std::shared_ptr<physicsShape> physicsConvexShape::create( const std::vector<Vector3>& vertices, const Real radius )
+{
+	physicsConvexShape* shape = new physicsConvexShape( vertices, radius );
+	std::shared_ptr<physicsShape> res( static_cast<physicsShape*>( shape ) );
+	return res;
+}
+
 physicsConvexShape::physicsConvexShape(const std::vector<Vector3>& vertices, const Real radius)
 { /// Get unsorted list of vertices, establish connections to treat as convex
 

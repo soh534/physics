@@ -11,11 +11,9 @@ void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyI
 	if (controlInfo.dummyBodyId == invalidId &&
 		controlInfo.dummyJointId == invalidId)
 	{
-		physicsBody* grabbedBody = world->getBody(bodyId);
-
 		physicsBodyCinfo cinfo;
 		{
-			cinfo.m_shape = new physicsCircleShape(0.f);
+			cinfo.m_shape = physicsCircleShape::create(0.f);
 			cinfo.m_type = physicsMotionType::STATIC;
 			cinfo.m_pos = pos;
 			cinfo.m_collidable = false;
@@ -23,7 +21,7 @@ void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyI
 
 		controlInfo.dummyBodyId = world->createBody( cinfo );
 
-		JointConfig config;
+		JointCinfo config;
 		{
 			config.pivot = pos;
 			config.bodyIdA = bodyId;
@@ -33,8 +31,7 @@ void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyI
 		controlInfo.dummyJointId = world->addJoint(config);
 	}
 
-	physicsBody* dummyBody = world->getBody(controlInfo.dummyBodyId);
-	dummyBody->setPosition(pos);
+	world->setPosition(controlInfo.dummyBodyId, pos);
 }
 
 void DemoUtils::releaseControl(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId)
@@ -46,7 +43,7 @@ void DemoUtils::releaseControl(ControlInfo& controlInfo, physicsWorld* world, Bo
 	controlInfo.dummyJointId = invalidId;
 }
 
-void DemoUtils::createPackedCircles(std::vector<physicsBody*>& bodies, int numCircles)
+void DemoUtils::createPackedCircles(std::vector<physicsBody>& bodies, int numCircles)
 {
 	Real radiusCircle = 5.0f;
 
@@ -67,11 +64,11 @@ void DemoUtils::createPackedCircles(std::vector<physicsBody*>& bodies, int numCi
 		}
 
 		physicsBodyCinfo cinfo;
-		cinfo.m_shape = new physicsCircleShape(radiusCircle);
+		cinfo.m_shape = physicsCircleShape::create(radiusCircle);
 
 		Vector3 buf; buf.setRotatedDir(arm, angle*j);
 
 		cinfo.m_pos = buf;
-		bodies.push_back(new physicsBody(cinfo));
+		bodies.push_back(physicsBody(cinfo));
 	}
 }
