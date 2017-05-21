@@ -1,4 +1,4 @@
-#include <Renderer.hpp>
+#include <Renderer.h>
 #include <GLFW/glfw3.h>
 
 int main( int argc, char* argv[] )

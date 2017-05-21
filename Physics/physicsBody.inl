@@ -5,14 +5,14 @@ inline std::shared_ptr<physicsShape> physicsBody::getShape() const
 
 inline physicsMotionType physicsBody::getMotionType() const
 {
-	return m_type;
+	return m_motionType;
 }
 
 inline void physicsBody::setMotionType(physicsMotionType type)
 {
-	m_type = type;
+	m_motionType = type;
 
-	if (m_type == physicsMotionType::STATIC)
+	if (m_motionType == physicsMotionType::STATIC)
 	{
 		m_linearVelocity.setZero();
 		m_angularSpeed = 0.f;
@@ -21,7 +21,7 @@ inline void physicsBody::setMotionType(physicsMotionType type)
 
 inline bool physicsBody::isStatic() const
 {
-	return (m_type == physicsMotionType::STATIC);
+	return (m_motionType == physicsMotionType::STATIC);
 }
 
 inline const Vector3& physicsBody::getPosition() const
@@ -161,7 +161,12 @@ inline unsigned int physicsBody::getBodyId() const
 	return m_bodyId;
 }
 
-inline unsigned int physicsBody::getBodyFilter() const
+inline unsigned int physicsBody::getCollisionFilter() const
 {
-	return m_bodyFilter;
+	return m_collisionFilter;
+}
+
+inline unsigned int physicsBody::getActiveListIdx() const
+{
+	return m_activeListIdx;
 }

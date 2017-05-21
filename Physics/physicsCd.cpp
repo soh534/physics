@@ -1,4 +1,4 @@
-#include <physicsCd.hpp>
+#include <physicsCd.h>
 
 /// Finds closest point in line 'p1' to 'p2' from 'point'
 void physicsCd::calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, const Vector3& point, Vector3& closest)

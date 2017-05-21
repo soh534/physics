@@ -1,9 +1,9 @@
-#include <Base.hpp>
-#include <DemoUtils.hpp>
+#include <Base.h>
+#include <DemoUtils.h>
 
-#include <physicsBody.hpp>
-#include <physicsShape.hpp>
-#include <physicsWorld.hpp>
+#include <physicsBody.h>
+#include <physicsShape.h>
+#include <physicsWorld.h>
 
 void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos)
 {
@@ -14,7 +14,7 @@ void DemoUtils::controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyI
 		physicsBodyCinfo cinfo;
 		{
 			cinfo.m_shape = physicsCircleShape::create(0.f);
-			cinfo.m_type = physicsMotionType::STATIC;
+			cinfo.m_motionType = physicsMotionType::STATIC;
 			cinfo.m_pos = pos;
 			cinfo.m_collidable = false;
 		}

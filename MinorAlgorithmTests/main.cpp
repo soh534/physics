@@ -83,7 +83,7 @@ void classifySetsTest()
 	printVector( e );
 }
 
-#include <physicsTypes.hpp>
+#include <physicsTypes.h>
 #include <algorithm>
 
 void bodyIdPairSortTest()

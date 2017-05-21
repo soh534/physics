@@ -1,16 +1,16 @@
 #include <memory>
 #include <cassert>
 #include <iostream>
-#include <Base.hpp>
-#include <physicsTypes.hpp>
-#include <physicsCd.hpp>
-#include <physicsBody.hpp>
-#include <physicsShape.hpp>
-#include <physicsObject.hpp>
-#include <physicsCollider.hpp>
+#include <Base.h>
+#include <physicsTypes.h>
+#include <physicsCd.h>
+#include <physicsBody.h>
+#include <physicsShape.h>
+#include <physicsObject.h>
+#include <physicsCollider.h>
 
-#include <DebugUtils.hpp>
-#include <Renderer.hpp>
+#include <DebugUtils.h>
+#include <Renderer.h>
 
 const Real g_collisionTolerance = .5f;
 const Real g_convexRadius = 1.f;

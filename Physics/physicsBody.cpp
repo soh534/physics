@@ -1,10 +1,10 @@
-#include <Base.hpp>
+#include <Base.h>
 
-#include <physicsTypes.hpp>
-#include <physicsBody.hpp>
-#include <physicsObject.hpp>
+#include <physicsTypes.h>
+#include <physicsBody.h>
+#include <physicsObject.h>
 
-#include <Renderer.hpp>
+#include <Renderer.h>
 
 #include <sstream>
 
@@ -12,16 +12,17 @@
 physicsBodyCinfo::physicsBodyCinfo()
 { 
 	/// Default values if no settings are specified
+	m_name = "";
     m_shape = nullptr;
-	m_type = physicsMotionType::DYNAMIC;
+	m_motionType = physicsMotionType::DYNAMIC;
 	m_pos.setZero();
-    m_ori = 0.0f;
-	m_com = m_pos;
+    m_ori = 0.f;
 	m_linearVelocity.setZero();
-    m_angularSpeed = 0.0f;
-    m_mass = -1.0f;
-	m_inertia = -1.0f;
-	m_friction = 0.5f;
+    m_angularSpeed = 0.f;
+    m_mass = -1.f;
+	m_inertia = -1.f;
+	m_com = m_pos;
+	m_friction = 0.f;
 	m_collidable = true;
 }
 
@@ -31,20 +32,21 @@ physicsBodyCinfo::~physicsBodyCinfo()
 }
 
 physicsBody::physicsBody(const physicsBodyCinfo& bodyCinfo) :
+	m_name(bodyCinfo.m_name),
+	m_bodyId(invalidId),
 	m_shape(bodyCinfo.m_shape),
-	m_type(bodyCinfo.m_type),
+	m_motionType(bodyCinfo.m_motionType),
 	m_pos(bodyCinfo.m_pos),
 	m_ori(bodyCinfo.m_ori),
-	m_com(bodyCinfo.m_com),
 	m_linearVelocity(bodyCinfo.m_linearVelocity),
 	m_angularSpeed(bodyCinfo.m_angularSpeed),
 	m_mass(bodyCinfo.m_mass),
 	m_inertia(bodyCinfo.m_inertia),
-	m_friction(bodyCinfo.m_friction),
-	m_bodyId(-1)
+	m_com(bodyCinfo.m_com),
+	m_friction(bodyCinfo.m_friction)
 {
 
-	if (bodyCinfo.m_type == physicsMotionType::DYNAMIC)
+	if (bodyCinfo.m_motionType == physicsMotionType::DYNAMIC)
 	{
 		/// Set up mass and inertia if not set (recommended way)
 		if (bodyCinfo.m_mass < 0.f)
@@ -60,7 +62,7 @@ physicsBody::physicsBody(const physicsBodyCinfo& bodyCinfo) :
 		m_invMass = 1.f / m_mass;
 		m_invInertia = 1.f / m_inertia;
 	}
-	else if (bodyCinfo.m_type == physicsMotionType::STATIC)
+	else if (bodyCinfo.m_motionType == physicsMotionType::STATIC)
 	{
 		Assert(m_mass < 0.f, "Mass shouldn't have been set for static bodies.");
 		Assert(m_inertia < 0.f, "Inertia shouldn't have been set for static bodies");
@@ -72,14 +74,7 @@ physicsBody::physicsBody(const physicsBodyCinfo& bodyCinfo) :
 		Assert(false, "Trying to construct invalid body type.");
 	}
 
-	if (bodyCinfo.m_collidable)
-	{
-		m_bodyFilter = 0;
-	}
-	else
-	{
-		m_bodyFilter = 1;
-	}
+	m_collisionFilter = (bodyCinfo.m_collidable) ? 0 : 1;
 }
 
 physicsBody::~physicsBody()
@@ -101,7 +96,7 @@ void physicsBody::render() const
 
 bool physicsBody::containsPoint(const Vector3& point) const
 {
-	/// Convert point from global to body local
+	/// Convert point: world->local
 	Vector3 local;
 	local.setSub(point, m_pos);
 	local.setRotatedDir(local, -m_ori);
@@ -122,13 +117,9 @@ void physicsBody::getPointVelocity(const Vector3& arm, Vector3& vel) const
 	Vector3 w(0.f, 0.f, m_angularSpeed);
 	Vector3 tangentVel = w.cross(arm.getRotatedDir(m_ori));
 	vel = tangentVel + m_linearVelocity;
-	if (vel.length() > 400.f)
-	{
-		// vel.setZero();
-	}
 }
 
-void physicsBody::dampVelocity(const Real& damping)
+void physicsBody::setDampedVelocity(const Real& damping)
 {
 	/// Example of damping would be 0.95f;
 	setLinearVelocity(getLinearVelocity() * damping);
@@ -167,7 +158,7 @@ void physicsBody::getInvInertiaWorld(Matrix3& invInertiaWorld) const
 	invInertiaWorld.setMul(temp, rott);
 }
 
-void physicsBody::calcEffectiveMassMatrixAt(const Vector3& ptWorld, Matrix3& effMassMatrix) const
+void physicsBody::calcEffectiveMassMatrix(const Vector3& ptWorld, Matrix3& effMassMatrix) const
 {
 	Vector3 r = ptWorld - m_pos;
 	Matrix3 rhat; rhat.setCrossMatrix(r);

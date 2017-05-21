@@ -1,4 +1,4 @@
-#include <physicsAabb.hpp>
+#include <physicsAabb.h>
 
 #include <cstdlib> // abs()
 

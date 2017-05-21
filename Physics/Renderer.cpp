@@ -1,7 +1,7 @@
-#include <Base.hpp>
+#include <Base.h>
 
-#include <Renderer.hpp>
-#include <FileIO.hpp>
+#include <Renderer.h>
+#include <FileIO.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>

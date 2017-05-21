@@ -1,5 +1,5 @@
 #include <vector>
-#include <physicsInternalTypes.hpp>
+#include <physicsInternalTypes.h>
 
 BodyIdPair::BodyIdPair( const BodyId a, const BodyId b )
 {

@@ -2,11 +2,11 @@
 #include <algorithm> // For using std::max
 #include <GLFW/glfw3.h>
 
-#include <Base.hpp>
-#include <physicsWorld.hpp>
-#include <Renderer.hpp>
-#include <DemoUtils.hpp>
-#include <Framework.hpp>
+#include <Base.h>
+#include <physicsWorld.h>
+#include <Renderer.h>
+#include <DemoUtils.h>
+#include <Framework.h>
 
 int g_widthWindow;
 int g_heightWindow;
@@ -16,8 +16,7 @@ Vector3 g_topLeft;
 // Body holding
 bool g_bodyHeld = false;
 Vector3 g_arm; // Local
-Vector3 g_cursor; // World
-Vector3 g_cursorVel;
+Vector3 g_cursorPos; // World
 int g_bodyId = -1;
 
 physicsWorld* g_world;
@@ -36,53 +35,48 @@ static void error_callback( int error, const char* description )
 	fputs( description, stderr );
 }
 
-void transformGLFWtoGL( const Vector3& pointGlfw, Vector3& pointOgl )
+void transformPointGLFWtoGL( const Vector3& pointGLFW, Vector3& pointGL )
 {
 	Vector3 yAxis( 1.f, 0.f );
 	Matrix3 yAxisReflection; yAxisReflection.setReflection( yAxis );
 
-	Vector3 windowHeight( 0.f, g_heightWindow );
+	Vector3 windowHeight( 0.f, static_cast< Real >( g_heightWindow ) );
 	Matrix3 shiftWindowHeight; shiftWindowHeight.setTranslation( windowHeight );
 
-	pointOgl.setTransformedPos( yAxisReflection, pointGlfw );
-	pointOgl.setTransformedPos( shiftWindowHeight, pointOgl );
+	pointGL.setTransformedPos( yAxisReflection, pointGLFW );
+	pointGL.setTransformedPos( shiftWindowHeight, pointGL );
 }
 
-static void cursor_pos_callback( GLFWwindow* window, double xpos, double ypos )
+static void cursorPositionCallback( GLFWwindow* window, double xpos, double ypos )
 {
 	if ( g_bodyId >= 0 )
 	{
-		Vector3 currPos;
-		transformGLFWtoGL( Vector3( (Real)xpos, (Real)ypos ), currPos );
-		g_cursorVel = ( currPos - g_cursor ) / g_world->getDeltaTime();
-		g_cursor = currPos;
+		transformPointGLFWtoGL( Vector3( static_cast< Real >( xpos ), 
+										 static_cast< Real >( ypos ) ),
+								g_cursorPos );
 	}
 }
 
-void mouse_button_callback( GLFWwindow* window, int button, int action, int mods )
+void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
 {
 	double x, y;
 	glfwGetCursorPos( window, &x, &y );
 
-	transformGLFWtoGL( Vector3( (Real)x, (Real)y ), g_cursor );
+	transformPointGLFWtoGL( Vector3( (Real)x, (Real)y ), g_cursorPos );
 
 	if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld )
 	{
-		std::vector<physicsBody> bodies;
-		int numActiveBodies = g_world->getNumActiveBodies();
-		bodies.reserve( numActiveBodies ); /// TODO: store this bodies array in limited scope
-		g_world->getActiveBodies( bodies );
-
-		for ( int i = 0; i < (int)bodies.size(); ++i )
+		const std::vector<BodyId>& activeBodyIds = g_world->getActiveBodyIds();
+		for ( auto i = 0; i < activeBodyIds.size(); i++ )
 		{
-			const physicsBody& body = bodies[i];
+			const physicsBody& body = g_world->getBody( activeBodyIds[i] );
 
 			if ( body.isStatic() ) continue;
 
-			if ( body.containsPoint( g_cursor ) )
+			if ( body.containsPoint( g_cursorPos ) )
 			{
 				g_bodyId = body.getBodyId();
-				g_arm.setSub( g_cursor, body.getPosition() );
+				g_arm.setSub( g_cursorPos, body.getPosition() );
 				g_bodyHeld = true;
 				break;
 			}
@@ -109,15 +103,12 @@ void stepRender( GLFWwindow* window )
 	g_world->render();
 
 	/// Print total momentum
-	/// TODO: store this bodies array in limited scope
-	std::vector<physicsBody> bodies;
-	bodies.resize( g_world->getNumActiveBodies() );
-	g_world->getActiveBodies( bodies );
-	Vector3 totLinMomentum( 0.f, 0.f, 0.f );
-
-	for ( int i = 0; i < (int)bodies.size(); i++ )
+	Vector3 totLinMomentum; totLinMomentum.setZero();
+	const std::vector<BodyId>& activeBodyIds = g_world->getActiveBodyIds();
+	for ( auto i = 0; i < activeBodyIds.size(); i++ )
 	{
-		totLinMomentum += bodies[i].getLinearVelocity() * bodies[i].getMass();
+		const physicsBody& body = g_world->getBody( activeBodyIds[i] );
+		totLinMomentum += body.getLinearVelocity() * body.getMass();
 	}
 
 	std::stringstream ss;
@@ -129,7 +120,7 @@ void stepRender( GLFWwindow* window )
 	{
 		if ( g_bodyId > -1 )
 		{
-			DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursor );
+			DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
 		}
 	}
 
@@ -188,8 +179,8 @@ int initializeWindow( GLFWwindow*& window, const WindowCinfo& cinfo )
 	glfwMakeContextCurrent( window );
 
 	glfwSetKeyCallback( window, key_callback );
-	glfwSetCursorPosCallback( window, cursor_pos_callback );
-	glfwSetMouseButtonCallback( window, mouse_button_callback );
+	glfwSetCursorPosCallback( window, cursorPositionCallback );
+	glfwSetMouseButtonCallback( window, mouseButtonCallback );
 
 	glfwWindowHint( GLFW_SAMPLES, 4 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );

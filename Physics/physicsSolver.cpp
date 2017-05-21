@@ -1,11 +1,11 @@
 #include <algorithm>
 
-#include <Base.hpp>
-#include <physicsTypes.hpp>
-#include <physicsBody.hpp>
-#include <physicsSolver.hpp>
+#include <Base.h>
+#include <physicsTypes.h>
+#include <physicsBody.h>
+#include <physicsSolver.h>
 
-#include <DebugUtils.hpp>
+#include <DebugUtils.h>
 
 /*
 { // Add friction

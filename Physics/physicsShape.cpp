@@ -1,5 +1,5 @@
-#include <physicsShape.hpp>
-#include <physicsAabb.hpp>
+#include <physicsShape.h>
+#include <physicsAabb.h>
 
 #include <vector>
 #include <climits>
@@ -9,7 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <Renderer.hpp>
+#include <Renderer.h>
 
 const Real g_density = .01f;
 
@@ -72,7 +72,7 @@ physicsAabb physicsShape::getAabb(const Real rot) const
 
 std::shared_ptr<physicsShape> physicsCircleShape::create( const Real radius )
 {
-	return std::shared_ptr<physicsShape>( static_cast<physicsShape*>( new physicsCircleShape( radius ) ) );
+	return std::shared_ptr<physicsShape>( new physicsCircleShape( radius ) );
 }
 
 physicsCircleShape::physicsCircleShape(const Real radius)
@@ -251,48 +251,12 @@ physicsAabb physicsBoxShape::getAabb(const Real rot) const
 		Vector3(-w / 2.0f, -h / 2.0f));
 }
 
-void physicsBoxShape::getEdgeFacingPoint(const Vector3& point, Vector3& base, Vector3& edge)
-{
-
-	Vector3 dirNe, dirSe;
-	dirNe = m_halfExtents;
-	dirSe.setNegated(m_halfExtents, 1);
-
-	Real dotTopRight = dirNe.dot(point);
-	Real dotBottomRight = dirSe.dot(point);
-
-    if (dotTopRight > 0.0f && dotBottomRight > 0.0f)
-    { // Right edge
-		base = dirSe;
-		edge.set(0.0f, 2.0f * m_halfExtents(1));
-    }
-    else if (dotTopRight > 0.0f && dotBottomRight < 0.0f)
-    { // Up edge
-        base = dirNe;
-        edge.set(-2.0f * m_halfExtents(0), 0.0f);
-    }
-    else if (dotTopRight < 0.0f && dotBottomRight > 0.0f)
-    { // Bottom edge
-		dirNe.setNegated(dirNe);
-        base = dirNe;
-        edge.set(2.0f * m_halfExtents(0), 0.0f);
-    }
-    else if (dotTopRight < 0.0f && dotBottomRight < 0.0f)
-    { // Left edge
-		dirSe.setNegated(dirSe);
-        base = dirSe;
-        edge.set(0.0f, -2.0f * m_halfExtents(1));
-    }
-}
-
 //
 // Convex shape class functions
 //
 std::shared_ptr<physicsShape> physicsConvexShape::create( const std::vector<Vector3>& vertices, const Real radius )
 {
-	physicsConvexShape* shape = new physicsConvexShape( vertices, radius );
-	std::shared_ptr<physicsShape> res( static_cast<physicsShape*>( shape ) );
-	return res;
+	return std::shared_ptr<physicsShape>( new physicsConvexShape( vertices, radius ) );
 }
 
 physicsConvexShape::physicsConvexShape(const std::vector<Vector3>& vertices, const Real radius)

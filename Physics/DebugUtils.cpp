@@ -1,6 +1,6 @@
-#include <Base.hpp>
+#include <Base.h>
 
-#include <DebugUtils.hpp>
+#include <DebugUtils.h>
 
 /// TODO: these debug macros should be checked for in the calling function
 /// instead of having these functions being called @ default

@@ -2,12 +2,12 @@
 #include <math.h> // For M_PI
 #include <cassert>
 
-#include <physicsWorld.hpp>
-#include <physicsShape.hpp>
+#include <physicsWorld.h>
+#include <physicsShape.h>
 
-#include <DemoUtils.hpp>
+#include <DemoUtils.h>
 
-#include <Framework.hpp>
+#include <Framework.h>
 
 using namespace std;
 
@@ -300,7 +300,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -25.f, -250.f ) );
 		vertices.push_back( Vector3( 25.f, -200.f ) );
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
-		cinfo.m_type = physicsMotionType::STATIC;
+		cinfo.m_motionType = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 87.f, 384.f );
 		world->createBody( cinfo );
 	}
@@ -315,7 +315,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 450.f, 25.f ) );
 		vertices.push_back( Vector3( 400.f, -25.f ) );
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
-		cinfo.m_type = physicsMotionType::STATIC;
+		cinfo.m_motionType = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 609.f );
 		world->createBody( cinfo );
 	}
@@ -330,7 +330,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 25.f, -250.f ) );
 		vertices.push_back( Vector3( -25.f, -200.f ) );
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
-		cinfo.m_type = physicsMotionType::STATIC;
+		cinfo.m_motionType = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 937.f, 384.f );
 		world->createBody( cinfo );
 	}
@@ -345,7 +345,7 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( 450.f, -25.f ) );
 		vertices.push_back( Vector3( 400.f, 25.f ) );
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
-		cinfo.m_type = physicsMotionType::STATIC;
+		cinfo.m_motionType = physicsMotionType::STATIC;
 		cinfo.m_pos.set( 512.f, 159.f );
 		world->createBody( cinfo );
 	}

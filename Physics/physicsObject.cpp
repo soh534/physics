@@ -1,4 +1,4 @@
-#include <physicsObject.hpp>
+#include <physicsObject.h>
 
 physicsObject::physicsObject()
 {
