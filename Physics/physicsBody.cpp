@@ -92,6 +92,8 @@ void physicsBody::render() const
 	Vector3 offset( 5.f, 5.f );
 	drawText( std::to_string( m_bodyId ), m_pos + offset );
     m_shape->render(m_pos, m_ori);
+
+	drawBox(m_aabb.m_max, m_aabb.m_min, PURPLE); /// TODO: remove this
 }
 
 bool physicsBody::containsPoint(const Vector3& point) const

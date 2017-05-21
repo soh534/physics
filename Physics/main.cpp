@@ -88,7 +88,7 @@ int Simulation( int argc, char* argv[] )
 #endif
 
 #if 1
-#if 1
+#if 0
 	int bIdA, bIdB;
 	{
 		physicsBodyCinfo cinfo;
@@ -130,7 +130,7 @@ int Simulation( int argc, char* argv[] )
 	config.bodyIdB = bIdB;
 	world->addJoint( config );
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -167,7 +167,7 @@ int Simulation( int argc, char* argv[] )
 	}
 
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;

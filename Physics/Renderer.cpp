@@ -134,7 +134,7 @@ struct Character
 	GLuint m_textureId;
 	Vector3 m_size;
 	Vector3 m_bearing;
-	GLuint m_advance;
+	FT_Pos m_advance;
 };
 std::map<GLchar, Character> Characters;
 
@@ -180,9 +180,9 @@ int initializeFreeType()
 
 		Character character =
 		{
-			texture,
-			Vector3( face->glyph->bitmap.width, face->glyph->bitmap.rows ),
-			Vector3( face->glyph->bitmap_left, face->glyph->bitmap_top ),
+			texture, 
+			Vector3( (Real)face->glyph->bitmap.width, (Real)face->glyph->bitmap.rows ),
+			Vector3( (Real)face->glyph->bitmap_left, (Real)face->glyph->bitmap_top ),
 			face->glyph->advance.x
 		};
 
@@ -380,8 +380,8 @@ void renderAxis()
 { 
 	Vector3 offset(5.f, 5.f);
 
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( g_width, 0.f ) + offset ); // X-axis
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, g_height ) + offset ); // Y-axis
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( (Real)g_width, 0.f ) + offset ); // X-axis
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, (Real)g_height ) + offset ); // Y-axis
 
 	const int interval = 50;
 
@@ -389,14 +389,14 @@ void renderAxis()
 
 	for (int i = 0; i < g_width; i += interval)
 	{
-		drawLine( Vector3( i, 0.f ) + offset, Vector3( i, 10.f ) + offset );
-		drawText( std::to_string( i ), Vector3( i, 0.f ) + textOffset );
+		drawLine( Vector3( (Real)i, 0.f ) + offset, Vector3( (Real)i, 10.f ) + offset );
+		drawText( std::to_string( (Real)i ), Vector3( (Real)i, 0.f ) + textOffset );
 	}
 	
 	for (int i = 0; i < g_height; i += interval)
 	{
-		drawLine( Vector3( 0.f, i ) + offset, Vector3( 10.f, i ) + offset );
-		drawText( std::to_string( i ), Vector3( 0.f, i ) + textOffset );
+		drawLine( Vector3( 0.f, (Real)i ) + offset, Vector3( 10.f, (Real)i ) + offset );
+		drawText( std::to_string( (Real)i ), Vector3( 0.f, (Real)i ) + textOffset );
 	}
 }
 

@@ -1,6 +1,8 @@
 #include <vector>
 #include <iostream>
 
+#include <physicsInternalTypes.h>
+
 /// Classifies contents of a and b into intersection and relative complements
 /// i.e. c = ab', d = ab, e = a'b
 template<typename T>

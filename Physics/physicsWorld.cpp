@@ -285,6 +285,8 @@ void physicsWorldEx::solve()
 			const Real& w = body.getAngularSpeed();
 			Real& rot = body.getRotation();
 			rot += w * m_solverInfo.m_deltaTime;
+
+			body.updateAabb(); /// TODO: this just for debug display, remove later
 		}
 	}
 }
@@ -472,7 +474,7 @@ void physicsWorld::step()
 /// TODO: move this function outside of physics
 void physicsWorld::render()
 {
-	for (int i = 0; i < (int)m_activeBodyIds.size(); i++)
+	for (size_t i = 0; i < m_activeBodyIds.size(); i++)
 	{
 		int activeBodyId = m_activeBodyIds[i];
 		const physicsBody& body = m_bodies[activeBodyId];

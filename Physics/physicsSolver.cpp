@@ -92,10 +92,10 @@ void solveConstraintPairs( const SolverInfo& info,
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			//drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
-			//drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
-			//drawArrow( bodyA.pos, rA_world, RED );
-			//drawArrow( bodyB.pos, rB_world, BLUE );
+			drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
+			drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
+			drawArrow( bodyA.pos, rA_world, RED );
+			drawArrow( bodyB.pos, rB_world, BLUE );
 
 			bodyA.v += jac.vA * imp * bodyA.mInv;
 			bodyB.v += jac.vB * imp * bodyB.mInv;
