@@ -8,6 +8,7 @@
 #include <DemoUtils.h>
 #include <Framework.h>
 
+/// TODO: wrap these global variables
 int g_widthWindow;
 int g_heightWindow;
 unsigned int g_framesPerSecond;
@@ -88,6 +89,30 @@ void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
 		g_bodyId = -1;
 		g_arm.setZero();
 		g_bodyHeld = false;
+	}
+}
+
+void renderAxis()
+{
+	Vector3 offset( 5.f, 5.f );
+
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( ( Real )g_widthWindow, 0.f ) + offset ); // X-axis
+	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, ( Real )g_heightWindow ) + offset ); // Y-axis
+
+	const int interval = 50;
+
+	Vector3 textOffset = offset * 2;
+
+	for ( int i = 0; i < g_widthWindow; i += interval )
+	{
+		drawLine( Vector3( i, 0.f ) + offset, Vector3( i, 10.f ) + offset );
+		drawText( std::to_string( i ), Vector3( i, 0.f ) + textOffset );
+	}
+
+	for ( int i = 0; i < g_heightWindow; i += interval )
+	{
+		drawLine( Vector3( 0.f, i ) + offset, Vector3( 10.f, i ) + offset );
+		drawText( std::to_string( i ), Vector3( 0.f, i ) + textOffset );
 	}
 }
 

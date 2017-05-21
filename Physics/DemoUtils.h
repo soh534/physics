@@ -21,9 +21,9 @@ namespace DemoUtils
 	};
 
 	/// Allow key-framed control of bodies in world
-	void controlBody(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos);
-	void releaseControl(ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId);
+	void controlBody( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos );
+	void releaseControl( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
 
 	/// Create packed circles for mass simulation
-	void createPackedCircles(std::vector<physicsBody>& bodies, int numCircles);
+	void createPackedCircles( std::vector<physicsBody>& bodies, int numCircles );
 }

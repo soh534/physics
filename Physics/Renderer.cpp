@@ -32,7 +32,6 @@ static int g_height = 0;
 
 class Line
 {
-	
 public:
 
 	Line( const Vector3& pointA, const Vector3& pointB, unsigned int color = BLACK);
@@ -44,7 +43,6 @@ public:
 
 class Text
 {
-
 public:
 
 	Text( const std::string& str, const Vector3& pos, const Real scale = 1.f, unsigned int color = BLACK);
@@ -373,30 +371,6 @@ void drawCircle( const Vector3& pos, const Real radius, unsigned int color )
 		na.set( radius * cos( i ), radius * sin( i ) );
 		nb.set( radius * cos( i + step ), radius * sin( i + step ) );
 		drawLine( pos + na, pos + nb );
-	}
-}
-
-void renderAxis()
-{ 
-	Vector3 offset(5.f, 5.f);
-
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( (Real)g_width, 0.f ) + offset ); // X-axis
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, (Real)g_height ) + offset ); // Y-axis
-
-	const int interval = 50;
-
-	Vector3 textOffset = offset * 2;
-
-	for (int i = 0; i < g_width; i += interval)
-	{
-		drawLine( Vector3( (Real)i, 0.f ) + offset, Vector3( (Real)i, 10.f ) + offset );
-		drawText( std::to_string( (Real)i ), Vector3( (Real)i, 0.f ) + textOffset );
-	}
-	
-	for (int i = 0; i < g_height; i += interval)
-	{
-		drawLine( Vector3( 0.f, (Real)i ) + offset, Vector3( 10.f, (Real)i ) + offset );
-		drawText( std::to_string( (Real)i ), Vector3( 0.f, (Real)i ) + textOffset );
 	}
 }
 

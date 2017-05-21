@@ -1,6 +1,7 @@
 #pragma once
 
-class physicsShape;
+class physicsBoxShape;
+class Vector3;
 
 namespace physicsShapeUtils
 {
