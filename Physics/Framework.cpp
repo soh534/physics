@@ -111,7 +111,7 @@ void stepRender( GLFWwindow* window )
 	/// Print total momentum
 	/// TODO: store this bodies array in limited scope
 	std::vector<physicsBody> bodies;
-	bodies.reserve( g_world->getNumActiveBodies() );
+	bodies.resize( g_world->getNumActiveBodies() );
 	g_world->getActiveBodies( bodies );
 	Vector3 totLinMomentum( 0.f, 0.f, 0.f );
 

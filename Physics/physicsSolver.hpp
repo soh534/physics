@@ -20,7 +20,7 @@ struct ConstrainedPair : public BodyIdPair
 {
 	std::vector<Constraint> constraints;
 
-	ConstrainedPair( const BodyId a, const BodyId b ) : BodyIdPair( a, b ) {}
+	ConstrainedPair( const BodyId a = invalidId, const BodyId b = invalidId ) : BodyIdPair( a, b ) {}
 	ConstrainedPair( const BodyIdPair& other ) : BodyIdPair( other ) {}
 };
 

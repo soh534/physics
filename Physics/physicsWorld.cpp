@@ -10,6 +10,29 @@
 
 #include <DebugUtils.hpp>
 
+class physicsWorldEx : public physicsWorld
+{
+public:
+
+	void registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func );
+
+	ColliderFuncPtr getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB );
+
+	void updateJointConstraints();
+
+	void solve();
+
+	void collideCachedAndNewPairs(
+		std::vector<ConstrainedPair>& cachedPairs,
+		const std::vector<BodyIdPair>& newPairs );
+
+	void collide();
+
+	void collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut );
+
+	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB );
+};
+
 physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 	m_gravity( cinfo.m_gravity ),
 	m_cor( cinfo.m_cor ),
@@ -20,16 +43,18 @@ physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 	m_solverInfo.m_deltaTime = 0.16f;
 	m_solverInfo.m_numIter = 1;
 
-	registerColliderFunc( physicsShape::BASE, physicsShape::BASE, nullptr );
-	registerColliderFunc( physicsShape::BASE, physicsShape::CIRCLE, nullptr );
-	registerColliderFunc( physicsShape::BASE, physicsShape::BOX, nullptr );
-	registerColliderFunc( physicsShape::BASE, physicsShape::CONVEX, nullptr );
-	registerColliderFunc( physicsShape::CIRCLE, physicsShape::CIRCLE, physicsCircleCollider::collide );
-	registerColliderFunc( physicsShape::CIRCLE, physicsShape::BOX, physicsCircleBoxCollider::collide );
-	registerColliderFunc( physicsShape::CIRCLE, physicsShape::CONVEX, physicsConvexCollider::collide );
-	registerColliderFunc( physicsShape::BOX, physicsShape::BOX, physicsBoxCollider::collide );
-	registerColliderFunc( physicsShape::BOX, physicsShape::CONVEX, physicsConvexCollider::collide );
-	registerColliderFunc( physicsShape::CONVEX, physicsShape::CONVEX, physicsConvexCollider::collide );
+	physicsWorldEx* self = static_cast<physicsWorldEx*>( this );
+
+	self->registerColliderFunc( physicsShape::BASE, physicsShape::BASE, nullptr );
+	self->registerColliderFunc( physicsShape::BASE, physicsShape::CIRCLE, nullptr );
+	self->registerColliderFunc( physicsShape::BASE, physicsShape::BOX, nullptr );
+	self->registerColliderFunc( physicsShape::BASE, physicsShape::CONVEX, nullptr );
+	self->registerColliderFunc( physicsShape::CIRCLE, physicsShape::CIRCLE, physicsCircleCollider::collide );
+	self->registerColliderFunc( physicsShape::CIRCLE, physicsShape::BOX, physicsCircleBoxCollider::collide );
+	self->registerColliderFunc( physicsShape::CIRCLE, physicsShape::CONVEX, physicsConvexCollider::collide );
+	self->registerColliderFunc( physicsShape::BOX, physicsShape::BOX, physicsBoxCollider::collide );
+	self->registerColliderFunc( physicsShape::BOX, physicsShape::CONVEX, physicsConvexCollider::collide );
+	self->registerColliderFunc( physicsShape::CONVEX, physicsShape::CONVEX, physicsConvexCollider::collide );
 }
 
 physicsWorld::~physicsWorld()
@@ -38,13 +63,13 @@ physicsWorld::~physicsWorld()
 	m_bodies.clear();
 }
 
-void physicsWorld::registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func )
+void physicsWorldEx::registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func )
 {
 	m_dispatchTable[ typeA ][ typeB ] = func;
 	m_dispatchTable[ typeB ][ typeA ] = func;
 }
 
-ColliderFuncPtr physicsWorld::getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB )
+ColliderFuncPtr physicsWorldEx::getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB )
 {
 	physicsShape::Type typeA = bodyA.getShapeType();
 	physicsShape::Type typeB = bodyB.getShapeType();
@@ -172,11 +197,12 @@ void physicsWorld::getActiveBodies( std::vector<physicsBody>& activeBodies ) con
 
 void physicsWorld::step()
 {
-	collide();
-	solve();
+	physicsWorldEx* self = static_cast<physicsWorldEx*>( this );
+	self->collide();
+	self->solve();
 }
 
-void physicsWorld::updateJointConstraints()
+void physicsWorldEx::updateJointConstraints()
 {
 	auto iterJoint = m_jointSolvePairs.begin();
 
@@ -205,10 +231,12 @@ void physicsWorld::updateJointConstraints()
 		constraintY.error = -( posA + rAworldy - posB - rBworldy )( 1 );
 		constraintY.jac.wA = rAworldy.cross( constraintY.jac.vA );
 		constraintY.jac.wB = rBworldy.cross( constraintY.jac.vB );
+
+		iterJoint++;
 	}
 }
 
-void physicsWorld::solve()
+void physicsWorldEx::solve()
 {
 	int numActiveBodies = (int)m_activeBodyIds.size();
 
@@ -272,7 +300,7 @@ static bool yless( const aabbIndex& aabbIdx1, const aabbIndex& aabbIdx2 )
 	return aabbIdx1.m_part( 1 ) < aabbIdx2.m_part( 1 );
 }
 
-void physicsWorld::collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut )
+void physicsWorldEx::collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut )
 {
 	// Update AABB's, do 1D sweep & prune, add pairs which have overlapping AABB's
 	std::vector<aabbIndex> aabbIndices;
@@ -353,24 +381,32 @@ void setAsContact( Constraint& c, const ContactPoint& contact, const Real rotA, 
 	c.jac.wB = rB_ws.cross( norm.getNegated() );
 }
 
-void physicsWorld::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cachedPairs,
+void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cachedPairs,
 											const std::vector<BodyIdPair>& newPairs )
 {
-	m_contactSolvePairs.reserve( cachedPairs.size() + newPairs.size() );
-
 	auto iterCached = cachedPairs.begin();
 	auto iterNew = newPairs.begin();
-	auto iterSolve = m_contactSolvePairs.begin();
 
-	while ( iterCached != cachedPairs.end() || iterNew != newPairs.end() )
+	while ( true )
 	{
-		if ( iterCached != cachedPairs.end() && iterNew != newPairs.end() )
+		if ( iterCached == cachedPairs.end() && iterNew == newPairs.end() )
 		{
-			bool newPairCached = ( *iterCached == *iterNew );
-			Assert( !newPairCached, "There is a new broad-phase pair that is already cached" );
+			break;
 		}
 
-		if ( *iterCached < *iterNew )
+		bool pairIsCached = false;
+
+		if ( iterCached != cachedPairs.end() && iterNew != newPairs.end() )
+		{
+			pairIsCached = ( *iterCached < *iterNew ) ? true : false;
+		}
+
+		if ( iterCached != cachedPairs.end() )
+		{
+			pairIsCached = true;
+		}
+
+		if ( pairIsCached )
 		{
 			const physicsBody& bodyA = m_bodies[iterCached->bodyIdA];
 			const physicsBody& bodyB = m_bodies[iterCached->bodyIdB];
@@ -384,9 +420,8 @@ void physicsWorld::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cache
 							  contacts[0],
 							  bodyA.getRotation(), bodyB.getRotation() );
 			}
-			
-			*iterSolve = *iterCached;
 
+			m_contactSolvePairs.push_back( *iterCached );
 			iterCached++;
 		}
 		else
@@ -406,17 +441,15 @@ void physicsWorld::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cache
 				setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
 				constrainedPair.constraints.push_back( c );
 
-				*iterSolve = constrainedPair;
+				m_contactSolvePairs.push_back( constrainedPair );
 			}
 
 			iterNew++;
 		}
-
-		iterSolve++;
 	}
 }
 
-void physicsWorld::collide()
+void physicsWorldEx::collide()
 {
 	/// 1. Add the pairs found in last frame to existing pairs
 	/// 2. Look through existing pairs and pairs within this frame to classify new & existing pairs
@@ -433,7 +466,7 @@ void physicsWorld::collide()
 	collideCachedAndNewPairs( m_cachedContactPairs, bpNewPairs );
 }
 
-bool physicsWorld::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
+bool physicsWorldEx::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
 {
 	const physicsBody& bodyA = m_bodies[bodyIdA];
 	const physicsBody& bodyB = m_bodies[bodyIdB];

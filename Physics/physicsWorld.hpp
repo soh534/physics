@@ -69,28 +69,7 @@ public:
 
 	const Real getDeltaTime();
 
-
-private:
-
-	void registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func );
-
-	ColliderFuncPtr getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB );
-
-	void updateJointConstraints();
-
-	void solve();
-
-	void collideCachedAndNewPairs(
-		std::vector<ConstrainedPair>& cachedPairs,
-		const std::vector<BodyIdPair>& newPairs );
-
-	void collide();
-
-	void collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut );
-
-	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB );
-
-private:
+protected:
 
 	Vector3 m_gravity;
 	Real m_cor;
