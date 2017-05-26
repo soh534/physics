@@ -204,9 +204,10 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 		{
 			const physicsBody& bodyA = m_bodies[iterCached->bodyIdA];
 			const physicsBody& bodyB = m_bodies[iterCached->bodyIdB];
-			ColliderFuncPtr collide = getCollisionFunc( bodyA, bodyB );
+			ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
 
-			std::vector<ContactPoint> contacts; collide( bodyA, bodyB, contacts );
+			std::vector<ContactPoint> contacts;
+			colliderFuncPtr( bodyA, bodyB, contacts );
 
 			if ( contacts.size() > 0 )
 			{
@@ -222,9 +223,10 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 		{
 			const physicsBody& bodyA = m_bodies[iterNew->bodyIdA];
 			const physicsBody& bodyB = m_bodies[iterNew->bodyIdB];
-			ColliderFuncPtr collide = getCollisionFunc( bodyA, bodyB );
+			ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
 
-			std::vector<ContactPoint> contacts; collide( bodyA, bodyB, contacts );
+			std::vector<ContactPoint> contacts;
+			colliderFuncPtr( bodyA, bodyB, contacts );
 
 			if ( contacts.size() > 0 )
 			{
