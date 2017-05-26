@@ -328,7 +328,7 @@ void physicsConvexCollider::collide(
 				/// Exclude touching situations
 				return;
 			}
-			normal.setNormalized(normal);
+			//normal.setNormalized( normal );
 
 			/// TODO: Implement convex radius here
 			ContactPoint contact(
@@ -341,6 +341,8 @@ void physicsConvexCollider::collide(
 			);
 
 			DebugUtils::drawContactLength(pointA, pointB, normal);
+
+			contacts.push_back( contact );
 
             return;
         }
@@ -433,7 +435,8 @@ void physicsConvexCollider::collide(
 		(pointB - posB).getRotatedDir(-bodyB.getRotation()),
 		//pointA - posA,
 		//pointB - posB,
-		normal.getNormalized()
+		//normal.getNormalized()
+		normal
 	);
 
 	//drawCross( pointA, 45.f * g_degToRad, 20.f, RED );

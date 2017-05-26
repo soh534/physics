@@ -48,8 +48,7 @@ ColliderFuncPtr physicsWorldEx::getCollisionFunc( const physicsBody& bodyA, cons
 
 void physicsWorldEx::collide()
 {
-	/// 1. Add the pairs found in last frame to existing pairs
-	/// 2. Look through existing pairs and pairs within this frame to classify new & existing pairs
+	/// Find new pairs in broadphase, cache them, delete caches for lost broadphase pairs
 
 	/// Broadphase
 	std::vector<BodyIdPair> bpPassedPairs;
@@ -58,6 +57,8 @@ void physicsWorldEx::collide()
 
 	std::vector<BodyIdPair> bpLostPairs, bpRemainedPairs, bpNewPairs;
 	BodyIdPairsUtils::classifyPairSets( m_cachedContactPairs, bpPassedPairs, bpLostPairs, bpRemainedPairs, bpNewPairs );
+
+	/// Remove 
 	BodyIdPairsUtils::deletePairsBfromA( m_cachedContactPairs, bpLostPairs );
 
 	collideCachedAndNewPairs( m_cachedContactPairs, bpNewPairs );
@@ -208,12 +209,9 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 
 			std::vector<ContactPoint> contacts; collide( bodyA, bodyB, contacts );
 
-			if ( contacts.size() > 0 )
-			{
-				setAsContact( iterCached->constraints[0],
-							  contacts[0],
-							  bodyA.getRotation(), bodyB.getRotation() );
-			}
+			setAsContact( iterCached->constraints[0],
+						  contacts[0],
+						  bodyA.getRotation(), bodyB.getRotation() );
 
 			m_contactSolvePairs.push_back( *iterCached );
 			iterCached++;
@@ -226,17 +224,14 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 
 			std::vector<ContactPoint> contacts; collide( bodyA, bodyB, contacts );
 
-			if ( contacts.size() > 0 )
-			{
-				/// Add new contact constraint
-				ConstrainedPair constrainedPair( *iterNew );
+			/// Add new contact constraint
+			ConstrainedPair constrainedPair( *iterNew );
+			
+			Constraint c;
+			setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
+			constrainedPair.constraints.push_back( c );
 
-				Constraint c;
-				setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-				constrainedPair.constraints.push_back( c );
-
-				m_contactSolvePairs.push_back( constrainedPair );
-			}
+			m_contactSolvePairs.push_back( constrainedPair );
 
 			iterNew++;
 		}
@@ -269,6 +264,7 @@ void physicsWorldEx::solve()
 
 	/// Solve constraints
 	m_solver->solveConstraints( m_solverInfo, m_contactSolvePairs, m_solverBodies, m_bodies );
+	m_solver->solveConstraints( m_solverInfo, m_jointSolvePairs, m_solverBodies, m_bodies );
 
 	/// Integrate time
 	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )

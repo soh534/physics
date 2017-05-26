@@ -22,8 +22,8 @@ int Simulation( int argc, char* argv[] )
 	//_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN );
 
 	physicsWorldCinfo cinfo;
-	//cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set( 0.f, -98.1f );
+	cinfo.m_gravity.setZero();
+	//cinfo.m_gravity.set( 0.f, -98.1f );
 	cinfo.m_numIter = 1;
 	world = new physicsWorld( cinfo );
 
@@ -161,7 +161,7 @@ int Simulation( int argc, char* argv[] )
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 		cinfo.m_pos.set( 712.f, 384.f );
 		cinfo.m_ori = 77 * g_degToRad;
-		cinfo.m_linearVelocity.set( 50.f, 0. );
+		//cinfo.m_linearVelocity.set( 50.f, 0. );
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
 		world->createBody( cinfo );
 	}

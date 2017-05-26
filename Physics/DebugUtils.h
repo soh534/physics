@@ -1,14 +1,14 @@
 #pragma once
 
 // Debugging macros
-#define D_BROADPHASE
+//#define D_BROADPHASE
 
 //#define D_TANGENTIAL_IMPULSE
 //#define D_CONTACT_IMPULSE
 
 // Narrowphase
 //#define D_GJK_MINKOWSKI
-//#define D_GJK_CONTACT_LENGTH
+#define D_GJK_CONTACT_LENGTH
 //#define D_GJK_TERMINATION_SIMPLEX
 //#define D_GJK_EXPANDED_SIMPLEX
 
