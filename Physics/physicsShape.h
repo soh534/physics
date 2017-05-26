@@ -10,7 +10,7 @@ class physicsAabb;
 /// Base class for all shapes
 class physicsShape : public physicsObject
 {
-  public:
+public:
 
     enum Type
     {
@@ -23,7 +23,7 @@ class physicsShape : public physicsObject
 	
 	Real m_convexRadius;
 
-  public:
+public:
 
     physicsShape();
 
@@ -48,6 +48,7 @@ class physicsShape : public physicsObject
 class physicsCircleShape : public physicsShape
 {
 public:
+
 	static std::shared_ptr<physicsShape> create( const Real radius );
 
     virtual ~physicsCircleShape() override;
@@ -66,7 +67,7 @@ public:
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
-    inline Real getRadius() const { return m_radius; }
+    Real getRadius() const { return m_radius; }
 
 protected:
 
@@ -78,9 +79,9 @@ protected:
 /// Box shape
 class physicsBoxShape : public physicsShape
 {
-  public:
+public:
 
-    physicsBoxShape(const Vector3& halfExtents);
+	static std::shared_ptr<physicsShape> create( const Vector3& halfExtents );
 
     virtual ~physicsBoxShape() override;
 
@@ -90,17 +91,19 @@ class physicsBoxShape : public physicsShape
 
 	virtual Real calculateInertia() const override;
 
-    virtual void render(const Vector3& pos, const Real rot) const override;
+	virtual void render( const Vector3& pos, const Real rot ) const override;
 
-    virtual bool containsPoint(const Vector3& point) const override;
+	virtual bool containsPoint( const Vector3& point ) const override;
 
-    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
+	virtual void getSupportingVertex( const Vector3& direction, Vector3& point ) const override;
 
-    virtual physicsAabb getAabb(const Real rot) const override;
+	virtual physicsAabb getAabb( const Real rot ) const override;
 
-    inline const Vector3& getHalfExtents() const { return m_halfExtents; }
+	const Vector3& getHalfExtents() const { return m_halfExtents; }
     
-  protected:
+protected:
+
+    physicsBoxShape(const Vector3& halfExtents);
 
     Vector3 m_halfExtents;
 };
@@ -108,12 +111,9 @@ class physicsBoxShape : public physicsShape
 /// Convex shape
 class physicsConvexShape : public physicsShape
 {
-	static const unsigned int maxVertices = 20;
-
 public:
 
-	static std::shared_ptr<physicsShape> create( const std::vector<Vector3>& vertices, 
-												 const Real radius );
+	static std::shared_ptr<physicsShape> create( const std::vector<Vector3>& vertices, const Real radius );
 
     virtual ~physicsConvexShape() override;
 
@@ -130,6 +130,10 @@ public:
     virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
+
+public:
+
+	static const unsigned int maxVertices = 20;
 
 protected:
 

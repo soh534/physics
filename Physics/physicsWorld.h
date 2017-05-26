@@ -8,6 +8,7 @@
 #include <physicsSolver.h>
 
 struct ContactPoint;
+class physicsSolver;
 
 typedef void( *ColliderFuncPtr )( const physicsBody&, const physicsBody&, std::vector<ContactPoint>& );
 
@@ -75,7 +76,7 @@ protected:
 	Real m_cor;
 	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
 	SolverInfo m_solverInfo;
-	class physicsSolver* m_solver;
+	physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
 	std::vector<BodyIdPair> m_newPairs; /// New broadphase pairs
 	std::vector<ConstrainedPair> m_cachedContactPairs;
