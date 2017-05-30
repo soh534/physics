@@ -143,7 +143,8 @@ public: /// TODO: stuff below should be invisible to users, move it
 	inline void setFriction( const Real friction );
 
 	/// Internal usage - indices
-	unsigned int getActiveListIdx() const;
+	inline void setActiveListIdx( unsigned int idx );
+	inline unsigned int getActiveListIdx() const;
 
 	/// Internal usage - collision filter
 	inline unsigned int getCollisionFilter() const;

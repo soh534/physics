@@ -166,6 +166,11 @@ inline unsigned int physicsBody::getCollisionFilter() const
 	return m_collisionFilter;
 }
 
+inline void physicsBody::setActiveListIdx( unsigned int idx )
+{
+	m_activeListIdx = idx;
+}
+
 inline unsigned int physicsBody::getActiveListIdx() const
 {
 	return m_activeListIdx;

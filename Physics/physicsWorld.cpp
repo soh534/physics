@@ -366,6 +366,7 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 
 		body.setBodyId( freeId );
 		m_activeBodyIds.push_back( body.getBodyId() );
+		body.setActiveListIdx( m_activeBodyIds.size() - 1 );
 
 		return body.getBodyId();
 	}
@@ -378,6 +379,7 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 
 		body.setBodyId( m_bodies.size() - 1 );
 		m_activeBodyIds.push_back( body.getBodyId() );
+		body.setActiveListIdx( m_activeBodyIds.size() - 1 );
 
 		return body.getBodyId();
 	}

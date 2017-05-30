@@ -77,7 +77,7 @@ void solveConstraintPairs( const SolverInfo& info,
 				jac.wB( 2 ) * bodyB.iInv * jac.wB( 2 );
 
 			Real imp = -1.f * ( Jv - error / info.m_deltaTime ) / JmJ;
-			
+
 #if 0
 			if ( contact )
 			{ // Accumulate impulse method for contact constraints
@@ -92,15 +92,18 @@ void solveConstraintPairs( const SolverInfo& info,
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
-			drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
-			//drawArrow( bodyA.pos, rA_world, RED );
-			//drawArrow( bodyB.pos, rB_world, BLUE );
+			//drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
+			//drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
+			drawArrow( bodyA.pos, rA_world, RED );
+			drawArrow( bodyB.pos, rB_world, BLUE );
 
 			bodyA.v += jac.vA * imp * bodyA.mInv;
 			bodyB.v += jac.vB * imp * bodyB.mInv;
 			bodyA.w += jac.wA * imp * bodyA.iInv;
 			bodyB.w += jac.wB * imp * bodyB.iInv;
+
+			Assert( bodyA.v.isNotNan(), "bodyA has nan linear velocity in solver" );
+			Assert( bodyB.v.isNotNan(), "bodyB has nan linear velocity in solver" );
 		}
 	}
 }

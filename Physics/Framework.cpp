@@ -55,6 +55,8 @@ static void cursorPositionCallback( GLFWwindow* window, double xpos, double ypos
 		transformPointGLFWtoGL( Vector3( static_cast< Real >( xpos ), 
 										 static_cast< Real >( ypos ) ),
 								g_cursorPos );
+
+		DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
 	}
 }
 
@@ -79,6 +81,7 @@ void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
 				g_bodyId = body.getBodyId();
 				g_arm.setSub( g_cursorPos, body.getPosition() );
 				g_bodyHeld = true;
+				DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
 				break;
 			}
 		}
@@ -139,15 +142,6 @@ void stepRender( GLFWwindow* window )
 	std::stringstream ss;
 	ss << totLinMomentum( 0 ) << ", " << totLinMomentum( 1 ) << std::endl;
 	drawText( ss.str(), g_topLeft );
-
-	// Add body held line
-	if ( g_bodyHeld )
-	{
-		if ( g_bodyId > -1 )
-		{
-			DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
-		}
-	}
 
 	step();
 

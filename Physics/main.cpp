@@ -17,7 +17,7 @@ int Simulation( int argc, char* argv[] )
 {
 	/// Raise floating point exceptions
 	unsigned int currentState = 0;
-	_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN);
+	//_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN );
 	_controlfp_s( &currentState, _EM_UNDERFLOW | _EM_INEXACT | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
 	//_controlfp_s( &currentState, _DN_FLUSH, _MCW_DN );
 
@@ -25,7 +25,7 @@ int Simulation( int argc, char* argv[] )
 	cinfo.m_gravity.setZero();
 	//cinfo.m_gravity.set( 0.f, -98.1f );
 	//cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set( 0.f, -9.81f );
+	//cinfo.m_gravity.set( 0.f, -9.81f );
 	cinfo.m_numIter = 1;
 	world = new physicsWorld( cinfo );
 

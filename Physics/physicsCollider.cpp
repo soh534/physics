@@ -59,7 +59,7 @@ void physicsCircleCollider::collide( const physicsBody& bodyA,
 
 	Vector3 ab = posB - posA;
 
-	if (ab.checkZero())
+	if (ab.isZero())
 	{
 		return;
 	}
@@ -77,7 +77,7 @@ void physicsCircleCollider::collide( const physicsBody& bodyA,
 		Vector3 cpB = posB + baHat * radB;
 		Vector3 norm = cpB - cpA;
 		
-		if (norm.checkZero())
+		if (norm.isZero())
 		{
 			/// TODO: Treated as touching due to numerical error
 			return;
@@ -234,7 +234,7 @@ void physicsConvexCollider::collide(
 
     Vector3 direction = posB - posA;
 
-	if (direction.checkZero())
+	if (direction.isZero())
 	{
 		return;
 	}
@@ -263,10 +263,10 @@ void physicsConvexCollider::collide(
 
 		/// TODO: Fix bug where direction becomes IND000
 
-		if (direction.checkZero())
+		if (direction.isZero())
 		{
 			/// Origin is on the simplex
-			return;
+			/// return;
 		}
 
         direction.setNegated(direction);
@@ -306,7 +306,7 @@ void physicsConvexCollider::collide(
 			Vector3 pointA, pointB;
 			Vector3 normal;
 
-            if (L.checkZero())
+            if (L.isZero())
             {
 				/// Closest simplex feature is a point
 				pointA = simplex[0][1];
@@ -323,10 +323,10 @@ void physicsConvexCollider::collide(
             }
 
 			normal.setSub(pointA, pointB);
-			if (normal.checkZero())
+			if (normal.isZero())
 			{
 				/// Exclude touching situations
-				return;
+				break;
 			}
 			//normal.setNormalized( normal );
 
@@ -400,7 +400,7 @@ void physicsConvexCollider::collide(
 
 	// Todo: Find out why two same vertices exist in simplex
 	Vector3 L = simplex[j][0] - simplex[i][0];
-	if (L.checkZero())
+	if (L.isZero())
 	{
 		return;
 	}
@@ -421,7 +421,7 @@ void physicsConvexCollider::collide(
 	// Must be directed from A to B because penetration
 	Vector3 normal = pointB - pointA;
 
-	if (normal.checkZero())
+	if (normal.isZero())
 	{
 		return;
 		/// Shapes aren't penetrated
@@ -487,25 +487,25 @@ void physicsConvexCollider::getClosestEdgeToOrigin(
 
 	Vector3 origin;
 
-	for (int i = 0; i < szSimplex; i++)
+	for ( int i = 0; i < szSimplex; i++ )
 	{
-		int j = (i + 1 == szSimplex) ? 0 : i + 1;
+		int j = ( i + 1 == szSimplex ) ? 0 : i + 1;
 
 		Vector3 edgeCw = simplex[j][0] - simplex[i][0];
 
 		// Get vector from origin to edge, which is direction we want to expand to
-		Vector3 n = edgeCw.cross(edgeCw.cross(simplex[i][0]));
+		Vector3 n = edgeCw.cross( edgeCw.cross( simplex[i][0] ) );
 		n.negate();
 
 		// For cases where simplex is touching the origin
-		if (!n.checkZero())
+		if ( !n.isZero() )
 		{
 			n.normalize();
 		}
 
-		Real len = n.dot(simplex[i][0]);
+		Real len = n.dot( simplex[i][0] );
 
-		if (len < edge.distSq)
+		if ( len < edge.distSq )
 		{
 			edge.distSq = len;
 			edge.normal = n;
