@@ -78,6 +78,11 @@ void solveConstraintPairs( const SolverInfo& info,
 
 			Real imp = -1.f * ( Jv - error / info.m_deltaTime ) / JmJ;
 
+			imp = std::max( imp, std::numeric_limits<Real>::lowest() );
+
+			Assert( !isinf( imp ), "infinite impulse in solver" );
+			Assert( !isnan( imp ), "nan impulse in solver" );
+
 #if 0
 			if ( contact )
 			{ // Accumulate impulse method for contact constraints
@@ -102,8 +107,15 @@ void solveConstraintPairs( const SolverInfo& info,
 			bodyA.w += jac.wA * imp * bodyA.iInv;
 			bodyB.w += jac.wB * imp * bodyB.iInv;
 
-			Assert( bodyA.v.isNotNan(), "bodyA has nan linear velocity in solver" );
-			Assert( bodyB.v.isNotNan(), "bodyB has nan linear velocity in solver" );
+			/// TODO: clean-up these sanity checks
+			Assert( !bodyA.v.isInf(), "bodyA has infinite linear velocity in solver" );
+			Assert( !bodyB.v.isInf(), "bodyB has infinite linear velocity in solver" );
+			Assert( !bodyA.v.isNan(), "bodyA has nan linear velocity in solver" );
+			Assert( !bodyB.v.isNan(), "bodyB has nan linear velocity in solver" );
+			Assert( !bodyA.w.isInf(), "bodyA has infinite angular velocity in solver" );
+			Assert( !bodyB.w.isInf(), "bodyB has infinite angular velocity in solver" );
+			Assert( !bodyA.w.isNan(), "bodyA has nan angular velocity in solver" );
+			Assert( !bodyB.w.isNan(), "bodyB has nan angular velocity in solver" );
 		}
 	}
 }

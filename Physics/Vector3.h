@@ -135,7 +135,9 @@ public:
 
 	///
 	/// Sanity checks
-	inline bool isNotNan() const;
+	inline bool isNan() const;
+
+	inline bool isInf() const;
 
 	///
 	/// Non-inline functions

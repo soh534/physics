@@ -420,9 +420,14 @@ inline bool Vector3::isZero() const
 			 fabs( z ) < sqrt( std::numeric_limits<Real>::epsilon() ) );
 }
 
-inline bool Vector3::isNotNan() const
+/// TODO: could potentially move to Vector3Utils
+inline bool Vector3::isNan() const
 {
-	float nan = std::numeric_limits<Real>::quiet_NaN();
+	return isnan( x ) || isnan( y ) || isnan( z );
+}
 
-	return (*this == nan);
+/// TODO: could potentially move to Vector3Utils
+inline bool Vector3::isInf() const
+{
+	return isinf( x ) || isinf( y ) || isinf( z );
 }

@@ -268,6 +268,8 @@ void physicsWorldEx::solve()
 	m_solver->solveConstraints( m_solverInfo, m_contactSolvePairs, m_solverBodies, m_bodies );
 	m_solver->solveConstraints( m_solverInfo, m_jointSolvePairs, m_solverBodies, m_bodies );
 
+	m_contactSolvePairs.clear();
+
 	/// Integrate time
 	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )
 	{
