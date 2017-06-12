@@ -11,6 +11,7 @@ public:
 	void includeAabb( const physicsAabb& aabb );
 	bool overlaps( const physicsAabb& aabb );
 	void expand( const Real factor );
+	void expand( const Vector3& direction );
 	void translate( const Vector3& translation );
 
 	Vector3 m_max;

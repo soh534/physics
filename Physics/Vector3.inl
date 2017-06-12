@@ -1,9 +1,11 @@
 #define _USE_MATH_DEFINES
-#include <math.h> // For M_PI definition
-#include <cmath> // For sqrt, cos, sin
-#include <cfloat> // For FLT_EPSILON
+#include <math.h> /// For M_PI definition
+#include <cmath> /// For sqrt, cos, sin
+#include <cfloat> /// For FLT_EPSILON
+#include <algorithm> /// For max
 
 #include <Base.h>
+#include "Vector3.h"
 
 ///
 /// Setting
@@ -340,6 +342,20 @@ inline void Vector3::setZero()
 	x = 0.f;
 	y = 0.f;
 	z = 0.f;
+}
+
+inline void Vector3::setMax( const Vector3 & v )
+{
+	x = std::max( x, v.x );
+	y = std::max( y, v.y );
+	z = std::max( z, v.z );
+}
+
+inline void Vector3::setMin( const Vector3 & v )
+{
+	x = std::min( x, v.x );
+	y = std::min( y, v.y );
+	z = std::min( z, v.z );
 }
 
 ///

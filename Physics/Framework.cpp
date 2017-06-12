@@ -127,8 +127,8 @@ void stepRender( GLFWwindow* window )
 
 	renderAxis();
 
-	g_world->step();
 	g_world->render();
+	g_world->step();
 
 	/// Print total momentum
 	Vector3 totLinMomentum; totLinMomentum.setZero();

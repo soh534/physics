@@ -111,6 +111,10 @@ public:
 
 	inline void setZero();
 
+	inline void setMax( const Vector3& v );
+
+	inline void setMin( const Vector3& v );
+
 	///
 	/// Comparison operator overloads
 	inline bool operator > ( const Vector3& rhs ) const;

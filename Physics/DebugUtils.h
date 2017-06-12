@@ -1,7 +1,7 @@
 #pragma once
 
 // Debugging macros
-//#define D_BROADPHASE
+#define D_BROADPHASE
 
 //#define D_TANGENTIAL_IMPULSE
 //#define D_CONTACT_IMPULSE

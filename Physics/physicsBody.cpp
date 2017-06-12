@@ -107,8 +107,8 @@ bool physicsBody::containsPoint(const Vector3& point) const
 void physicsBody::updateAabb()
 {
     m_aabb = m_shape->getAabb(m_ori);
-    m_aabb.expand(0.5f);
-    m_aabb.translate(m_pos);
+	m_aabb.expand( m_linearVelocity );
+	m_aabb.translate( m_pos );
 }
 
 void physicsBody::getPointVelocity(const Vector3& arm, Vector3& vel) const

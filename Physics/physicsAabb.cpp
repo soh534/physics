@@ -48,6 +48,14 @@ void physicsAabb::expand( const Real factor )
 	m_min.setMul( m_min, 1.f + factor );
 }
 
+void physicsAabb::expand( const Vector3 & direction )
+{
+	Vector3 newMax = m_max + direction;
+	Vector3 newMin = m_min + direction;
+	m_max.setMax( newMax );
+	m_min.setMin( newMin );
+}
+
 void physicsAabb::translate( const Vector3& translation )
 {
 	m_max.setAdd( m_max, translation );
