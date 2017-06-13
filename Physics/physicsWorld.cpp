@@ -214,7 +214,7 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 						  contacts[0],
 						  bodyA.getRotation(), bodyB.getRotation() );
 
-			m_contactSolvePairs.push_back( *iterCached );
+			//m_contactSolvePairs.push_back( *iterCached );
 			iterCached++;
 		}
 		else
@@ -226,14 +226,17 @@ void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cac
 			std::vector<ContactPoint> contacts;
 			colliderFuncPtr( bodyA, bodyB, contacts );
 
-			/// Add new contact constraint
-			ConstrainedPair constrainedPair( *iterNew );
-			
-			Constraint c;
-			setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-			constrainedPair.constraints.push_back( c );
+			if ( contacts.size() > 0 )
+			{
+				/// Add new contact constraint
+				ConstrainedPair constrainedPair( *iterNew );
 
-			m_contactSolvePairs.push_back( constrainedPair );
+				Constraint c;
+				setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
+				constrainedPair.constraints.push_back( c );
+
+				//m_contactSolvePairs.push_back( constrainedPair );
+			}
 
 			iterNew++;
 		}
@@ -293,9 +296,7 @@ void physicsWorldEx::solve()
 
 void physicsWorldEx::updateJointConstraints()
 {
-	auto iterJoint = m_jointSolvePairs.begin();
-
-	while ( iterJoint != m_jointSolvePairs.end() )
+	for ( auto iterJoint = m_jointSolvePairs.begin(); iterJoint != m_jointSolvePairs.end(); iterJoint++ )
 	{
 		const physicsBody& bodyA = m_bodies[iterJoint->bodyIdA];
 		const physicsBody& bodyB = m_bodies[iterJoint->bodyIdB];
@@ -320,8 +321,6 @@ void physicsWorldEx::updateJointConstraints()
 		constraintY.error = -( posA + rAworldy - posB - rBworldy )( 1 );
 		constraintY.jac.wA = rAworldy.cross( constraintY.jac.vA );
 		constraintY.jac.wB = rBworldy.cross( constraintY.jac.vB );
-
-		iterJoint++;
 	}
 }
 
@@ -413,7 +412,7 @@ const physicsBody& physicsWorld::getBody( const BodyId bodyId ) const
 
 int physicsWorld::addJoint( const JointCinfo& config )
 {
-	ConstrainedPair joint(config.bodyIdA, config.bodyIdB);
+	ConstrainedPair joint( config.bodyIdA, config.bodyIdB );
 	{
 		const physicsBody& bodyA = m_bodies[joint.bodyIdA];
 		const physicsBody& bodyB = m_bodies[joint.bodyIdB];
@@ -440,7 +439,7 @@ int physicsWorld::addJoint( const JointCinfo& config )
 		}
 
 		/// Constraint y-axis
-		{ 
+		{
 			Constraint constraintY;
 			constraintY.rA = rAlocal;
 			constraintY.rB = rBlocal;
@@ -476,7 +475,7 @@ void physicsWorld::step()
 /// TODO: move this function outside of physics
 void physicsWorld::render()
 {
-	for (size_t i = 0; i < m_activeBodyIds.size(); i++)
+	for ( size_t i = 0; i < m_activeBodyIds.size(); i++ )
 	{
 		int activeBodyId = m_activeBodyIds[i];
 		const physicsBody& body = m_bodies[activeBodyId];

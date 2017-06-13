@@ -359,7 +359,7 @@ int main( int argc, char* argv[] )
 
 	WindowCinfo cinfo;
 	{
-		cinfo.widthWindow = 1024;
+		cinfo.widthWindow = 1366;
 		cinfo.heightWindow = 768;
 		cinfo.framesPerSecond = 30;
 		cinfo.world = world;

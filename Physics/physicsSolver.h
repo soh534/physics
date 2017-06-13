@@ -5,12 +5,12 @@
 
 struct Jacobian
 {
-	Vector3 vA, wA, vB, wB; /// World
+	Vector3 vA, wA, vB, wB;
 };
 
 struct Constraint
 {
-	Vector3 rA, rB; /// Local
+	Vector3 rA, rB; /// Constrained points viewed from local
 	Real accumImp;
 	Real error;
 	Jacobian jac;
@@ -47,7 +47,7 @@ class physicsSolver
 public:
 
 	void solveConstraints( const SolverInfo& info,
-						   std::vector<ConstrainedPair>& constraints,
+						   std::vector<ConstrainedPair>& constrainedPairs,
 						   std::vector<SolverBody>& solverBodies,
 						   std::vector<physicsBody>& physicsBodies );
 };

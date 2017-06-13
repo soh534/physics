@@ -40,7 +40,7 @@ void SolverBody::setFromBody( const physicsBody& body )
 	iInv = body.getInvInertia();
 }
 
-void solveConstraintPairs( const SolverInfo& info, 
+void solveConstrainedPairs( const SolverInfo& info, 
 						   std::vector<ConstrainedPair>& solvePairs,
 						   std::vector<SolverBody>& updatedBodiesOut )
 {
@@ -121,22 +121,21 @@ void solveConstraintPairs( const SolverInfo& info,
 }
 
 void physicsSolver::solveConstraints( const SolverInfo& info,
-									  std::vector<ConstrainedPair>& constraints,
+									  std::vector<ConstrainedPair>& constrainedPairs,
 									  std::vector<SolverBody>& solverBodies,
 									  std::vector<physicsBody>& physicsBodies )
 {
 	/// Solve constraints, put satisfying velocities in solver bodies
 	for ( int i = 0; i < info.m_numIter; i++ )
 	{
-		solveConstraintPairs( info, constraints, solverBodies );
+		solveConstrainedPairs( info, constrainedPairs, solverBodies );
 	}
 
-	/// Update flagged bodies
+	/// Update body velocities
 	for ( int activeBodyIdsIdx = 0; activeBodyIdsIdx < (int)solverBodies.size(); activeBodyIdsIdx++ )
 	{
 		const SolverBody& solverBody = solverBodies[activeBodyIdsIdx];
 		physicsBody& body = physicsBodies[activeBodyIdsIdx];
-
 
 		body.setLinearVelocity( solverBody.v );
 		body.setAngularSpeed( solverBody.w( 2 ) );

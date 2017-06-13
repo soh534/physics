@@ -407,3 +407,46 @@ physicsAabb physicsConvexShape::getAabb( const Real rot ) const
 
 	return physicsAabb( Vector3( xmax, ymax ), Vector3( xmin, ymin ) );
 }
+
+bool physicsConvexShape::getAdjacentVertices( const Vector3& vertex, Vector3& va, Vector3& vb )
+{
+	int numVertices = ( int )m_vertices.size();
+	int idx = -1;
+
+	for ( int i = 0; i < numVertices; i++ )
+	{
+		if ( (vertex - m_vertices[i]).lengthSquared() < 0.01f )
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if ( idx < 0 )
+	{
+		return false;
+	}
+
+	int numConnectivity = ( int )m_connectivity.size();
+	int idxConnection = -1;
+
+	for ( int i = 0; i < numConnectivity; i++ )
+	{
+		if ( idx == m_connectivity[i] )
+		{
+			idxConnection = i;
+			break;
+		}
+	}
+
+	Assert( idxConnection > -1, "Connectivity data in convex shape doesn't match vertices index." );
+
+	/// TODO: so messy, clean up
+	int idxVertA = ( idxConnection == 0 ) ? m_connectivity[numConnectivity - 2] : m_connectivity[idxConnection - 1];
+	int idxVertB = (idxConnection == numConnectivity - 1) ? m_connectivity[1] : m_connectivity[idxConnection + 1];
+
+	va = m_vertices[idxVertA];
+	vb = m_vertices[idxVertB];
+
+	return true;
+}

@@ -227,81 +227,81 @@ struct SimplexEdge
 void physicsConvexCollider::collide(
 	const physicsBody& bodyA,
 	const physicsBody& bodyB,
-	std::vector<ContactPoint>& contacts)
+	std::vector<ContactPoint>& contacts )
 {
     Vector3 posA = bodyA.getPosition();
     Vector3 posB = bodyB.getPosition();
 
     Vector3 direction = posB - posA;
 
-	if (direction.isZero())
+	if ( direction.isZero() )
 	{
 		return;
 	}
 
-	direction.setNormalized(direction);
+	direction.setNormalized( direction );
 
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
-	std::vector< std::array<Vector3, 3> > simplex(3);
-
-    getSimplexVertex(direction, bodyA, bodyB, simplex[0][0], simplex[0][1], simplex[0][2]);
-	direction.setNegated(direction);
-    getSimplexVertex(direction, bodyA, bodyB, simplex[1][0], simplex[1][1], simplex[1][2]);
-
-    Vector3 origin(0.0f, 0.0f);
-
-	physicsCd::calcClosestPointOnLine(simplex[0][0], simplex[1][0], origin, direction);
+	std::vector< std::array<Vector3, 3> > simplex( 3 );
+	
+	getSimplexVertex( direction, bodyA, bodyB, simplex[0][0], simplex[0][1], simplex[0][2] );
+	direction.setNegated( direction );
+	getSimplexVertex( direction, bodyA, bodyB, simplex[1][0], simplex[1][1], simplex[1][2] );
+	
+	Vector3 origin( 0.0f, 0.0f );
+	
+	physicsCd::calcClosestPointOnLine( simplex[0][0], simplex[1][0], origin, direction );
 
 	/// TODO: find out appropriate eps
 	/// float eps = sqrt(std::numeric_limits<float>::epsilon());
 	Real eps = 0.01f;
     
-    for (int i = 0; i < g_gjkMaxIter; i++)
+	for ( int i = 0; i < g_gjkMaxIter; i++ )
     {
 		/// TODO: fix
 		/// DebugUtils::drawMinkowskiDifference(this);
 
 		/// TODO: Fix bug where direction becomes IND000
 
-		if (direction.isZero())
+		if ( direction.isZero() )
 		{
 			/// Origin is on the simplex
 			/// return;
 		}
 
-        direction.setNegated(direction);
-        direction.setNormalized(direction);
+		direction.setNegated( direction );
+		direction.setNormalized( direction );
 
 		/// Get third simplex triangle vertex
-        getSimplexVertex(direction, bodyA, bodyB, simplex[2][0], simplex[2][1], simplex[2][2]);
+		getSimplexVertex( direction, bodyA, bodyB, simplex[2][0], simplex[2][1], simplex[2][2] );
 
 		{ 
 			/// Terminate when origin is enclosed by triangle simplex
-			Vector3 edge01; edge01.setSub(simplex[1][0], simplex[0][0]);
-			Vector3 edge12; edge12.setSub(simplex[2][0], simplex[1][0]);
-			Vector3 edge20; edge20.setSub(simplex[0][0], simplex[2][0]);
+			Vector3 edge01; edge01.setSub( simplex[1][0], simplex[0][0] );
+			Vector3 edge12; edge12.setSub( simplex[2][0], simplex[1][0] );
+			Vector3 edge20; edge20.setSub( simplex[0][0], simplex[2][0] );
 			Vector3 vo;
 
-			vo.setNegated(simplex[0][0]);
-			bool l01 = (edge01(0)*vo(1) - edge01(1)*vo(0)) > 0;
-			vo.setNegated(simplex[1][0]);
-			bool l12 = (edge12(0)*vo(1) - edge12(1)*vo(0)) > 0;
-			vo.setNegated(simplex[2][0]);
-			bool l20 = (edge20(0)*vo(1) - edge20(1)*vo(0)) > 0;
+			vo.setNegated( simplex[0][0] );
+			bool l01 = ( edge01( 0 )*vo( 1 ) - edge01( 1 )*vo( 0 ) ) > 0;
+			vo.setNegated( simplex[1][0] );
+			bool l12 = ( edge12( 0 )*vo( 1 ) - edge12( 1 )*vo( 0 ) ) > 0;
+			vo.setNegated( simplex[2][0] );
+			bool l20 = ( edge20( 0 )*vo( 1 ) - edge20( 1 )*vo( 0 ) ) > 0;
 
-			if (l01 == l12 && l12 == l20)
+			if ( l01 == l12 && l12 == l20 )
 			{
 				break;
 			}
 		}
 
-        Real da = direction.dot(simplex[0][0]);
-        Real dc = direction.dot(simplex[2][0]);
+		Real da = direction.dot( simplex[0][0] );
+		Real dc = direction.dot( simplex[2][0] );
 
-        if (dc - da < eps)
+		if ( dc - da < eps )
         {
 			/// Converged on closest feature on simplex
-			Vector3 L; L.setSub(simplex[1][0], simplex[0][0]);
+			Vector3 L; L.setSub( simplex[1][0], simplex[0][0] );
 
 			Vector3 pointA, pointB;
 			Vector3 normal;
@@ -315,59 +315,61 @@ void physicsConvexCollider::collide(
             else
             {
 				/// Determine closest point on simplex edge
-                Real l = -1.f * simplex[0][0].dot(L) / L.dot(L);
+				Real l = -1.f * simplex[0][0].dot( L ) / L.dot( L );
 
 				/// Interpolation to find contact details if closest is on edge of simplex
-				pointA.setInterpolate(simplex[0][1], simplex[1][1], l);
-				pointB.setInterpolate(simplex[0][2], simplex[1][2], l);
+				pointA.setInterpolate( simplex[0][1], simplex[1][1], l );
+				pointB.setInterpolate( simplex[0][2], simplex[1][2], l );
             }
 
-			normal.setSub(pointA, pointB);
-			if (normal.isZero())
+			normal.setSub( pointA, pointB );
+			if ( normal.isZero() )
 			{
 				/// Exclude touching situations
 				break;
 			}
 			//normal.setNormalized( normal );
 
+#if 0
 			/// TODO: Implement convex radius here
 			ContactPoint contact(
 				0.f, 
-				(pointA - posA).getRotatedDir(-bodyA.getRotation()),
-				(pointB - posB).getRotatedDir(-bodyB.getRotation()),
+				( pointA - posA ).getRotatedDir( -bodyA.getRotation() ),
+				( pointB - posB ).getRotatedDir( -bodyB.getRotation() ),
 				//pointA - posA,
 				//pointB - posB,
 				normal
 			);
 
-			DebugUtils::drawContactLength(pointA, pointB, normal);
-
 			contacts.push_back( contact );
+#endif
+
+			DebugUtils::drawContactLength( pointA, pointB, normal );
 
             return;
         }
 
 		/// Drive simplex edge closer to origin
 		Vector3 closest02, closest21;
-		if (simplex[0][0] == simplex[2][0])
+		if ( simplex[0][0] == simplex[2][0] )
 		{
 			closest02 = simplex[0][0];
 		}
 		else
 		{
-			physicsCd::calcClosestPointOnLine(simplex[0][0], simplex[2][0], origin, closest02);
+			physicsCd::calcClosestPointOnLine( simplex[0][0], simplex[2][0], origin, closest02 );
 		}
 
-		if (simplex[2][0] == simplex[1][0])
+		if ( simplex[2][0] == simplex[1][0] )
 		{
 			closest21 = simplex[1][0];
 		}
 		else
 		{
-			physicsCd::calcClosestPointOnLine(simplex[2][0], simplex[1][0], origin, closest21);
+			physicsCd::calcClosestPointOnLine( simplex[2][0], simplex[1][0], origin, closest21 );
 		}
 
-		if (closest02.dot(closest02) < closest21.dot(closest21))
+		if ( closest02.dot( closest02 ) < closest21.dot( closest21 ) )
 		{
 			simplex[1][0] = simplex[2][0];
 			simplex[1][1] = simplex[2][1];
@@ -383,12 +385,12 @@ void physicsConvexCollider::collide(
 		}
     }
 
-	DebugUtils::drawTerminationSimplex(simplex);
+	DebugUtils::drawTerminationSimplex( simplex );
 
 	SimplexEdge closest;
-	expandingPolytopeAlgorithm(bodyA, bodyB, simplex, closest);
+	expandingPolytopeAlgorithm( bodyA, bodyB, simplex, closest );
 
-	DebugUtils::drawExpandedSimplex(simplex);
+	DebugUtils::drawExpandedSimplex( simplex );
 
 	// Determine closest point on simplex edge
 	const size_t szSimplex = simplex.size();
@@ -396,53 +398,72 @@ void physicsConvexCollider::collide(
 	j = closest.index;
 	i = j == 0 ? szSimplex - 1 : j - 1;
 
-	Vector3 pointA, pointB;
-
 	// Todo: Find out why two same vertices exist in simplex
 	Vector3 L = simplex[j][0] - simplex[i][0];
-	if (L.isZero())
+	if ( L.isZero() )
 	{
 		return;
 	}
 
-	Real l = -1.f * simplex[i][0].dot(L) / L.dot(L);
+	Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
 
-	// Interpolation to find contact details if closest is on edge of simplex
-    /*
-	drawCross(simplex[i][1], 10.f, RED);
-	drawCross(simplex[j][1], 10.f, BLUE);
-	drawCross(simplex[i][2], 10.f, RED);
-	drawCross(simplex[j][2], 10.f, BLUE);
-    */
-
-	pointA.setInterpolate(simplex[i][1], simplex[j][1], l);
-	pointB.setInterpolate(simplex[i][2], simplex[j][2], l);
+	Vector3 pointA, pointB;
+	pointA.setInterpolate( simplex[i][1], simplex[j][1], l );
+	pointB.setInterpolate( simplex[i][2], simplex[j][2], l );
 
 	// Must be directed from A to B because penetration
 	Vector3 normal = pointB - pointA;
 
-	if (normal.isZero())
+	if ( normal.isZero() )
 	{
 		return;
 		/// Shapes aren't penetrated
 	}
 
-	DebugUtils::drawContactLength(pointA, pointB, normal);
+	DebugUtils::drawContactLength( pointA, pointB, normal );
+
+	Vector3 cpLocalA = ( pointA - posA ).getRotatedDir( -bodyA.getRotation() );
+	Vector3 cpLocalB = ( pointB - posB ).getRotatedDir( -bodyB.getRotation() );
 
 	ContactPoint contact(
 		normal.length(),
-		(pointA - posA).getRotatedDir(-bodyA.getRotation()),
-		(pointB - posB).getRotatedDir(-bodyB.getRotation()),
+		cpLocalA,
+		cpLocalB,
 		//pointA - posA,
 		//pointB - posB,
 		//normal.getNormalized()
 		normal
 	);
 
+	physicsConvexShape* shapeA = static_cast< physicsConvexShape* >( bodyA.getShape().get() );
+	physicsConvexShape* shapeB = static_cast< physicsConvexShape* >( bodyB.getShape().get() );
+
+	Vector3 vaa, vab;
+	if ( shapeA->getAdjacentVertices( cpLocalA, vaa, vab ) )
+	{
+
+	}
+
+	Vector3 vba, vbb;
+	if ( shapeB->getAdjacentVertices( cpLocalB, vba, vbb ) )
+	{
+		drawCross( bodyB.getPosition() + vba.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, RED );
+		drawCross( bodyB.getPosition() + vbb.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, RED );
+
+		drawCross( bodyB.getPosition() + cpLocalB.getRotatedDir( bodyB.getRotation() ) - normal, 45.f * g_degToRad, 20.f, GREEN );
+
+		Vector3 cpvba, cpvbb;
+		physicsCd::calcClosestPointOnLine( cpLocalB, vba, cpLocalB - normal, cpvba );
+		physicsCd::calcClosestPointOnLine( cpLocalB, vbb, cpLocalB - normal, cpvbb );
+
+		drawCross( bodyB.getPosition() + cpvba.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, BLUE );
+		drawCross( bodyB.getPosition() + cpvbb.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, BLUE );
+	}
+	
 	//drawCross( pointA, 45.f * g_degToRad, 20.f, RED );
 	//drawCross( pointB, 45.f * g_degToRad, 20.f, BLUE );
 
-	contacts.push_back(contact);
+	contacts.push_back( contact );
 }
 
 void physicsConvexCollider::expandingPolytopeAlgorithm(
@@ -451,19 +472,19 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 	std::vector< std::array<Vector3, 3> >& simplex,
 	SimplexEdge& edge)
 {	
-	const Vector3 origin(0.f, 0.f);
+	const Vector3 origin( 0.f, 0.f );
 
-	while (true)
+	while ( true )
 	{
 		// TODO: freezes here in some collisions
-		getClosestEdgeToOrigin(simplex, edge);
+		getClosestEdgeToOrigin( simplex, edge );
 
 		Vector3 vert, p0, p1;
-		getSimplexVertex(edge.normal, bodyA, bodyB, vert, p0, p1);
+		getSimplexVertex( edge.normal, bodyA, bodyB, vert, p0, p1 );
 
-		Real dist = vert.dot(edge.normal);
-
-		if (dist - edge.distSq < g_tolerance)
+		Real dist = vert.dot( edge.normal );
+		
+		if ( dist - edge.distSq < g_tolerance )
 		{ 
 			// Convergence, closest edge determined
 			break;
@@ -473,7 +494,7 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 			// Expand simplex
 			std::array<Vector3, 3> newSimplexVertex = { vert, p0, p1 };
 			std::vector< std::array<Vector3, 3> >::iterator iter = simplex.begin();
-			simplex.insert(iter + edge.index, newSimplexVertex);
+			simplex.insert( iter + edge.index, newSimplexVertex );
 		}
 	}
 }

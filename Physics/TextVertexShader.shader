@@ -10,8 +10,8 @@ void main()
 	/// todo:
 	/// replace this part with a projection matrix
 	/// pass screen dimensions properly
-	vec2 positionClipspace = position.xy - vec2(  1024 / 2, 768 / 2 );
-	positionClipspace /= vec2(  1024 / 2, 768 / 2 );
+	vec2 positionClipspace = position.xy - vec2( 1366 / 2, 768 / 2 );
+	positionClipspace /= vec2(  1366 / 2, 768 / 2 );
 	gl_Position = vec4( positionClipspace, 0, 1 );
 	//gl_Position = projection * vec4(position.xy, 0.f, 1.f);
 	

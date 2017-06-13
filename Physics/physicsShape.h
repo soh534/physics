@@ -131,6 +131,8 @@ public:
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
+	bool getAdjacentVertices( const Vector3& vertex, Vector3& va, Vector3& vb );
+
 public:
 
 	static const unsigned int maxVertices = 20;
@@ -143,5 +145,5 @@ protected:
 
     std::vector<Vector3> m_vertices;
 
-    std::vector<int> m_connectivity;
+    std::vector<int> m_connectivity; /// Wraps towards the end
 };
