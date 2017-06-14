@@ -104,10 +104,15 @@ bool physicsBody::containsPoint(const Vector3& point) const
     return m_shape->containsPoint(local);
 }
 
+//#define PREDICTIVE_C
 void physicsBody::updateAabb()
 {
     m_aabb = m_shape->getAabb(m_ori);
+#if defined PREDICTIVE_C
 	m_aabb.expand( m_linearVelocity );
+#else
+	m_aabb.expand( 0.1f );
+#endif
 	m_aabb.translate( m_pos );
 }
 

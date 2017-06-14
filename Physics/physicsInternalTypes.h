@@ -14,6 +14,7 @@ struct BodyIdPair
 };
 
 bool operator == ( const BodyIdPair& pairA, const BodyIdPair& pairB );
+bool operator != ( const BodyIdPair& pairA, const BodyIdPair& pairB );
 bool operator < ( const BodyIdPair& pairA, const BodyIdPair& pairB );
 bool operator > ( const BodyIdPair& pairA, const BodyIdPair& pairB );
 bool bodyIdPairLess( const BodyIdPair& pairA, const BodyIdPair& pairB );

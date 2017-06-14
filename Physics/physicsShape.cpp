@@ -415,6 +415,7 @@ bool physicsConvexShape::getAdjacentVertices( const Vector3& vertex, Vector3& va
 
 	for ( int i = 0; i < numVertices; i++ )
 	{
+		/// TODO: measure appropriate epsilon and make it const var
 		if ( (vertex - m_vertices[i]).lengthSquared() < 0.01f )
 		{
 			idx = i;

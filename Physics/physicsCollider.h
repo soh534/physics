@@ -18,6 +18,9 @@ private:
 
 public:
 
+	ContactPoint()
+		: m_depth( 0.f ), m_posA(), m_posB(), m_norm() {}
+
 	ContactPoint( Real depth, const Vector3& posA, const Vector3& posB, Vector3 norm )
 		: m_depth( depth ), m_posA( posA ), m_posB( posB ), m_norm( norm ) {}
 
@@ -25,7 +28,13 @@ public:
 	inline const Vector3& getContactA() const { return m_posA; }
 	inline const Vector3& getContactB() const { return m_posB; }
 	inline const Vector3& getNormal() const { return m_norm; }
+
 };
+
+namespace ContactPointUtils
+{
+	void getContactDifference( const ContactPoint& cpA, const ContactPoint& cpB, Real& res );
+}
 
 /// TODO: since no more agents make these not a class?
 class physicsCollider : public physicsObject

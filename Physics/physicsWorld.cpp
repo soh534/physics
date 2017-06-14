@@ -20,12 +20,14 @@ public:
 
 	void collide();
 
-	void collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut );
+	/// Accept array of indexed AABB's, return pairs which overlap
+	void collideAabbs( std::vector<BroadphaseBody>& broadphaseBodies, 
+					   std::vector<BodyIdPair>& broadPhasePassedPairsOut );
 
 	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB );
 
-	void collideCachedAndNewPairs(
-		std::vector<ConstrainedPair>& cachedPairs,
+	void mergeCollidableStreams(
+		const std::vector<BodyIdPair>& cachedPairs,
 		const std::vector<BodyIdPair>& newPairs );
 
 	void solve();
@@ -48,20 +50,38 @@ ColliderFuncPtr physicsWorldEx::getCollisionFunc( const physicsBody& bodyA, cons
 
 void physicsWorldEx::collide()
 {
-	/// Find new pairs in broadphase, cache them, delete caches for lost broadphase pairs
+	/// Find new pairs in broadphase, delete caches for lost broadphase pairs
 
-	/// Broadphase
+	/// Update broadphase AABB's
+	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )
+	{
+		int activeBodyId = m_activeBodyIds[i];
+		physicsBody& body = m_bodies[activeBodyId];
+
+		body.updateAabb();
+
+		DebugUtils::drawBpAabb( body ); /// TODO: move this out
+		
+		BroadphaseBody bpBody( body.getBodyId(), body.getAabb() );
+		m_broadphaseBodies.push_back( bpBody ); /// TODO: don't push_back this, just overwrite the contents
+	}
+
 	std::vector<BodyIdPair> bpPassedPairs;
-	collideAabbs( bpPassedPairs );
+	collideAabbs( m_broadphaseBodies, bpPassedPairs );
+	m_broadphaseBodies.clear(); /// TODO: don't clear this, just overwrite the contents
+
 	std::sort( bpPassedPairs.begin(), bpPassedPairs.end(), bodyIdPairLess );
 
-	std::vector<BodyIdPair> bpLostPairs, bpRemainedPairs, bpNewPairs;
-	BodyIdPairsUtils::classifyPairSets( m_cachedContactPairs, bpPassedPairs, bpLostPairs, bpRemainedPairs, bpNewPairs );
+	std::vector<BodyIdPair> bpLostPairs, bpRemainedPairs;
+	BodyIdPairsUtils::classifyPairSets( m_existingPairs, bpPassedPairs, bpLostPairs, bpRemainedPairs, m_newPairs );
 
-	/// Remove 
-	BodyIdPairsUtils::deletePairsBfromA( m_cachedContactPairs, bpLostPairs );
+	/// Remove collision caches for which we lose broadphase pair
+	BodyIdPairsUtils::deletePairsBfromA( m_cachedPairs, bpLostPairs );
+	BodyIdPairsUtils::deletePairsBfromA( m_existingPairs, bpLostPairs );
 
-	collideCachedAndNewPairs( m_cachedContactPairs, bpNewPairs );
+	mergeCollidableStreams( m_existingPairs, m_newPairs );
+
+	BodyIdPairsUtils::movePairsBtoA( m_existingPairs, m_newPairs );
 }
 
 struct aabbIndex
@@ -82,29 +102,27 @@ static bool yless( const aabbIndex& aabbIdx1, const aabbIndex& aabbIdx2 )
 	return aabbIdx1.m_part( 1 ) < aabbIdx2.m_part( 1 );
 }
 
-void physicsWorldEx::collideAabbs( std::vector<BodyIdPair>& broadPhasePassedPairsOut )
+void physicsWorldEx::collideAabbs( std::vector<BroadphaseBody>& broadphaseBodies,
+								   std::vector<BodyIdPair>& broadPhasePassedPairsOut )
 {
-	// Update AABB's, do 1D sweep & prune, add pairs which have overlapping AABB's
-	std::vector<aabbIndex> aabbIndices;
+	// Do 1D sweep & prune, add pairs which have overlapping AABB's
+	std::vector<aabbIndex> aabbIndices; /// TODO: don't keep reconstructing this vector, store it and re-use
 
-	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )
+	int numBpBodies = ( int )broadphaseBodies.size();
+
+	for ( int i = 0; i < numBpBodies; i++ )
 	{
-		int activeBodyId = m_activeBodyIds[i];
-		physicsBody& body = m_bodies[activeBodyId];
+		const BroadphaseBody& bpBody = broadphaseBodies[i];
 
-		body.updateAabb();
-
-		DebugUtils::drawBpAabb( body ); /// TODO: move this out
-
-		physicsAabb aabb = body.getAabb();
-		BodyId bodyId = body.getBodyId();
-		aabbIndices.push_back( aabbIndex( bodyId, aabb.m_min ) );
-		aabbIndices.push_back( aabbIndex( bodyId, aabb.m_max ) );
+		aabbIndex idxMin( bpBody.bodyId, bpBody.aabb.m_min );
+		aabbIndex idxMax( bpBody.bodyId, bpBody.aabb.m_max );
+		aabbIndices.push_back( idxMin );
+		aabbIndices.push_back( idxMax );
 	}
 
 	std::sort( aabbIndices.begin(), aabbIndices.end(), xless );
 
-	std::vector<bool> flags( m_bodies.size(), false );
+	std::vector<bool> flags( numBpBodies, false );
 
 	for ( int i = 0; i < ( int )aabbIndices.size(); i++ )
 	{
@@ -160,87 +178,132 @@ bool physicsWorldEx::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
 	return false;
 }
 
-void setAsContact( Constraint& c, const ContactPoint& contact, const Real rotA, const Real rotB )
+void setAsContact( Constraint& constraint, const ContactPoint& contact, const Real rotA, const Real rotB )
 {
-	c.rA = contact.getContactA();
-	c.rB = contact.getContactB();
-	c.error = contact.getDepth();
+	constraint.rA = contact.getContactA();
+	constraint.rB = contact.getContactB();
+	constraint.accumImp = 0.f;
+	constraint.error = contact.getDepth();
 
 	const Vector3& norm = contact.getNormal();
-	const Vector3& rA_ws = c.rA.getRotatedDir( rotA );
-	const Vector3& rB_ws = c.rB.getRotatedDir( rotB );
+	const Vector3& rA_ws = constraint.rA.getRotatedDir( rotA );
+	const Vector3& rB_ws = constraint.rB.getRotatedDir( rotB );
 
-	c.jac.vA = norm;
-	c.jac.vB = norm.getNegated();
-	c.jac.wA = rA_ws.cross( norm );
-	c.jac.wB = rB_ws.cross( norm.getNegated() );
+	constraint.jac.vA = norm;
+	constraint.jac.vB = norm.getNegated();
+	constraint.jac.wA = rA_ws.cross( norm );
+	constraint.jac.wB = rB_ws.cross( norm.getNegated() );
 }
 
-void physicsWorldEx::collideCachedAndNewPairs( std::vector<ConstrainedPair>& cachedPairs,
-											   const std::vector<BodyIdPair>& newPairs )
+void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& existingPairs,
+											 const std::vector<BodyIdPair>& newPairs )
 {
-	auto iterCached = cachedPairs.begin();
+	auto iterExisting = existingPairs.begin();
 	auto iterNew = newPairs.begin();
+	auto iterCached = m_cachedPairs.begin();
 
 	while ( true )
 	{
-		if ( iterCached == cachedPairs.end() && iterNew == newPairs.end() )
+		if ( iterExisting == existingPairs.end() && iterNew == newPairs.end() )
 		{
 			break;
 		}
 
-		bool pairIsCached = false;
+		BodyIdPair currentPair;
 
-		if ( iterCached != cachedPairs.end() && iterNew != newPairs.end() )
+		if ( iterExisting != existingPairs.end() && iterNew != newPairs.end() )
 		{
-			pairIsCached = ( *iterCached < *iterNew ) ? true : false;
+			Assert( *iterExisting != *iterNew, "can't have same pairs both existing and new" );
+
+			if ( *iterExisting < *iterNew )
+			{
+				currentPair = *iterExisting;
+				iterExisting++;
+			}
+			else
+			{
+				currentPair = *iterNew;
+				iterNew++;
+			}
+		}
+		else
+		{
+			if ( iterExisting != existingPairs.end() )
+			{
+				currentPair = *iterExisting;
+				iterExisting++;
+			}
+			else
+			{
+				currentPair = *iterNew;
+				iterNew++;
+			}
 		}
 
-		if ( iterCached != cachedPairs.end() )
+		const physicsBody& bodyA = m_bodies[currentPair.bodyIdA];
+		const physicsBody& bodyB = m_bodies[currentPair.bodyIdB];
+
+		ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
+
+		std::vector<ContactPoint> contacts;
+		colliderFuncPtr( bodyA, bodyB, contacts );
+
+		bool isCached = false;
+
+		if ( iterCached != m_cachedPairs.end() )
 		{
-			pairIsCached = true;
+			if ( currentPair == *iterCached )
+			{
+				isCached = true;
+			}
 		}
 
-		if ( pairIsCached )
+		if ( isCached )
 		{
-			const physicsBody& bodyA = m_bodies[iterCached->bodyIdA];
-			const physicsBody& bodyB = m_bodies[iterCached->bodyIdB];
-			ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
+			if ( contacts.size() > 0 )
+			{
+				iterCached->addContact( contacts[0] );
 
-			std::vector<ContactPoint> contacts;
-			colliderFuncPtr( bodyA, bodyB, contacts );
+				/// Add new contact constraint
+				ConstrainedPair constrainedPair( currentPair );
 
-			setAsContact( iterCached->constraints[0],
-						  contacts[0],
-						  bodyA.getRotation(), bodyB.getRotation() );
+				Constraint constraint0;
+				setAsContact( constraint0, iterCached->cpA, bodyA.getRotation(), bodyB.getRotation() );
+				constrainedPair.constraints.push_back( constraint0 );
 
-			//m_contactSolvePairs.push_back( *iterCached );
+				if ( iterCached->numContacts == 2 )
+				{
+					Constraint constraint1;
+					setAsContact( constraint1, iterCached->cpB, bodyA.getRotation(), bodyB.getRotation() );
+					constrainedPair.constraints.push_back( constraint1 );
+				}
+
+				m_contactSolvePairs.push_back( constrainedPair );
+			}
+
 			iterCached++;
 		}
 		else
 		{
-			const physicsBody& bodyA = m_bodies[iterNew->bodyIdA];
-			const physicsBody& bodyB = m_bodies[iterNew->bodyIdB];
-			ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
-
-			std::vector<ContactPoint> contacts;
-			colliderFuncPtr( bodyA, bodyB, contacts );
-
 			if ( contacts.size() > 0 )
 			{
+				CachedPair cachedPair( currentPair );
+				cachedPair.addContact( contacts[0] );
+				m_cachedPairs.push_back( cachedPair );
+
 				/// Add new contact constraint
-				ConstrainedPair constrainedPair( *iterNew );
+				ConstrainedPair constrainedPair( currentPair );
 
-				Constraint c;
-				setAsContact( c, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-				constrainedPair.constraints.push_back( c );
+				Constraint constraint;
+				setAsContact( constraint, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
+				constrainedPair.constraints.push_back( constraint );
 
-				//m_contactSolvePairs.push_back( constrainedPair );
+				m_contactSolvePairs.push_back( constrainedPair );
 			}
-
-			iterNew++;
 		}
 	}
+
+	std::sort( m_cachedPairs.begin(), m_cachedPairs.end(), bodyIdPairLess );
 }
 
 void physicsWorldEx::solve()

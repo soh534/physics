@@ -17,6 +17,17 @@ const Real g_convexRadius = 1.f;
 const int g_gjkMaxIter = 50;
 const Real g_tolerance = 0.001f;
 
+void ContactPointUtils::getContactDifference( const ContactPoint& cpA, const ContactPoint& cpB, Real& res )
+{
+	const Vector3& cpaa = cpA.getContactA();
+	const Vector3& cpab = cpA.getContactB();
+	const Vector3& cpba = cpB.getContactA();
+	const Vector3& cpbb = cpB.getContactB();
+	
+	res = ( cpaa - cpba ).lengthSquared() + ( cpab - cpbb ).lengthSquared();
+}
+
+
 /// Base collision agent class functions
 physicsCollider::physicsCollider()
 {
@@ -224,6 +235,17 @@ struct SimplexEdge
 	Vector3 normal;
 };
 
+///#define CD_MULT_CP_VERSION
+
+#if defined CD_MULT_CP_VERSION
+void physicsConvexCollider::collide(
+	const physicsBody& bodyA,
+	const physicsBody& bodyB,
+	std::vector<ContactPoint>& contacts )
+{
+
+}
+#else
 void physicsConvexCollider::collide(
 	const physicsBody& bodyA,
 	const physicsBody& bodyB,
@@ -435,6 +457,7 @@ void physicsConvexCollider::collide(
 		normal
 	);
 
+#if 0
 	physicsConvexShape* shapeA = static_cast< physicsConvexShape* >( bodyA.getShape().get() );
 	physicsConvexShape* shapeB = static_cast< physicsConvexShape* >( bodyB.getShape().get() );
 
@@ -453,19 +476,26 @@ void physicsConvexCollider::collide(
 		drawCross( bodyB.getPosition() + cpLocalB.getRotatedDir( bodyB.getRotation() ) - normal, 45.f * g_degToRad, 20.f, GREEN );
 
 		Vector3 cpvba, cpvbb;
-		physicsCd::calcClosestPointOnLine( cpLocalB, vba, cpLocalB - normal, cpvba );
-		physicsCd::calcClosestPointOnLine( cpLocalB, vbb, cpLocalB - normal, cpvbb );
+		physicsCd::calcClosestPointOnLine( bodyB.getPosition() + cpLocalB.getRotatedDir(bodyB.getRotation()),
+										   bodyB.getPosition() + vba.getRotatedDir(bodyB.getRotation()),
+										   bodyB.getPosition() + cpLocalB.getRotatedDir( bodyB.getRotation() ) - normal,
+										   cpvba );
 
-		drawCross( bodyB.getPosition() + cpvba.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, BLUE );
-		drawCross( bodyB.getPosition() + cpvbb.getRotatedDir( bodyB.getRotation() ), 45.f * g_degToRad, 20.f, BLUE );
+		physicsCd::calcClosestPointOnLine( bodyB.getPosition() + cpLocalB.getRotatedDir( bodyB.getRotation() ),
+										   bodyB.getPosition() + vbb.getRotatedDir( bodyB.getRotation() ),
+										   bodyB.getPosition() + cpLocalB.getRotatedDir( bodyB.getRotation() ) - normal,
+										   cpvbb );
+
+		drawCross( cpvba, 45.f * g_degToRad, 20.f, BLUE );
+		drawCross( cpvbb, 45.f * g_degToRad, 20.f, BLUE );
 	}
-	
+#endif
 	//drawCross( pointA, 45.f * g_degToRad, 20.f, RED );
 	//drawCross( pointB, 45.f * g_degToRad, 20.f, BLUE );
 
 	contacts.push_back( contact );
 }
-
+#endif
 void physicsConvexCollider::expandingPolytopeAlgorithm(
 	const physicsBody& bodyA,
 	const physicsBody& bodyB,

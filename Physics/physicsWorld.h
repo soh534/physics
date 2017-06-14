@@ -5,6 +5,7 @@
 
 #include <physicsBody.h> /// For physicsMotionType
 #include <physicsShape.h> /// For physicsShape::NUM_SHAPES
+#include <physicsCollider.h>
 #include <physicsSolver.h>
 
 struct ContactPoint;
@@ -35,8 +36,58 @@ struct JointCinfo
 
 struct CachedPair : public BodyIdPair
 {
-	CachedPair( const BodyId a, const BodyId b ) : BodyIdPair( a, b ) {}
-	CachedPair( const BodyIdPair& other ) : BodyIdPair( other ) {}
+	ContactPoint cpA;
+	ContactPoint cpB;
+	int numContacts;
+
+	CachedPair( const BodyId a, const BodyId b ):
+		BodyIdPair( a, b ),
+		cpA(), cpB(), numContacts( 0 )
+	{
+
+	}
+
+	CachedPair( const BodyIdPair& other ) :
+		BodyIdPair( other ),
+		cpA(), cpB(), numContacts( 0 )
+	{
+
+	}
+
+	/// TODO: move implementation out
+	void addContact(const ContactPoint cp)
+	{
+		if ( numContacts == 0 )
+		{
+			cpA = cp;
+			numContacts = 1;
+		}
+		else if ( numContacts == 1 )
+		{
+			cpB = cp;
+			numContacts = 2;
+		}
+		else
+		{
+			Real distToA, distToB;
+			ContactPointUtils::getContactDifference( cp, cpA, distToA );
+			ContactPointUtils::getContactDifference( cp, cpB, distToB );
+			( distToA < distToB ) ? cpB = cp : cpA = cp;
+		}
+	}
+};
+
+struct BroadphaseBody
+{
+	BodyId bodyId;
+	physicsAabb aabb;
+
+	BroadphaseBody( const BodyId bodyId, const physicsAabb& aabb ) :
+		bodyId( bodyId ),
+		aabb( aabb ) 
+	{
+
+	}
 };
 
 class physicsWorld : public physicsObject
@@ -75,11 +126,13 @@ protected:
 	Vector3 m_gravity;
 	Real m_cor;
 	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
+	std::vector<BroadphaseBody> m_broadphaseBodies;
 	SolverInfo m_solverInfo;
 	physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
 	std::vector<BodyIdPair> m_newPairs; /// New broadphase pairs
-	std::vector<ConstrainedPair> m_cachedContactPairs;
+	std::vector<BodyIdPair> m_existingPairs; /// Existing broadphase pairs
+	std::vector<CachedPair> m_cachedPairs;
 	std::vector<ConstrainedPair> m_jointSolvePairs;
 	std::vector<ConstrainedPair> m_contactSolvePairs;
 	std::vector<BodyId> m_activeBodyIds; /// Simulated body Ids

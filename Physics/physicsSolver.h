@@ -34,8 +34,8 @@ struct SolverBody
 {
 	Vector3 v;
 	Vector3 w;
-	Vector3 pos;
-	Real ori;
+	Vector3 pos; /// TODO: remove this
+	Real ori; /// TODO: remove this
 	Real mInv;
 	Real iInv;
 

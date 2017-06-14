@@ -9,8 +9,8 @@
 // Narrowphase
 //#define D_GJK_MINKOWSKI
 #define D_GJK_CONTACT_LENGTH
-#define D_GJK_TERMINATION_SIMPLEX
-#define D_GJK_EXPANDED_SIMPLEX
+//#define D_GJK_TERMINATION_SIMPLEX
+//#define D_GJK_EXPANDED_SIMPLEX
 
 // Solver
 #define D_SOLVER_IMPULSE
