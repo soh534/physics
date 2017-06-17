@@ -36,7 +36,7 @@ physicsCollider::physicsCollider()
 
 void physicsCollider::collide( const std::shared_ptr<physicsShape>& shapeA, 
 							   const std::shared_ptr<physicsShape>& shapeB,
-							   const Matrix3 & transformA, const Matrix3 & transformB,
+							   const Transform & transformA, const Transform & transformB,
 							   std::vector<ContactPoint>& contacts )
 {
 
@@ -50,7 +50,7 @@ physicsCircleCollider::physicsCircleCollider()
 
 void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA,
 									 const std::shared_ptr<physicsShape>& shapeB, 
-									 const Matrix3 & transformA, const Matrix3 & transformB, 
+									 const Transform & transformA, const Transform & transformB, 
 									 std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider" );
@@ -62,8 +62,8 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 	Real radA = circleA->getRadius();
 	Real radB = circleB->getRadius();
 
-	Vector3 posA = transformA.getTranslationUnit();
-	Vector3 posB = transformB.getTranslationUnit();
+	Vector3 posA = transformA.getTranslation();
+	Vector3 posB = transformB.getTranslation();
 
 	Vector3 ab = posB - posA;
 
@@ -111,7 +111,7 @@ physicsCircleBoxCollider::physicsCircleBoxCollider()
 }
 
 /// A: Circle, B: Box
-void physicsCircleBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Matrix3 & transformA, const Matrix3 & transformB, std::vector<ContactPoint>& contacts )
+void physicsCircleBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle-box collider 1st param" );
 	Assert( shapeB->getType() == physicsShape::BOX, "non-box shape sent to circle-box collider 2nd param" );
@@ -125,7 +125,7 @@ physicsBoxCollider::physicsBoxCollider()
 
 }
 
-void physicsBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Matrix3 & transformA, const Matrix3 & transformB, std::vector<ContactPoint>& contacts )
+void physicsBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::BOX, "non-box shape sent to box collider" );
 	Assert( shapeB->getType() == physicsShape::BOX, "non-box shape sent to box collider" );
@@ -142,7 +142,7 @@ physicsConvexCollider::physicsConvexCollider()
 void physicsConvexCollider::getSimplexVertex( const Vector3& directionInA,
 											  const std::shared_ptr<physicsShape>& shapeA,
 											  const std::shared_ptr<physicsShape>& shapeB,
-											  const Matrix3& transformBtoA,
+											  const Transform& transformBtoA,
 											  Vector3& simplexVertInA,
 											  Vector3& supportA,
 											  Vector3& supportBinA )
@@ -219,12 +219,12 @@ struct SimplexEdge
 void physicsConvexCollider::collide(
 	const std::shared_ptr<physicsShape>& shapeA,
 	const std::shared_ptr<physicsShape>& shapeB,
-	const Matrix3& transformA,
-	const Matrix3& transformB,
+	const Transform& transformA,
+	const Transform& transformB,
 	std::vector<ContactPoint>& contacts )
 {
-    Vector3 posA = transformA.getTranslationUnit();
-    Vector3 posB = transformB.getTranslationUnit();
+    Vector3 posA = transformA.getTranslation();
+    Vector3 posB = transformB.getTranslation();
 
     Vector3 direction = posB - posA;
 
@@ -234,13 +234,13 @@ void physicsConvexCollider::collide(
 	}
 
 	direction.setNormalized( direction ); /// TODO: investigate whether normalization really necessary
-	direction.setRotatedDir( transformA.getRotationUnit() );
+	direction.setRotatedDir( transformA.getRotation() );
 
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
 	std::vector< std::array<Vector3, 3> > simplex( 3 ); /// TODO: replace with raw 2D array
 
-	Matrix3 tBtoA, tBtoWorld;
-	tBtoWorld.setInverse22( transformB );
+	Transform tBtoA, tBtoWorld;
+	tBtoWorld.setInverse( transformB );
 	tBtoA.setMul( tBtoWorld, transformA );
 	
 	getSimplexVertex( direction, shapeA, shapeB, tBtoA, simplex[0][0], simplex[0][1], simplex[0][2] );
@@ -424,7 +424,7 @@ void physicsConvexCollider::collide(
 void physicsConvexCollider::expandingPolytopeAlgorithm(
 	const std::shared_ptr<physicsShape>& shapeA,
 	const std::shared_ptr<physicsShape>& shapeB,
-	const Matrix3& transformBtoA,
+	const Transform& transformBtoA,
 	std::vector< std::array<Vector3, 3> >& simplex,
 	SimplexEdge& edge)
 {	

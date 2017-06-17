@@ -135,8 +135,8 @@ public: /// TODO: stuff below should be invisible to users, move it
 	inline const Real getInvInertia() const;
 	inline void setCenterOfMass(const Vector3& com);
 
-	void getInvInertiaWorld( Matrix3& invInertiaWorld ) const;
-	void calcEffectiveMassMatrix( const Vector3& ptWorld, Matrix3& effMassMatrix ) const;
+	void getInvInertiaWorld( Transform& invInertiaWorld ) const;
+	void calcEffectiveMassMatrix( const Vector3& ptWorld, Transform& effMassMatrix ) const;
 	void applyPointImpulse( const Vector3& impulse, const Vector3& arm /* arm is in body local*/ );
 
 	/// Internal usage - friction

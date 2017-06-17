@@ -39,10 +39,10 @@ static void error_callback( int error, const char* description )
 void transformPointGLFWtoGL( const Vector3& pointGLFW, Vector3& pointGL )
 {
 	Vector3 yAxis( 1.f, 0.f );
-	Matrix3 yAxisReflection; yAxisReflection.setReflection( yAxis );
+	Transform yAxisReflection; yAxisReflection.setReflection( yAxis );
 
 	Vector3 windowHeight( 0.f, static_cast< Real >( g_heightWindow ) );
-	Matrix3 shiftWindowHeight; shiftWindowHeight.setTranslation( windowHeight );
+	Transform shiftWindowHeight; shiftWindowHeight.setTranslation( windowHeight );
 
 	pointGL.setTransformedPos( yAxisReflection, pointGLFW );
 	pointGL.setTransformedPos( shiftWindowHeight, pointGL );

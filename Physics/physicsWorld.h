@@ -13,8 +13,8 @@ class physicsSolver;
 
 typedef void( *ColliderFuncPtr )( const std::shared_ptr<physicsShape>& shapeA, 
 								  const std::shared_ptr<physicsShape>& shapeB,
-								  const Matrix3& transformA,
-								  const Matrix3& transformB,
+								  const Transform& transformA,
+								  const Transform& transformB,
 								  std::vector<ContactPoint>& contacts);
 
 struct physicsWorldCinfo

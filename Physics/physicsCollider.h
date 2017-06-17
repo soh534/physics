@@ -56,8 +56,8 @@ public:
 
 	static void collide( const std::shared_ptr<physicsShape>& shapeA,
 						 const std::shared_ptr<physicsShape>& shapeB,
-						 const Matrix3& transformA,
-						 const Matrix3& transformB,
+						 const Transform& transformA,
+						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -71,8 +71,8 @@ public:
 
 	static void collide( const std::shared_ptr<physicsShape>& shapeA,
 						 const std::shared_ptr<physicsShape>& shapeB,
-						 const Matrix3& transformA,
-						 const Matrix3& transformB,
+						 const Transform& transformA,
+						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -86,8 +86,8 @@ public:
 
 	static void collide( const std::shared_ptr<physicsShape>& shapeA,
 						 const std::shared_ptr<physicsShape>& shapeB,
-						 const Matrix3& transformA,
-						 const Matrix3& transformB,
+						 const Transform& transformA,
+						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -101,8 +101,8 @@ public:
 
 	static void collide( const std::shared_ptr<physicsShape>& shapeA,
 						 const std::shared_ptr<physicsShape>& shapeB,
-						 const Matrix3& transformA,
-						 const Matrix3& transformB,
+						 const Transform& transformA,
+						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
 };
 
@@ -116,14 +116,14 @@ private:
 	static void getSimplexVertex( const Vector3& directionInA,
 								  const std::shared_ptr<physicsShape>& shapeA,
 								  const std::shared_ptr<physicsShape>& shapeB,
-								  const Matrix3& transformBtoA,
+								  const Transform& transformBtoA,
 								  Vector3& simplexVertInA,
 								  Vector3& supportA,
 								  Vector3& supportBinA );
 
 	static void expandingPolytopeAlgorithm( const std::shared_ptr<physicsShape>& shapeA,
 											const std::shared_ptr<physicsShape>& shapeB,
-											const Matrix3& transformBtoA,
+											const Transform& transformBtoA,
 											std::vector< std::array<Vector3, 3> >& simplex,
 											struct SimplexEdge& closest );
 
@@ -134,7 +134,7 @@ public:
 
 	static void collide( const std::shared_ptr<physicsShape>& shapeA,
 						 const std::shared_ptr<physicsShape>& shapeB,
-						 const Matrix3& transformA,
-						 const Matrix3& transformB,
+						 const Transform& transformA,
+						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
 };

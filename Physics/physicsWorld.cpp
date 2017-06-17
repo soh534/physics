@@ -254,8 +254,8 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 
 		const physicsBody& bodyA = m_bodies[currentPair.bodyIdA];
 		const physicsBody& bodyB = m_bodies[currentPair.bodyIdB];
-		Matrix3 transformA( bodyA.getPosition(), bodyA.getRotation() );
-		Matrix3 transformB( bodyB.getPosition(), bodyB.getRotation() );
+		Transform transformA( bodyA.getPosition(), bodyA.getRotation() );
+		Transform transformB( bodyB.getPosition(), bodyB.getRotation() );
 
 		ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
 

@@ -22,7 +22,7 @@ Vector3::Vector3( const Vector3& copy )
 	/// Over-ride copy constructor
 }
 
-void Vector3::setTransformedPos( const Matrix3& t, const Vector3& v )
+void Vector3::setTransformedPos( const Transform& t, const Vector3& v )
 {
 	Vector3 vCopy( v );
 	vCopy( 2 ) = 1.f; /// Add additional dimension to enable translation
@@ -31,7 +31,7 @@ void Vector3::setTransformedPos( const Matrix3& t, const Vector3& v )
 	x = xbuf;
 }
 
-void Vector3::setTransformedInversePos( const Matrix3& t, const Vector3& v )
+void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 {
 	/// Original matrix
 	/// t(0,0) t(0,1) t(0,2)

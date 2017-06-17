@@ -1,6 +1,6 @@
 #pragma once
 
-class Matrix3;
+class Transform;
 
 class Vector3
 {
@@ -147,9 +147,9 @@ public:
 
 	///
 	/// Non-inline functions
-	void setTransformedPos( const Matrix3& t, const Vector3& v );
+	void setTransformedPos( const Transform& t, const Vector3& v );
 
-	void setTransformedInversePos( const Matrix3& t, const Vector3& v );
+	void setTransformedInversePos( const Transform& t, const Vector3& v );
 
 	void setClampedLength( const Vector3& v, const Real length );
 
