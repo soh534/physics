@@ -10,6 +10,19 @@
 
 #include <DebugUtils.h>
 
+struct BroadphaseBody
+{
+	BodyId bodyId;
+	physicsAabb aabb;
+
+	BroadphaseBody( const BodyId bodyId, const physicsAabb& aabb ) :
+		bodyId( bodyId ),
+		aabb( aabb )
+	{
+
+	}
+};
+
 class physicsWorldEx : public physicsWorld
 {
 public:
@@ -182,7 +195,6 @@ void setAsContact( Constraint& constraint, const ContactPoint& contact, const Re
 {
 	constraint.rA = contact.getContactA();
 	constraint.rB = contact.getContactB();
-	constraint.accumImp = 0.f;
 	constraint.error = contact.getDepth();
 
 	const Vector3& norm = contact.getNormal();
@@ -242,11 +254,13 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 
 		const physicsBody& bodyA = m_bodies[currentPair.bodyIdA];
 		const physicsBody& bodyB = m_bodies[currentPair.bodyIdB];
+		Matrix3 transformA( bodyA.getPosition(), bodyA.getRotation() );
+		Matrix3 transformB( bodyB.getPosition(), bodyB.getRotation() );
 
 		ColliderFuncPtr colliderFuncPtr = getCollisionFunc( bodyA, bodyB );
 
 		std::vector<ContactPoint> contacts;
-		colliderFuncPtr( bodyA, bodyB, contacts );
+		colliderFuncPtr( bodyA.getShape(), bodyB.getShape(), transformA, transformB, contacts );
 
 		bool isCached = false;
 
@@ -255,6 +269,9 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			if ( currentPair == *iterCached )
 			{
 				isCached = true;
+
+				/// Clean up cache
+				
 			}
 		}
 
@@ -262,13 +279,15 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 		{
 			if ( contacts.size() > 0 )
 			{
-				iterCached->addContact( contacts[0] );
+				//iterCached->addContact( contacts[0] );
 
 				/// Add new contact constraint
 				ConstrainedPair constrainedPair( currentPair );
 
+				constrainedPair.accumImp = iterCached->accumImp;  /// re-use impulse
+
 				Constraint constraint0;
-				setAsContact( constraint0, iterCached->cpA, bodyA.getRotation(), bodyB.getRotation() );
+				setAsContact( constraint0, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
 				constrainedPair.constraints.push_back( constraint0 );
 
 				if ( iterCached->numContacts == 2 )
@@ -288,7 +307,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			if ( contacts.size() > 0 )
 			{
 				CachedPair cachedPair( currentPair );
-				cachedPair.addContact( contacts[0] );
+				//cachedPair.addContact( contacts[0] );
 				m_cachedPairs.push_back( cachedPair );
 
 				/// Add new contact constraint
@@ -333,6 +352,23 @@ void physicsWorldEx::solve()
 	/// Solve constraints
 	m_solver->solveConstraints( m_solverInfo, m_contactSolvePairs, m_solverBodies, m_bodies );
 	m_solver->solveConstraints( m_solverInfo, m_jointSolvePairs, m_solverBodies, m_bodies );
+
+	/// Store contact impulses
+	{
+		auto contactIter = m_contactSolvePairs.begin();
+		auto cacheIter = m_cachedPairs.begin();
+
+		while ( contactIter != m_contactSolvePairs.end() )
+		{
+			if ( *contactIter == *cacheIter )
+			{
+				cacheIter->accumImp = contactIter->accumImp;
+				contactIter++;
+			}
+
+			cacheIter++;
+		}
+	}
 
 	m_contactSolvePairs.clear();
 
@@ -491,7 +527,6 @@ int physicsWorld::addJoint( const JointCinfo& config )
 			Constraint constraintX;
 			constraintX.rA = rAlocal;
 			constraintX.rB = rBlocal;
-			constraintX.accumImp = 0.f;
 			constraintX.error = 0.f;
 			constraintX.jac.vA.set( 1.f, 0.f );
 			constraintX.jac.vB.set( -1.f, 0.f );
@@ -506,7 +541,6 @@ int physicsWorld::addJoint( const JointCinfo& config )
 			Constraint constraintY;
 			constraintY.rA = rAlocal;
 			constraintY.rB = rBlocal;
-			constraintY.accumImp = 0.f;
 			constraintY.error = 0.f;
 			constraintY.jac.vA.set( 0.f, 1.f );
 			constraintY.jac.vB.set( 0.f, -1.f );

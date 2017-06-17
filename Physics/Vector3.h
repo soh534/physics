@@ -101,6 +101,8 @@ public:
 
 	inline void setRotatedDir( const Vector3& v, const Real angle );
 
+	inline void setRotatedDir( const Real angle );
+
 	inline void setNormalized( const Vector3& v );
 
 	inline void setNegated( const Vector3& v );

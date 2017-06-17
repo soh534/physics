@@ -11,7 +11,11 @@
 struct ContactPoint;
 class physicsSolver;
 
-typedef void( *ColliderFuncPtr )( const physicsBody&, const physicsBody&, std::vector<ContactPoint>& );
+typedef void( *ColliderFuncPtr )( const std::shared_ptr<physicsShape>& shapeA, 
+								  const std::shared_ptr<physicsShape>& shapeB,
+								  const Matrix3& transformA,
+								  const Matrix3& transformB,
+								  std::vector<ContactPoint>& contacts);
 
 struct physicsWorldCinfo
 {
@@ -38,18 +42,25 @@ struct CachedPair : public BodyIdPair
 {
 	ContactPoint cpA;
 	ContactPoint cpB;
+	Real accumImp;
 	int numContacts;
+
+private:
+
+	
+
+public:
 
 	CachedPair( const BodyId a, const BodyId b ):
 		BodyIdPair( a, b ),
-		cpA(), cpB(), numContacts( 0 )
+		cpA(), cpB(), accumImp(0.f), numContacts( 0 )
 	{
 
 	}
 
 	CachedPair( const BodyIdPair& other ) :
 		BodyIdPair( other ),
-		cpA(), cpB(), numContacts( 0 )
+		cpA(), cpB(), accumImp(0.f), numContacts( 0 )
 	{
 
 	}
@@ -64,29 +75,37 @@ struct CachedPair : public BodyIdPair
 		}
 		else if ( numContacts == 1 )
 		{
-			cpB = cp;
-			numContacts = 2;
+			Real distToA;
+			ContactPointUtils::getContactDifference( cp, cpA, distToA );
+			if ( distToA < 5.f )
+			{
+				cpA = cp;
+				numContacts = 1;
+			}
+			else
+			{
+				cpB = cp;
+				numContacts = 2;
+			}
 		}
 		else
 		{
 			Real distToA, distToB;
 			ContactPointUtils::getContactDifference( cp, cpA, distToA );
 			ContactPointUtils::getContactDifference( cp, cpB, distToB );
-			( distToA < distToB ) ? cpB = cp : cpA = cp;
+
+			if ( distToA < 5.f )
+			{
+				cpA = cp;
+				numContacts = 1;
+			}
+			else if ( distToB < 5.f )
+			{
+				cpA = cp;
+				numContacts = 1;
+			}
+			( distToA < distToB ) ? cpA = cp : cpB = cp;
 		}
-	}
-};
-
-struct BroadphaseBody
-{
-	BodyId bodyId;
-	physicsAabb aabb;
-
-	BroadphaseBody( const BodyId bodyId, const physicsAabb& aabb ) :
-		bodyId( bodyId ),
-		aabb( aabb ) 
-	{
-
 	}
 };
 
@@ -126,7 +145,7 @@ protected:
 	Vector3 m_gravity;
 	Real m_cor;
 	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
-	std::vector<BroadphaseBody> m_broadphaseBodies;
+	std::vector<struct BroadphaseBody> m_broadphaseBodies;
 	SolverInfo m_solverInfo;
 	physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];

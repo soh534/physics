@@ -11,7 +11,6 @@ struct Jacobian
 struct Constraint
 {
 	Vector3 rA, rB; /// Constrained points viewed from local
-	Real accumImp;
 	Real error;
 	Jacobian jac;
 };
@@ -19,9 +18,19 @@ struct Constraint
 struct ConstrainedPair : public BodyIdPair
 {
 	std::vector<Constraint> constraints;
+	Real accumImp;
 
-	ConstrainedPair( const BodyId a = invalidId, const BodyId b = invalidId ) : BodyIdPair( a, b ) {}
-	ConstrainedPair( const BodyIdPair& other ) : BodyIdPair( other ) {}
+	ConstrainedPair( const BodyId a = invalidId, const BodyId b = invalidId ) : 
+		BodyIdPair( a, b ), accumImp(0.f) 
+	{
+
+	}
+
+	ConstrainedPair( const BodyIdPair& other ) : 
+		BodyIdPair( other ), accumImp(0.f)
+	{
+
+	}
 };
 
 struct SolverInfo

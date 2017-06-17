@@ -6,3 +6,10 @@ Matrix3::Matrix3()
 {
 	setIdentity();
 }
+
+Matrix3::Matrix3( const Vector3& position, const Real rotation )
+{
+	setIdentity();
+	setTranslationUnit( position );
+	setRotationUnit( rotation );
+}

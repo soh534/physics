@@ -83,12 +83,12 @@ void solveConstrainedPairs( const SolverInfo& info,
 			Assert( !isinf( imp ), "infinite impulse in solver" );
 			Assert( !isnan( imp ), "nan impulse in solver" );
 
-#if 0
-			if ( contact )
+#if 1
+			if ( true )
 			{ // Accumulate impulse method for contact constraints
-				Real newImpulse = std::max( constraint.accumImp + imp, 0.f );
-				imp = newImpulse - constraint.accumImp;
-				constraint.accumImp = newImpulse;
+				Real newImpulse = std::max( pair.accumImp + imp, 0.f );
+				imp = newImpulse - pair.accumImp;
+				pair.accumImp = imp;
 				//drawText(std::to_string(constraint.accumImp), bodyA.pos + rA_world);
 			}
 #endif
@@ -97,10 +97,10 @@ void solveConstrainedPairs( const SolverInfo& info,
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			//drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
-			//drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
-			drawArrow( bodyA.pos, rA_world, RED );
-			drawArrow( bodyB.pos, rB_world, BLUE );
+			drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
+			drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
+			//drawArrow( bodyA.pos, rA_world, RED );
+			//drawArrow( bodyB.pos, rB_world, BLUE );
 
 			bodyA.v += jac.vA * imp * bodyA.mInv;
 			bodyB.v += jac.vB * imp * bodyB.mInv;

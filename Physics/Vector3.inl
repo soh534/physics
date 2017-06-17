@@ -303,6 +303,13 @@ inline void Vector3::setRotatedDir( const Vector3& v, const Real angle )
 	x = xbuf;
 }
 
+inline void Vector3::setRotatedDir( const Real angle )
+{
+	Real xbuf = cos( angle )*x - sin( angle )*y;
+	y = sin( angle )*x + cos( angle )*y;
+	x = xbuf;
+}
+
 inline void Vector3::setNormalized( const Vector3& v )
 {
 	Assert( !v.isZero(), "Trying to normalize a zero vector" );

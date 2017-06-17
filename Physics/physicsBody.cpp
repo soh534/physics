@@ -111,7 +111,7 @@ void physicsBody::updateAabb()
 #if defined PREDICTIVE_C
 	m_aabb.expand( m_linearVelocity );
 #else
-	m_aabb.expand( 0.1f );
+	m_aabb.expand( 0.5f );
 #endif
 	m_aabb.translate( m_pos );
 }

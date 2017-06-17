@@ -61,9 +61,13 @@ void Vector3::setTransformedInversePos( const Matrix3& t, const Vector3& v )
 	Assert( fabs( detT ) > std::numeric_limits<Real>::epsilon(), "Transformation matrix doesn't have inverse" );
 
 	Real xbuf =
-		( ( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) )*v( 0 ) + ( t( 2, 1 )*t( 0, 2 ) - t( 0, 1 )*t( 2, 2 ) )*v( 1 ) + ( t( 0, 1 )*t( 1, 2 ) - t( 1, 1 )*t( 0, 2 ) )*v( 2 ) ) / detT;
+		( ( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) )*v( 0 ) +
+		( t( 2, 1 )*t( 0, 2 ) - t( 0, 1 )*t( 2, 2 ) )*v( 1 ) +
+		  ( t( 0, 1 )*t( 1, 2 ) - t( 1, 1 )*t( 0, 2 ) )*v( 2 ) ) / detT;
 	y =
-		( ( t( 2, 0 )*t( 1, 2 ) - t( 1, 0 )*t( 2, 2 ) )*v( 0 ) + ( t( 0, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 0, 2 ) )*v( 1 ) + ( t( 1, 0 )*t( 0, 2 ) - t( 0, 0 )*t( 1, 2 ) )*v( 2 ) ) / detT;
+		( ( t( 2, 0 )*t( 1, 2 ) - t( 1, 0 )*t( 2, 2 ) )*v( 0 ) + 
+		( t( 0, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 0, 2 ) )*v( 1 ) + 
+		  ( t( 1, 0 )*t( 0, 2 ) - t( 0, 0 )*t( 1, 2 ) )*v( 2 ) ) / detT;
 	x = xbuf;
 }
 
