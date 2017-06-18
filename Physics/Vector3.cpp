@@ -54,7 +54,6 @@ void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 	/// t(2,0)*t(1,2)-t(1,0)*t(2,2)  t(0,0)*t(2,2)-t(2,0)*t(0,2)  t(1,0)*t(0,2)-t(0,0)*t(1,2)
 	/// t(1,0)*t(2,1)-t(2,0)*t(1,1)  t(2,0)*t(0,1)-t(0,0)*t(2,1)  t(0,0)*t(1,1)-t(1,0)*t(0,1)
 
-
 	Real detT =
 		t( 0, 0 )*( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) ) -
 		t( 0, 1 )*( t( 1, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 1, 2 ) ) +

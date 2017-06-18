@@ -32,7 +32,7 @@ namespace DebugUtils
 	void debug_draw_triangle( const Vector3& p0, const Vector3& p1, const Vector3& p2 );
 
 	// Narrowphase
-	void drawMinkowskiDifference( physicsConvexCollider const * const agent );
+	void drawMinkowskiDifference( const physicsConvexCollider* agent );
 	void drawContactLength( const Vector3& pA, const Vector3& pB, const Vector3& n );
 	void drawTerminationSimplex( const std::vector< std::array<Vector3, 3> >& simplex );
 	void drawExpandedSimplex( const std::vector< std::array<Vector3, 3> >& simplex );

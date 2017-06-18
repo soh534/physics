@@ -59,9 +59,6 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 	const physicsCircleShape* circleA = static_cast< physicsCircleShape* >( shapeA.get() );
 	const physicsCircleShape* circleB = static_cast< physicsCircleShape* >( shapeB.get() );
 
-	Real radA = circleA->getRadius();
-	Real radB = circleB->getRadius();
-
 	Vector3 posA = transformA.getTranslation();
 	Vector3 posB = transformB.getTranslation();
 
@@ -72,12 +69,13 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 		return;
 	}
 
-	Real len = ab.length();
+	Real len = ab.length(); /// TODO: see if we can avoid square rooting
+	Real radA = circleA->getRadius();
+	Real radB = circleB->getRadius();
 	Real depth = radA + radB - len;
 
 	if ( depth > 0.f )
 	{
-		/// TODO: has problem when a circle is exactly overlapping another
 		Vector3 abHat = ab / len;
 		Vector3 baHat = abHat.getNegated();
 
@@ -87,18 +85,14 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 
 		if ( norm.isZero() )
 		{
-			/// TODO: Treated as touching due to numerical error
+			/// Don't add contact if exactly touching
 			return;
 		}
 
+		/// TODO: See if we can avoid square rooting
 		norm.normalize();
 
-		ContactPoint contact(
-			depth,
-			cpA - posA,
-			cpB - posB,
-			norm
-		); /// AB for separation
+		ContactPoint contact( depth, cpA - posA, cpB - posB, norm ); /// AB for separation
 
 		contacts.push_back( contact );
 	}
@@ -151,7 +145,6 @@ void physicsConvexCollider::getSimplexVertex( const Vector3& directionInA,
 	directionInB.setTransformedInversePos( transformBtoA, directionInA );
 	shapeA->getSupportingVertex( directionInA, supportA );
 	shapeB->getSupportingVertex( directionInB, supportB );
-
 	supportBinA.setTransformedPos( transformBtoA, supportB );
 	simplexVertInA = supportA - supportBinA;
 }
@@ -234,20 +227,19 @@ void physicsConvexCollider::collide(
 	}
 
 	direction.setNormalized( direction ); /// TODO: investigate whether normalization really necessary
-	direction.setRotatedDir( transformA.getRotation() );
 
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
 	std::vector< std::array<Vector3, 3> > simplex( 3 ); /// TODO: replace with raw 2D array
 
-	Transform tBtoA, tBtoWorld;
-	tBtoWorld.setInverse( transformB );
-	tBtoA.setMul( transformA, tBtoWorld );
+	Transform bToA, tBinv;
+	tBinv.setInverse( transformB );
+	bToA.setMul( transformA, tBinv );
 	
-	getSimplexVertex( direction, shapeA, shapeB, tBtoA, simplex[0][0], simplex[0][1], simplex[0][2] );
+	getSimplexVertex( direction, shapeA, shapeB, bToA, simplex[0][0], simplex[0][1], simplex[0][2] );
 	direction.setNegated( direction );
-	getSimplexVertex( direction, shapeA, shapeB, tBtoA, simplex[1][0], simplex[1][1], simplex[1][2] );
+	getSimplexVertex( direction, shapeA, shapeB, bToA, simplex[1][0], simplex[1][1], simplex[1][2] );
 	
-	Vector3 origin( 0.0f, 0.0f );
+	Vector3 origin( posA.getNegated() );
 	
 	physicsCd::calcClosestPointOnLine( simplex[0][0], simplex[1][0], origin, direction );
 
@@ -257,9 +249,6 @@ void physicsConvexCollider::collide(
     
 	for ( int i = 0; i < g_gjkMaxIter; i++ )
     {
-		/// TODO: fix
-		/// DebugUtils::drawMinkowskiDifference(this);
-
 		/// TODO: Fix bug where direction becomes IND000
 
 		if ( direction.isZero() )
@@ -272,7 +261,7 @@ void physicsConvexCollider::collide(
 		direction.setNormalized( direction );
 
 		/// Get third simplex triangle vertex
-		getSimplexVertex( direction, shapeA, shapeB, tBtoA, simplex[2][0], simplex[2][1], simplex[2][2] );
+		getSimplexVertex( direction, shapeA, shapeB, bToA, simplex[2][0], simplex[2][1], simplex[2][2] );
 
 		{ 
 			/// Terminate when origin is enclosed by triangle simplex
@@ -329,9 +318,7 @@ void physicsConvexCollider::collide(
 			}
 			//normal.setNormalized( normal );
 
-
-
-			//DebugUtils::drawContactLength( pointA, pointB, normal );
+			DebugUtils::drawContactLength( pointA, pointB, normal );
 
             return;
         }
@@ -375,7 +362,7 @@ void physicsConvexCollider::collide(
 	DebugUtils::drawTerminationSimplex( simplex );
 
 	SimplexEdge closest;
-	expandingPolytopeAlgorithm( shapeA, shapeB, tBtoA, simplex, closest );
+	expandingPolytopeAlgorithm( shapeA, shapeB, bToA, simplex, closest );
 
 	DebugUtils::drawExpandedSimplex( simplex );
 
@@ -409,7 +396,7 @@ void physicsConvexCollider::collide(
 
 	DebugUtils::drawContactLength( pointA, pointB, normal );
 
-	Vector3 contactBinA; contactBinA.setTransformedPos( tBtoA, pointB - posB );
+	Vector3 contactBinA; contactBinA.setTransformedPos( bToA, pointB - posB );
 
 	ContactPoint contact(
 		normal.length(),

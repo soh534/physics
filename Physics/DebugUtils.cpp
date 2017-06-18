@@ -31,7 +31,7 @@ void DebugUtils::debug_draw_triangle( const Vector3& p0, const Vector3& p1, cons
 #endif
 }
 
-void DebugUtils::drawMinkowskiDifference( physicsConvexCollider const * const agent )
+void DebugUtils::drawMinkowskiDifference( const physicsConvexCollider* agent )
 {
 #if defined D_GJK_MINKOWSKI
 	Vector3 vertex0, vertex1, dummy0, dummy1;
