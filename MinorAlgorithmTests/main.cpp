@@ -113,11 +113,86 @@ void bodyIdPairSortTest()
 	std::sort(pairs.begin(), pairs.end(), bodyIdPairLess);
 }
 
+#include <Transform.h>
+
+void transformsTest()
+{
+	Vector3 v( 50.f, 50.f );
+	Vector3 vopp = v.getNegated();
+
+	Real rot( 45.f * g_degToRad );
+	Real rotopp = -1.f * rot;
+
+	Transform t( v, rot );
+	Transform tinv; tinv.setInverse( t );
+	v = tinv.getTranslation();
+	rot = tinv.getRotation();
+	t.setInverse( tinv );
+	v = t.getTranslation();
+	rot = t.getRotation();
+	Transform id; id.setMul(t, tinv);
+
+	Transform lin; lin.setTranslation( v );
+	Transform ang; ang.setRotation( rot );
+	Transform linAng; linAng.setMul( lin, ang ); /// Remember v' = LRv, rotation applied first
+
+	Transform linInv; linInv.setInverse( lin );
+	Transform angInv; angInv.setInverse( ang );
+
+	Transform angInvLinInv( vopp, rotopp );
+
+	/// v3(-10.f, 10.f)  ********* v0(10.f, 10.f)
+	///                  *       *
+	///                  *   0   * -> rotate 45 deg, then translate 50, 50
+	///                  *       *
+	/// v2(-10.f, -10.f) ********* v1(10.f, -10.f)
+
+	Vector3 v0( 10.f, 10.f );
+	Vector3 v1( 10.f, -10.f );
+	Vector3 v2( -10.f, -10.f );
+	Vector3 v3( -10.f, 10.f );
+
+	v0.setTransformedPos( ang, v0 );
+	v1.setTransformedPos( ang, v1 );
+	v2.setTransformedPos( ang, v2 );
+	v3.setTransformedPos( ang, v3 );
+
+	v0.setTransformedPos( lin, v0 );
+	v1.setTransformedPos( lin, v1 );
+	v2.setTransformedPos( lin, v2 );
+	v3.setTransformedPos( lin, v3 );
+
+	v0.set( 10.f, 10.f );
+	v1.set( 10.f, -10.f );
+	v2.set( -10.f, -10.f );
+	v3.set( -10.f, 10.f );
+
+	v0.setTransformedPos( linAng, v0 );
+	v1.setTransformedPos( linAng, v1 );
+	v2.setTransformedPos( linAng, v2 );
+	v3.setTransformedPos( linAng, v3 );
+
+	/// Test Transform::setMul(a, b) = a * b
+	Transform t0, t1;
+	t0( 0, 0 ) = 1.f; t0( 0, 1 ) = 2.f; t0( 0, 2 ) = 3.f;
+	t0( 1, 0 ) = 4.f; t0( 1, 1 ) = 5.f; t0( 1, 2 ) = 6.f;
+	t0( 2, 0 ) = 7.f; t0( 2, 1 ) = 8.f; t0( 2, 2 ) = 9.f;
+
+	t1( 0, 0 ) = 10.f; t1( 0, 1 ) = 11.f; t1( 0, 2 ) = 12.f;
+	t1( 1, 0 ) = 13.f; t1( 1, 1 ) = 14.f; t1( 1, 2 ) = 15.f;
+	t1( 2, 0 ) = 16.f; t1( 2, 1 ) = 17.f; t1( 2, 2 ) = 18.f;
+
+	Transform t0t1; t0t1.setMul( t0, t1 );
+	Transform t1t0; t1t0.setMul( t1, t0 );
+}
+
 int main( int argc, char* argv[] )
 {
 	classifySetsTest();
 
 	bodyIdPairSortTest();
+
+	transformsTest();
 
 	__debugbreak();
 

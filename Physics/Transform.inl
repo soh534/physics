@@ -1,5 +1,7 @@
 #include "Transform.h"
 
+#include <cmath>
+
 inline const Real& Transform::operator()( int i, int j ) const
 {
 	return m_data[i][j];
@@ -39,19 +41,6 @@ inline void Transform::setZero()
 	}
 }
 
-inline void Transform::setTranspose( const Transform& m )
-{
-	Assert( this != &m, "feeding self as input" );
-
-	for ( unsigned int i = 0; i < 3; i++ )
-	{
-		for ( unsigned int j = 0; j < 3; j++ )
-		{
-			( *this )( j, i ) = m( i, j );
-		}
-	}
-}
-
 inline void Transform::addTranslation( const Vector3& translation )
 {
 	m_data[0][2] = translation( 0 );
@@ -83,17 +72,15 @@ inline void Transform::setRotation( const Real rotation )
 
 inline Real Transform::getRotation() const
 {
-	Real rot00, rot01, rot10, rot11;
-	rot00 = acos( m_data[0][0] );
-	rot01 = asin( -m_data[0][1] );
-	rot10 = asin( m_data[1][0] );
-	rot11 = acos( m_data[1][1] );
+	Real acos00 = acos( m_data[0][0] );
+	Real asin01 = asin( -m_data[0][1] );
+	Real asin10 = asin( m_data[1][0] );
+	Real acos11 = acos( m_data[1][1] );
 
-	Assert( rot00 == rot01, "faulty getRotation()" );
-	Assert( rot10 == rot11, "faulty getRotation()" );
-	Assert( rot01 == rot10, "faulty getRotation()" );
+	Assert( acos00 == acos11, "faulty getRotation()" );
+	Assert( asin01 == asin10, "faulty getRotation()" );
 
-	return Real();
+	return asin01;
 }
 
 inline void Transform::setTransform( const Vector3& translation, const Real rotation )
@@ -106,18 +93,19 @@ inline void Transform::setTransform( const Vector3& translation, const Real rota
 inline void Transform::setReflection( const Vector3& direction )
 {
 	setIdentity();
-	const Real xsq = direction( 0 ) * direction( 0 );
-	const Real ysq = direction( 1 ) * direction( 1 );
-	m_data[0][0] = xsq - ysq;
+	const Real xx = direction( 0 ) * direction( 0 );
+	const Real yy = direction( 1 ) * direction( 1 );
+	m_data[0][0] = xx - yy;
 	m_data[0][1] = 2.f * direction( 0 ) * direction( 1 );
 	m_data[1][0] = 2.f * direction( 0 ) * direction( 1 );
-	m_data[1][1] = ysq - xsq;
+	m_data[1][1] = yy - xx;
 }
 
-/// TO-DO - this function doesn't work, repair it
-inline void Transform::setMul( const Transform& m0, const Transform& m1 )
+inline void Transform::setMul( const Transform& t0, const Transform& t1 )
 {
-	Assert( this != &m0 && this != &m1, "Feeding self as input" );
+	Transform t0copy( t0 );
+	Transform t1copy( t1 );
+
 	setZero();
 
 	for ( int i = 0; i < 3; i++ )
@@ -126,7 +114,7 @@ inline void Transform::setMul( const Transform& m0, const Transform& m1 )
 		{
 			for ( int k = 0; k < 3; k++ )
 			{
-				m_data[i][j] += m0( i, k ) * m1( k, j );
+				m_data[i][j] += t0copy( i, k ) * t1copy( k, j );
 			}
 		}
 	}
@@ -134,44 +122,48 @@ inline void Transform::setMul( const Transform& m0, const Transform& m1 )
 
 inline void Transform::mul( const Transform& t )
 {
-	Assert( false, "Function is not implemented yet" );
+	setMul( *this, t );
 }
 
-inline void Transform::setAdd( const Transform& m0, const Transform& m1 )
+inline void Transform::setInverse( const Transform& t )
 {
-	for ( int i = 0; i < 3; i++ )
-	{
-		for ( int j = 0; j < 3; j++ )
-		{
-			m_data[i][j] = m0( i, j ) + m1( i, j );
-		}
-	}
-}
+	/// Copy
+	Transform copy( t );
 
-inline void Transform::setSub( const Transform& m0, const Transform& m1 )
-{
-	for ( int i = 0; i < 3; i++ )
-	{
-		for ( int j = 0; j < 3; j++ )
-		{
-			m_data[i][j] = m0( i, j ) - m1( i, j );
-		}
-	}
-}
-
-inline void Transform::setInverse( const Transform& m )
-{
-	Assert( this != &m, "Feeding self as input" );
 	setIdentity();
 
 	for ( int i = 0; i < 2; i++ )
 	{
 		for ( int j = 0; j < 2; j++ )
 		{
-			m_data[i][j] = m.m_data[j][i];
+			m_data[i][j] = copy.m_data[j][i];
 		}
 	}
 
-	m_data[0][2] = -1.f * ( m_data[0][0] * m.m_data[0][2] + m_data[0][1] * m.m_data[1][2] );
-	m_data[1][2] = -1.f * ( m_data[1][0] * m.m_data[0][2] + m_data[1][1] * m.m_data[1][2] );
+	m_data[0][2] = -1.f * ( m_data[0][0] * copy.m_data[0][2] + m_data[0][1] * copy.m_data[1][2] );
+	m_data[1][2] = -1.f * ( m_data[1][0] * copy.m_data[0][2] + m_data[1][1] * copy.m_data[1][2] );
+}
+
+inline void Transform::invert()
+{
+	setInverse( *this );
+}
+
+inline bool Transform::isApproximatelyEqual( const Transform& t, Real epsilon)
+{
+	bool res = true;
+
+	for ( int i = 0; i < 3; i++ )
+	{
+		for ( int j = 0; j < 3; j++ )
+		{
+			if ( fabs( m_data[i][j] - t.m_data[i][j] ) > epsilon )
+			{
+				res = false;
+				break;
+			}
+		}
+	}
+
+	return res;
 }

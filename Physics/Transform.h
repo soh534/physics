@@ -3,7 +3,7 @@
 class Vector3;
 
 /// Homogeneous transformation matrix which stores 2d translation and z-axis rotation in a 3-by-3
-/// Capable of multiplying with other transformation matrices to produce mixed transforms
+/// Capable of multiplying with other transformation matrices to produce combined transforms
 
 class Transform
 {
@@ -13,12 +13,14 @@ class Transform
 	/// m_data[2][0], m_data[2][1], m_data[2][2]
 
 	Real m_data[3][3];
+	
 
 public:
 
 	Transform();
 
-	Transform( const Vector3& position, const Real rotation );
+	/// Sets into T = Lt * Rt ( Rotation applied then translation )
+	Transform( const Vector3& translation, const Real rotation );
 
 	inline const Real& operator()( int i, int j ) const;
 
@@ -28,25 +30,24 @@ public:
 
 	inline void setZero();
 
-	/// Sets this matrix to transpose of m
-	inline void setTranspose( const Transform& m );
-
-	/// Sets just the translational component of this matrix
+	/// Sets translational component of this matrix
 	inline void addTranslation( const Vector3& translation );
 
 	/// Sets into pure translation matrix
 	inline void setTranslation( const Vector3& translation );
 
 	/// Gets translational component of this matrix
+	/// If transform also has rotation and was inverted, naturally inverse(Lt) != -Lt
 	inline Vector3 getTranslation() const;
 
-	/// Sets just the rotational component of this matrix
+	/// Sets rotational component of this matrix
 	inline void addRotation( const Real rotation );
 
 	/// Sets into pure rotation matrix
 	inline void setRotation( const Real rotation );
 
 	/// Gets rotational component of this matrix
+	/// Always inverse(Rt) == -Rt
 	inline Real getRotation() const;
 
 	/// Sets into matrix with translational and rotational components
@@ -56,16 +57,16 @@ public:
 	inline void setReflection( const Vector3& direction );
 
 	/// Matrix utility functions
-	inline void setMul( const Transform& m0, const Transform& m1 );
+	inline void setMul( const Transform& t0, const Transform& t1 );
 
-	inline void mul( const Transform& m );
+	inline void mul( const Transform& t );
 
-	inline void setAdd( const Transform& m0, const Transform& m1 );
+	inline void setInverse( const Transform& t );
 
-	inline void setSub( const Transform& m0, const Transform& m1 );
+	inline void invert();
 
-	inline void setInverse( const Transform& m );
-
+	inline bool isApproximatelyEqual( const Transform& t,
+									  Real epsilon = std::numeric_limits<Real>::epsilon() );
 };
 
 #include <Transform.inl>

@@ -24,15 +24,16 @@ Vector3::Vector3( const Vector3& copy )
 
 void Vector3::setTransformedPos( const Transform& t, const Vector3& v )
 {
-	Vector3 vCopy( v );
-	vCopy( 2 ) = 1.f; /// Add additional dimension to enable translation
-	Real xbuf = t( 0, 0 )*vCopy( 0 ) + t( 0, 1 )*vCopy( 1 ) + t( 0, 2 )*vCopy( 2 );
-	y = t( 1, 0 )*vCopy( 0 ) + t( 1, 1 )*vCopy( 1 ) + t( 1, 2 )*vCopy( 2 );
+	Vector3 vHomogeneous( v );
+	vHomogeneous( 2 ) = 1.f; /// Add additional dimension to enable translation
+	Real xbuf = t( 0, 0 )*vHomogeneous( 0 ) + t( 0, 1 )*vHomogeneous( 1 ) + t( 0, 2 )*vHomogeneous( 2 );
+	y = t( 1, 0 )*vHomogeneous( 0 ) + t( 1, 1 )*vHomogeneous( 1 ) + t( 1, 2 )*vHomogeneous( 2 );
 	x = xbuf;
 }
 
 void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 {
+/*
 	/// Original matrix
 	/// t(0,0) t(0,1) t(0,2)
 	/// t(1,0) t(1,1) t(1,2)
@@ -53,6 +54,7 @@ void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 	/// t(2,0)*t(1,2)-t(1,0)*t(2,2)  t(0,0)*t(2,2)-t(2,0)*t(0,2)  t(1,0)*t(0,2)-t(0,0)*t(1,2)
 	/// t(1,0)*t(2,1)-t(2,0)*t(1,1)  t(2,0)*t(0,1)-t(0,0)*t(2,1)  t(0,0)*t(1,1)-t(1,0)*t(0,1)
 
+
 	Real detT =
 		t( 0, 0 )*( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) ) -
 		t( 0, 1 )*( t( 1, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 1, 2 ) ) +
@@ -69,6 +71,9 @@ void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 		( t( 0, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 0, 2 ) )*v( 1 ) + 
 		  ( t( 1, 0 )*t( 0, 2 ) - t( 0, 0 )*t( 1, 2 ) )*v( 2 ) ) / detT;
 	x = xbuf;
+*/
+	Transform tinv; tinv.setInverse( t );
+	return setTransformedPos( tinv, v );
 }
 
 void Vector3::setClampedLength( const Vector3& v, const Real length )

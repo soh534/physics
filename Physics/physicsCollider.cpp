@@ -241,7 +241,7 @@ void physicsConvexCollider::collide(
 
 	Transform tBtoA, tBtoWorld;
 	tBtoWorld.setInverse( transformB );
-	tBtoA.setMul( tBtoWorld, transformA );
+	tBtoA.setMul( transformA, tBtoWorld );
 	
 	getSimplexVertex( direction, shapeA, shapeB, tBtoA, simplex[0][0], simplex[0][1], simplex[0][2] );
 	direction.setNegated( direction );
