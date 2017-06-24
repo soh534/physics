@@ -7,11 +7,6 @@ inline const Real& Transform::operator()( int i, int j ) const
 	return m_data[i][j];
 }
 
-inline Real& Transform::operator()( int i, int j )
-{
-	return m_data[i][j];
-}
-
 inline void Transform::setIdentity()
 {
 	for ( int i = 0; i < 3; i++ )
@@ -28,6 +23,8 @@ inline void Transform::setIdentity()
 			}
 		}
 	}
+
+	m_rotation = 0.f;
 }
 
 inline void Transform::setZero()
@@ -62,6 +59,7 @@ inline void Transform::addRotation( const Real rotation )
 {
 	m_data[0][0] = cos( rotation ); m_data[0][1] = -sin( rotation );
 	m_data[1][0] = sin( rotation ); m_data[1][1] = cos( rotation );
+	m_rotation = rotation;
 }
 
 inline void Transform::setRotation( const Real rotation )
@@ -72,15 +70,7 @@ inline void Transform::setRotation( const Real rotation )
 
 inline Real Transform::getRotation() const
 {
-	Real acos00 = acos( m_data[0][0] );
-	Real asin01 = asin( -m_data[0][1] );
-	Real asin10 = asin( m_data[1][0] );
-	Real acos11 = acos( m_data[1][1] );
-
-	Assert( acos00 == acos11, "faulty getRotation()" );
-	Assert( asin01 == asin10, "faulty getRotation()" );
-
-	return asin01;
+	return m_rotation;
 }
 
 inline void Transform::setTransform( const Vector3& translation, const Real rotation )
@@ -118,6 +108,8 @@ inline void Transform::setMul( const Transform& t0, const Transform& t1 )
 			}
 		}
 	}
+
+	m_rotation = t0copy.getRotation() + t1copy.getRotation();
 }
 
 inline void Transform::mul( const Transform& t )
@@ -142,6 +134,8 @@ inline void Transform::setInverse( const Transform& t )
 
 	m_data[0][2] = -1.f * ( m_data[0][0] * copy.m_data[0][2] + m_data[0][1] * copy.m_data[1][2] );
 	m_data[1][2] = -1.f * ( m_data[1][0] * copy.m_data[0][2] + m_data[1][1] * copy.m_data[1][2] );
+
+	m_rotation *= -1.f;
 }
 
 inline void Transform::invert()
@@ -163,6 +157,11 @@ inline bool Transform::isApproximatelyEqual( const Transform& t, Real epsilon)
 				break;
 			}
 		}
+	}
+
+	if ( fabs( m_rotation - t.getRotation() ) > epsilon )
+	{
+		res = false;
 	}
 
 	return res;

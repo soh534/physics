@@ -11,7 +11,7 @@
 
 #include <Renderer.h>
 
-const Real g_density = .01f;
+const Real g_density = 1.f;
 
 ///#define D_PRINT_VERTICES
 #if defined (D_PRINT_VERTICES)

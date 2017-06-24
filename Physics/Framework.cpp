@@ -36,26 +36,41 @@ static void error_callback( int error, const char* description )
 	fputs( description, stderr );
 }
 
-void transformPointGLFWtoGL( const Vector3& pointGLFW, Vector3& pointGL )
+void transformPointGLFWtoGL( GLFWwindow* window, const Vector3& pointGLFW, Vector3& pointGL )
 {
-	Vector3 yAxis( 1.f, 0.f );
-	Transform yAxisReflection; yAxisReflection.setReflection( yAxis );
+	float left, right, bottom, top;
+	getDimensions( left, right, bottom, top );
 
-	Vector3 windowHeight( 0.f, static_cast< Real >( g_heightWindow ) );
-	Transform shiftWindowHeight; shiftWindowHeight.setTranslation( windowHeight );
+	int windowWidth, windowHeight;
+	glfwGetWindowSize( window, &windowWidth, &windowHeight );
 
-	pointGL.setTransformedPos( yAxisReflection, pointGLFW );
+	/// Reflect monitor-space across x-axis
+	Vector3 axisX( 1.f, 0.f );
+	Transform axisXReflection; axisXReflection.setReflection( axisX );
+	pointGL.setTransformedPos( axisXReflection, pointGLFW );
+
+	/// Shift origin back to zero
+	Vector3 offsetWindowHeight( 0.f, windowHeight );
+	Transform shiftWindowHeight( offsetWindowHeight, 0.f );
 	pointGL.setTransformedPos( shiftWindowHeight, pointGL );
+
+	/// Scale to dimension-space
+	Vector3 scale( ( right - left ) / windowWidth, ( top - bottom ) / windowHeight );
+	pointGL *= scale;
+
+	/// Shift origin to dimension-space
+	Vector3 bottomLeft( left, bottom );
+	Transform tBottomLeft( bottomLeft, 0.f );
+	pointGL.setTransformedPos( tBottomLeft, pointGL );
 }
 
 static void cursorPositionCallback( GLFWwindow* window, double xpos, double ypos )
 {
+	Vector3 posGlfw( static_cast< Real >( xpos ), static_cast< Real >( ypos ) );
+	transformPointGLFWtoGL( window, posGlfw, g_cursorPos );
+
 	if ( g_bodyId >= 0 )
 	{
-		transformPointGLFWtoGL( Vector3( static_cast< Real >( xpos ), 
-										 static_cast< Real >( ypos ) ),
-								g_cursorPos );
-
 		DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
 	}
 }
@@ -65,7 +80,8 @@ void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
 	double x, y;
 	glfwGetCursorPos( window, &x, &y );
 
-	transformPointGLFWtoGL( Vector3( (Real)x, (Real)y ), g_cursorPos );
+	Vector3 posGlfw( static_cast< Real >( x ), static_cast< Real >( y ) );
+	transformPointGLFWtoGL( window, posGlfw, g_cursorPos );
 
 	if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld )
 	{
@@ -95,28 +111,61 @@ void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
 	}
 }
 
-void renderAxis()
+void drawAxis()
 {
-	Vector3 offset( 5.f, 5.f );
+	float left, right, bottom, top;
+	getDimensions( left, right, bottom, top );
 
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( ( Real )g_widthWindow, 0.f ) + offset ); // X-axis
-	drawLine( Vector3( 0.f, 0.f ) + offset, Vector3( 0.f, ( Real )g_heightWindow ) + offset ); // Y-axis
+	Vector3 xleft( left, 0.f );
+	Vector3 xright( right, 0.f );
+	Vector3 ybottom( 0.f, bottom );
+	Vector3 ytop( 0.f, top );
+
+	drawLine( xleft, xright ); // X-axis
+	drawLine( ybottom, ytop ); // Y-axis
 
 	const int interval = 50;
 
-	Vector3 textOffset = offset * 2;
+	float shift = 8.f;
+	Vector3 base, ext;
+	Vector3 offset( shift, shift );
 
-	for ( int i = 0; i < g_widthWindow; i += interval )
+	for ( int i = 0; i < right; i += interval )
 	{
-		drawLine( Vector3( i, 0.f ) + offset, Vector3( i, 10.f ) + offset );
-		drawText( std::to_string( i ), Vector3( i, 0.f ) + textOffset );
+		base.set( i, 0.f );
+		ext.set( i, shift );
+		drawLine( base, ext );
+		drawText( std::to_string( i ), base + offset );
 	}
 
-	for ( int i = 0; i < g_heightWindow; i += interval )
+	for ( int i = -interval; i > left; i -= interval )
 	{
-		drawLine( Vector3( 0.f, i ) + offset, Vector3( 10.f, i ) + offset );
-		drawText( std::to_string( i ), Vector3( 0.f, i ) + textOffset );
+		base.set( i, 0.f );
+		ext.set( i, shift );
+		drawLine( base, ext );
+		drawText( std::to_string( i ), base + offset );
 	}
+
+	for ( int i = interval; i < top; i += interval )
+	{
+		base.set( 0.f, i );
+		ext.set( shift, i );
+		drawLine( base, ext );
+		drawText( std::to_string( i ), base + offset );
+	}
+
+	for ( int i = -interval; i > bottom; i -= interval )
+	{
+		base.set( 0.f, i );
+		ext.set( shift, i );
+		drawLine( base, ext );
+		drawText( std::to_string( i ), base + offset );
+	}
+}
+
+void drawCursorMarker()
+{
+	drawCross( g_cursorPos, 45.f * g_degToRad, 50.f, PURPLE );
 }
 
 void stepRender( GLFWwindow* window )
@@ -125,7 +174,8 @@ void stepRender( GLFWwindow* window )
 	glClear( GL_COLOR_BUFFER_BIT );
 	glColor3f( 0.0f, 0.0f, 0.0f );
 
-	renderAxis();
+	drawAxis();
+	drawCursorMarker();
 
 	g_world->render();
 	g_world->step();
@@ -218,7 +268,7 @@ void BeginGraphics( const WindowCinfo& cinfo )
 	g_framesPerSecond = cinfo.framesPerSecond;
 	g_topLeft.set( -g_widthWindow / 3.f, g_heightWindow / 3.f );
 	g_world = cinfo.world;
-	g_state = Running;
+	g_state = Paused;
 	g_controlInfo.dummyBodyId = -1;
 	g_controlInfo.dummyJointId = -1;
 
@@ -227,6 +277,9 @@ void BeginGraphics( const WindowCinfo& cinfo )
 	initializeWindow( window, cinfo );
 
 	initializeRendering( cinfo.widthWindow, cinfo.heightWindow );
+
+	glfwPollEvents();
+	stepRender( window );
 
 	while ( !glfwWindowShouldClose( window ) )
 	{

@@ -63,14 +63,14 @@ void DebugUtils::drawContactLength( const Vector3& pA, const Vector3& pB, const 
 #endif
 }
 
-void DebugUtils::drawTerminationSimplex( const std::vector< std::array<Vector3, 3> >& simplex )
+void DebugUtils::drawTerminationSimplex( const physicsConvexCollider::Simplex& simplex )
 {
 #if defined (D_GJK_TERMINATION_SIMPLEX)	
 	debug_draw_triangle( simplex[0][0], simplex[1][0], simplex[2][0] );
 #endif
 }
 
-void DebugUtils::drawExpandedSimplex( const std::vector< std::array<Vector3, 3> >& simplex )
+void DebugUtils::drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex )
 {
 #if defined (D_GJK_EXPANDED_SIMPLEX)
 	int szSimplex = ( int )simplex.size();
@@ -85,7 +85,7 @@ void DebugUtils::drawExpandedSimplex( const std::vector< std::array<Vector3, 3> 
 #endif
 }
 
-void DebugUtils::drawBodyImpulse( physicsBody const * const body, const Vector3& arm, const Vector3& impulse )
+void DebugUtils::drawBodyImpulse( const physicsBody* body, const Vector3& arm, const Vector3& impulse )
 {
 #if defined (D_SOLVER_IMPULSE)
 	drawArrow( body->getPosition() + arm, impulse, RED );

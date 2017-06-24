@@ -24,53 +24,13 @@ Vector3::Vector3( const Vector3& copy )
 
 void Vector3::setTransformedPos( const Transform& t, const Vector3& v )
 {
-	Vector3 vHomogeneous( v );
-	vHomogeneous( 2 ) = 1.f; /// Add additional dimension to enable translation
-	Real xbuf = t( 0, 0 )*vHomogeneous( 0 ) + t( 0, 1 )*vHomogeneous( 1 ) + t( 0, 2 )*vHomogeneous( 2 );
-	y = t( 1, 0 )*vHomogeneous( 0 ) + t( 1, 1 )*vHomogeneous( 1 ) + t( 1, 2 )*vHomogeneous( 2 );
-	x = xbuf;
+	Vector3 vh( v ); vh( 2 ) = 1.f; /// Add additional dimension to enable translation
+	x = t( 0, 0 )*vh( 0 ) + t( 0, 1 )*vh( 1 ) + t( 0, 2 )*vh( 2 );
+	y = t( 1, 0 )*vh( 0 ) + t( 1, 1 )*vh( 1 ) + t( 1, 2 )*vh( 2 );
 }
 
 void Vector3::setTransformedInversePos( const Transform& t, const Vector3& v )
 {
-/*
-	/// Original matrix
-	/// t(0,0) t(0,1) t(0,2)
-	/// t(1,0) t(1,1) t(1,2)
-	/// t(2,0) t(2,1) t(2,2)
-
-	/// Matrix of minors
-	/// t(1,1)*t(2,2)-t(2,1)*t(1,2)  t(1,0)*t(2,2)-t(2,0)*t(1,2)  t(1,0)*t(2,1)-t(2,0)*t(1,1)
-	/// t(0,1)*t(2,2)-t(2,1)*t(0,2)  t(0,0)*t(2,2)-t(2,0)*t(0,2)  t(0,0)*t(2,1)-t(2,0)*t(0,1)
-	/// t(0,1)*t(1,2)-t(1,1)*t(0,2)  t(0,0)*t(1,2)-t(1,0)*t(0,2)  t(0,0)*t(1,1)-t(1,0)*t(0,1)
-
-	/// Matrix of cofactors
-	/// t(1,1)*t(2,2)-t(2,1)*t(1,2)  t(2,0)*t(1,2)-t(1,0)*t(2,2)  t(1,0)*t(2,1)-t(2,0)*t(1,1)
-	/// t(2,1)*t(0,2)-t(0,1)*t(2,2)  t(0,0)*t(2,2)-t(2,0)*t(0,2)  t(2,0)*t(0,1)-t(0,0)*t(2,1)
-	/// t(0,1)*t(1,2)-t(1,1)*t(0,2)  t(1,0)*t(0,2)-t(0,0)*t(1,2)  t(0,0)*t(1,1)-t(1,0)*t(0,1)
-
-	/// Adjugation
-	/// t(1,1)*t(2,2)-t(2,1)*t(1,2)  t(2,1)*t(0,2)-t(0,1)*t(2,2)  t(0,1)*t(1,2)-t(1,1)*t(0,2)
-	/// t(2,0)*t(1,2)-t(1,0)*t(2,2)  t(0,0)*t(2,2)-t(2,0)*t(0,2)  t(1,0)*t(0,2)-t(0,0)*t(1,2)
-	/// t(1,0)*t(2,1)-t(2,0)*t(1,1)  t(2,0)*t(0,1)-t(0,0)*t(2,1)  t(0,0)*t(1,1)-t(1,0)*t(0,1)
-
-	Real detT =
-		t( 0, 0 )*( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) ) -
-		t( 0, 1 )*( t( 1, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 1, 2 ) ) +
-		t( 0, 2 )*( t( 1, 0 )*t( 2, 1 ) - t( 2, 0 )*t( 1, 1 ) );
-
-	Assert( fabs( detT ) > std::numeric_limits<Real>::epsilon(), "Transformation matrix doesn't have inverse" );
-
-	Real xbuf =
-		( ( t( 1, 1 )*t( 2, 2 ) - t( 2, 1 )*t( 1, 2 ) )*v( 0 ) +
-		( t( 2, 1 )*t( 0, 2 ) - t( 0, 1 )*t( 2, 2 ) )*v( 1 ) +
-		  ( t( 0, 1 )*t( 1, 2 ) - t( 1, 1 )*t( 0, 2 ) )*v( 2 ) ) / detT;
-	y =
-		( ( t( 2, 0 )*t( 1, 2 ) - t( 1, 0 )*t( 2, 2 ) )*v( 0 ) + 
-		( t( 0, 0 )*t( 2, 2 ) - t( 2, 0 )*t( 0, 2 ) )*v( 1 ) + 
-		  ( t( 1, 0 )*t( 0, 2 ) - t( 0, 0 )*t( 1, 2 ) )*v( 2 ) ) / detT;
-	x = xbuf;
-*/
 	Transform tinv; tinv.setInverse( t );
 	return setTransformedPos( tinv, v );
 }

@@ -34,9 +34,9 @@ namespace DebugUtils
 	// Narrowphase
 	void drawMinkowskiDifference( const physicsConvexCollider* agent );
 	void drawContactLength( const Vector3& pA, const Vector3& pB, const Vector3& n );
-	void drawTerminationSimplex( const std::vector< std::array<Vector3, 3> >& simplex );
-	void drawExpandedSimplex( const std::vector< std::array<Vector3, 3> >& simplex );
+	void drawTerminationSimplex( const physicsConvexCollider::Simplex& simplex );
+	void drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex );
 
 	// Solver
-	void drawBodyImpulse( physicsBody const * const body, const Vector3& arm, const Vector3& impulse );
+	void drawBodyImpulse( const physicsBody* body, const Vector3& arm, const Vector3& impulse );
 }

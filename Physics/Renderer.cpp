@@ -14,6 +14,10 @@
 
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 std::vector<class Line> g_renderLines;
 std::vector<class Text> g_renderTexts;
 
@@ -29,6 +33,11 @@ static GLuint g_txtVBO = { 0 };
 
 static int g_width = 0;
 static int g_height = 0;
+static int g_left;
+static int g_right;
+static int g_bottom;
+static int g_top;
+static glm::mat4 g_projection;
 
 class Line
 {
@@ -211,9 +220,15 @@ int initializeRendering( int width, int height )
 	GLenum err = glewInit();
 	Assert( err == GLEW_OK, "failed to initialize glew" );
 
-	/// This part isn't very design-obeying. Change it
+	/// TODO: clean-up
 	g_width = width;
 	g_height = height;
+
+	g_left = 0;//-g_width;
+	g_right = g_width;
+	g_bottom = 0;// -g_height;
+	g_top = g_height;
+	g_projection = glm::ortho( ( float )g_left, ( float )g_right, ( float )g_bottom, ( float )g_top );
 
 #if defined FREETYPE_TEST
 	g_lineProgramID = LoadShaders( "../Physics/VertexShader.shader", "../Physics/FragmentShader.shader" );
@@ -236,6 +251,8 @@ int initializeRendering( int width, int height )
 	glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
 
 	glBindVertexArray( 0 );
+
+
 
 #if defined FREETYPE_TEST
 	g_txtProgramID = LoadShaders( "../Physics/TextVertexShader.shader", "../Physics/TextFragmentShader.shader" );
@@ -301,6 +318,10 @@ void Line::render() const
 	};
 
 	glUseProgram( g_lineProgramID );
+
+	GLuint projectionLocation = glGetUniformLocation( g_lineProgramID, "projection" );
+	glUniformMatrix4fv( projectionLocation, 1, GL_FALSE, glm::value_ptr( g_projection ) );
+
 	glBindVertexArray( g_lineVAO );
 	glBindBuffer( GL_ARRAY_BUFFER, g_lineVBO[0] );
 	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
@@ -313,6 +334,14 @@ void Line::render() const
 void addDisplay( const Line& line )
 {
 	g_renderLines.push_back( line );
+}
+
+void getDimensions( float & left, float & right, float & bottom, float & top )
+{
+	left = g_left;
+	right = g_right;
+	bottom = g_bottom;
+	top = g_top;
 }
 
 void drawLine( const Vector3& pa, const Vector3& pb, unsigned int color )
@@ -383,7 +412,12 @@ Text::Text( const std::string& str, const Vector3& pos, const Real scale, unsign
 void Text::render() const
 {
 	glUseProgram( g_txtProgramID );
-	glUniform3f( glGetUniformLocation( g_txtProgramID, "textColor" ),
+
+	GLuint projectionLocation = glGetUniformLocation( g_lineProgramID, "projection" );
+	glUniformMatrix4fv( projectionLocation, 1, GL_FALSE, glm::value_ptr( g_projection ) );
+
+	GLuint textColorLocation = glGetUniformLocation( g_txtProgramID, "textColor" );
+	glUniform3f( textColorLocation,
 				 (GLfloat)(m_color & 0xff) / 255.f,
 				 (GLfloat)(m_color >> 8 & 0xff) / 255.f,
 				 (GLfloat)(m_color >> 16 & 0xff) / 255.f );

@@ -21,8 +21,8 @@ int Simulation( int argc, char* argv[] )
 	_controlfp_s( &currentState, _EM_INEXACT | _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
 
 	physicsWorldCinfo cinfo;
-	cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set(0.f, -1.81f);
+	//cinfo.m_gravity.setZero();
+	cinfo.m_gravity.set(0.f, -9.81f);
 	cinfo.m_numIter = 1;
 	world = new physicsWorld( cinfo );
 
@@ -164,7 +164,14 @@ int Simulation( int argc, char* argv[] )
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
 		world->createBody( cinfo );
 	}
-
+#endif
+#if 0
+	{
+		physicsBodyCinfo info;
+		info.m_shape = physicsCircleShape::create( 40.f );
+		info.m_pos.set( 500.f, 500.f );
+		world->createBody( info );
+	}
 #endif
 #if 0
 	{

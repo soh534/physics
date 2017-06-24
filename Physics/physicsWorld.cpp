@@ -262,35 +262,38 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 		std::vector<ContactPoint> contacts;
 		colliderFuncPtr( bodyA.getShape(), bodyB.getShape(), transformA, transformB, contacts );
 
-		bool isCached = false;
+		bool canUseCache = false;
 
 		if ( iterCached != m_cachedPairs.end() )
 		{
 			if ( currentPair == *iterCached )
 			{
-				isCached = true;
+				canUseCache = true;
 
 				/// Clean up cache
 				
 			}
 		}
 
-		if ( isCached )
+		if ( canUseCache )
 		{
 			if ( contacts.size() > 0 )
 			{
-				//iterCached->addContact( contacts[0] );
+				iterCached->addContact( contacts[0] );
 
 				/// Add new contact constraint
 				ConstrainedPair constrainedPair( currentPair );
 
 				constrainedPair.accumImp = iterCached->accumImp;  /// re-use impulse
+				drawText( std::to_string( constrainedPair.accumImp ), Vector3( 50.f, 50.f ) );
 
 				Constraint constraint0;
+				//setAsContact( constraint0, iterCached->cpA, bodyA.getRotation(), bodyB.getRotation() );
 				setAsContact( constraint0, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
 				constrainedPair.constraints.push_back( constraint0 );
 
-				if ( iterCached->numContacts == 2 )
+				if ( false )
+				//if ( iterCached->numContacts == 2 )
 				{
 					Constraint constraint1;
 					setAsContact( constraint1, iterCached->cpB, bodyA.getRotation(), bodyB.getRotation() );
@@ -307,7 +310,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			if ( contacts.size() > 0 )
 			{
 				CachedPair cachedPair( currentPair );
-				//cachedPair.addContact( contacts[0] );
+				cachedPair.addContact( contacts[0] );
 				m_cachedPairs.push_back( cachedPair );
 
 				/// Add new contact constraint
@@ -340,7 +343,7 @@ void physicsWorldEx::solve()
 		if ( !body.isStatic() )
 		{
 			Vector3& v = body.getLinearVelocity();
-			v += m_gravity * getDeltaTime();
+			v += m_gravity * m_solverInfo.m_deltaTime;
 		}
 
 		/// Prepare solver bodies
@@ -350,8 +353,8 @@ void physicsWorldEx::solve()
 	updateJointConstraints();
 
 	/// Solve constraints
-	m_solver->solveConstraints( m_solverInfo, m_contactSolvePairs, m_solverBodies, m_bodies );
-	m_solver->solveConstraints( m_solverInfo, m_jointSolvePairs, m_solverBodies, m_bodies );
+	m_solver->solveConstraints( m_solverInfo, false, m_jointSolvePairs, m_solverBodies, m_bodies );
+	m_solver->solveConstraints( m_solverInfo, true, m_contactSolvePairs, m_solverBodies, m_bodies );
 
 	/// Store contact impulses
 	{
@@ -430,8 +433,8 @@ physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 {
 	m_solver = new physicsSolver;
 
-	m_solverInfo.m_deltaTime = 0.16f;
-	m_solverInfo.m_numIter = 1;
+	m_solverInfo.m_deltaTime = cinfo.m_deltaTime;
+	m_solverInfo.m_numIter = cinfo.m_numIter;
 
 	physicsWorldEx* self = static_cast<physicsWorldEx*>( this );
 

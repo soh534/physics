@@ -13,8 +13,8 @@ class Transform
 	/// m_data[2][0], m_data[2][1], m_data[2][2]
 
 	Real m_data[3][3];
+	Real m_rotation; /// in radians
 	
-
 public:
 
 	Transform();
@@ -24,11 +24,7 @@ public:
 
 	inline const Real& operator()( int i, int j ) const;
 
-	inline Real& operator()( int i, int j );
-
 	inline void setIdentity();
-
-	inline void setZero();
 
 	/// Sets translational component of this matrix
 	inline void addTranslation( const Vector3& translation );
@@ -67,6 +63,10 @@ public:
 
 	inline bool isApproximatelyEqual( const Transform& t,
 									  Real epsilon = std::numeric_limits<Real>::epsilon() );
+
+private:
+
+	inline void setZero();
 };
 
 #include <Transform.inl>

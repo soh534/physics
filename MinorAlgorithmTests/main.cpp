@@ -172,18 +172,20 @@ void transformsTest()
 	v2.setTransformedPos( linAng, v2 );
 	v3.setTransformedPos( linAng, v3 );
 
-	/// Test Transform::setMul(a, b) = a * b
-	Transform t0, t1;
-	t0( 0, 0 ) = 1.f; t0( 0, 1 ) = 2.f; t0( 0, 2 ) = 3.f;
-	t0( 1, 0 ) = 4.f; t0( 1, 1 ) = 5.f; t0( 1, 2 ) = 6.f;
-	t0( 2, 0 ) = 7.f; t0( 2, 1 ) = 8.f; t0( 2, 2 ) = 9.f;
+	for ( float angle = 0.f; angle < 360.f; angle += 1.f )
+	{
+		//float c = cos( angle * g_degToRad );
+		//float ac = acos( c ) / g_degToRad;
+		//Assert( fabs( ac - angle ) < 0.001f, "faults" ); /// Fails from angle = 181.f
 
-	t1( 0, 0 ) = 10.f; t1( 0, 1 ) = 11.f; t1( 0, 2 ) = 12.f;
-	t1( 1, 0 ) = 13.f; t1( 1, 1 ) = 14.f; t1( 1, 2 ) = 15.f;
-	t1( 2, 0 ) = 16.f; t1( 2, 1 ) = 17.f; t1( 2, 2 ) = 18.f;
+		//float s = sin( angle * g_degToRad );
+		//float as = asin( s ) / g_degToRad;
+		//Assert( fabs( as - angle ) < 0.001f, "faults" ); /// Fails from angle = 91.f
 
-	Transform t0t1; t0t1.setMul( t0, t1 );
-	Transform t1t0; t1t0.setMul( t1, t0 );
+		Transform trot; trot.setRotation( angle * g_degToRad );
+		Transform trott; trott.setRotation( trot.getRotation() );
+		Assert( trot.isApproximatelyEqual( trott, 0.001f ), "faults" );
+	}
 }
 
 int main( int argc, char* argv[] )

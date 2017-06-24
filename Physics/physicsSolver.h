@@ -56,6 +56,7 @@ class physicsSolver
 public:
 
 	void solveConstraints( const SolverInfo& info,
+						   bool isContact,
 						   std::vector<ConstrainedPair>& constrainedPairs,
 						   std::vector<SolverBody>& solverBodies,
 						   std::vector<physicsBody>& physicsBodies );

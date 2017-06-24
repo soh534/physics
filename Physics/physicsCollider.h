@@ -12,9 +12,9 @@ struct ContactPoint
 private:
 
 	Real m_depth;
-	Vector3 m_posA; /// Contact on A local to A
-	Vector3 m_posB; /// Contact on B local to B
-	Vector3 m_norm; /// Pointing from B to A local to world
+	Vector3 m_posA; /// Contact on A seen by A
+	Vector3 m_posB; /// Contact on B seen by B
+	Vector3 m_norm; /// Contact on B - contact on A seen by world
 
 public:
 
@@ -106,29 +106,43 @@ public:
 						 std::vector<ContactPoint>& contacts );
 };
 
+
+
 class physicsConvexCollider: public physicsCollider
 {
+public:
+	
+	typedef std::array<Vector3, 3> SimplexVertex; /// [0] = vertex, [1] = supportA, [2] = supportB
+	typedef std::vector<SimplexVertex> Simplex;
+
+	struct SimplexEdge
+	{
+		int index;
+		Real distSq;
+		Vector3 normal;
+	};
+
 private:
+
 
 	physicsConvexCollider();
 
 	/// Finds simplex vertex and it's support vertices local to A
-	static void getSimplexVertex( const Vector3& directionInA,
+	static void getSimplexVertex( const Vector3& direction,
 								  const std::shared_ptr<physicsShape>& shapeA,
 								  const std::shared_ptr<physicsShape>& shapeB,
-								  const Transform& transformBtoA,
-								  Vector3& simplexVertInA,
-								  Vector3& supportA,
-								  Vector3& supportBinA );
+								  const Transform& transformA,
+								  const Transform& transformB,
+								  SimplexVertex& simplexVert );
 
 	static void expandingPolytopeAlgorithm( const std::shared_ptr<physicsShape>& shapeA,
 											const std::shared_ptr<physicsShape>& shapeB,
-											const Transform& transformBtoA,
-											std::vector< std::array<Vector3, 3> >& simplex,
-											struct SimplexEdge& closest );
+											const Transform& transformA,
+											const Transform& transformB,
+											Simplex& simplex,
+											struct SimplexEdge& closestEdge );
 
-	static void getClosestEdgeToOrigin( const std::vector< std::array<Vector3, 3> >& simplex,
-										struct SimplexEdge& edge );
+	static void getClosestEdgeToOrigin( const Simplex& simplex, struct SimplexEdge& edge );
 
 public:
 

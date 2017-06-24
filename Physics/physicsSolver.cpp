@@ -41,26 +41,24 @@ void SolverBody::setFromBody( const physicsBody& body )
 }
 
 void solveConstrainedPairs( const SolverInfo& info, 
-						   std::vector<ConstrainedPair>& solvePairs,
-						   std::vector<SolverBody>& updatedBodiesOut )
+							bool isContact,
+							std::vector<ConstrainedPair>& solvePairs,
+							std::vector<SolverBody>& updatedBodiesOut )
 {
-	for ( int i = 0; i < (int)solvePairs.size(); i++ )
+	for ( auto pairIdx = 0; pairIdx < solvePairs.size(); pairIdx++ )
 	{
-		ConstrainedPair& pair = solvePairs[ i ];
+		ConstrainedPair& pair = solvePairs[ pairIdx ];
 
 		SolverBody& bodyA = updatedBodiesOut[ pair.bodyIdA ];
 		SolverBody& bodyB = updatedBodiesOut[ pair.bodyIdB ];
 		std::vector<Constraint>& constraints = pair.constraints;
 
-		int numConstraints = (int)constraints.size();
-		for ( int j = 0; j < numConstraints; j++ )
+		for ( auto constraintIdx = 0; constraintIdx < constraints.size(); constraintIdx++ )
 		{
-			Constraint& constraint = constraints[ j ];
+			Constraint& constraint = constraints[ constraintIdx ];
 
-			Vector3 rA_world = constraint.rA.getRotatedDir( bodyA.ori );
+			Vector3 rA_world = constraint.rA.getRotatedDir( bodyA.ori ); /// TODO: replace with transform
 			Vector3 rB_world = constraint.rB.getRotatedDir( bodyB.ori );
-
-			Real error = constraint.error;
 
 			const Jacobian& jac = constraint.jac;
 
@@ -76,36 +74,34 @@ void solveConstrainedPairs( const SolverInfo& info,
 				jac.vB( 1 ) * bodyB.mInv * jac.vB( 1 ) +
 				jac.wB( 2 ) * bodyB.iInv * jac.wB( 2 );
 
-			Real imp = -1.f * ( Jv - error / info.m_deltaTime ) / JmJ;
+			Real impulse = -1.f * ( Jv - ( 0.01f )*( constraint.error / info.m_deltaTime ) ) / JmJ;
 
-			imp = std::max( imp, std::numeric_limits<Real>::lowest() );
+			//imp = std::max( imp, std::numeric_limits<Real>::lowest() );
 
-			Assert( !isinf( imp ), "infinite impulse in solver" );
-			Assert( !isnan( imp ), "nan impulse in solver" );
+			Assert( !isinf( impulse ), "infinite impulse in solver" );
+			Assert( !isnan( impulse ), "nan impulse in solver" );
 
-#if 1
-			if ( true )
-			{ // Accumulate impulse method for contact constraints
-				Real newImpulse = std::max( pair.accumImp + imp, 0.f );
-				imp = newImpulse - pair.accumImp;
-				pair.accumImp = imp;
-				//drawText(std::to_string(constraint.accumImp), bodyA.pos + rA_world);
+			if ( false )
+			{ 
+				Real newImpulse = std::max( pair.accumImp + impulse, 0.f );
+				impulse = newImpulse - pair.accumImp;
+				pair.accumImp = newImpulse;
 			}
-#endif
+
 			/// Contact point arms
 			//drawArrow(bodyA.pos, rA_world, RED);
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			drawArrow( bodyA.pos + rA_world, jac.vA * imp, RED );
-			drawArrow( bodyB.pos + rB_world, jac.vB * imp, BLUE );
-			//drawArrow( bodyA.pos, rA_world, RED );
-			//drawArrow( bodyB.pos, rB_world, BLUE );
+			drawArrow( bodyA.pos + rA_world, jac.vA * impulse, RED );
+			drawArrow( bodyB.pos + rB_world, jac.vB * impulse, BLUE );
+			drawArrow( bodyA.pos, rA_world, RED );
+			drawArrow( bodyB.pos, rB_world, BLUE );
 
-			bodyA.v += jac.vA * imp * bodyA.mInv;
-			bodyB.v += jac.vB * imp * bodyB.mInv;
-			bodyA.w += jac.wA * imp * bodyA.iInv;
-			bodyB.w += jac.wB * imp * bodyB.iInv;
+			bodyA.v += jac.vA * impulse * bodyA.mInv;
+			bodyB.v += jac.vB * impulse * bodyB.mInv;
+			bodyA.w += jac.wA * impulse * bodyA.iInv;
+			bodyB.w += jac.wB * impulse * bodyB.iInv;
 
 			/// TODO: clean-up these sanity checks
 			Assert( !bodyA.v.isInf(), "bodyA has infinite linear velocity in solver" );
@@ -121,6 +117,7 @@ void solveConstrainedPairs( const SolverInfo& info,
 }
 
 void physicsSolver::solveConstraints( const SolverInfo& info,
+									  bool isContact,
 									  std::vector<ConstrainedPair>& constrainedPairs,
 									  std::vector<SolverBody>& solverBodies,
 									  std::vector<physicsBody>& physicsBodies )
@@ -128,7 +125,7 @@ void physicsSolver::solveConstraints( const SolverInfo& info,
 	/// Solve constraints, put satisfying velocities in solver bodies
 	for ( int i = 0; i < info.m_numIter; i++ )
 	{
-		solveConstrainedPairs( info, constrainedPairs, solverBodies );
+		solveConstrainedPairs( info, isContact, constrainedPairs, solverBodies );
 	}
 
 	/// Update body velocities

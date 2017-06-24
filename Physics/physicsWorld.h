@@ -44,6 +44,7 @@ struct CachedPair : public BodyIdPair
 	ContactPoint cpB;
 	Real accumImp;
 	int numContacts;
+	int idx;
 
 private:
 
@@ -53,14 +54,14 @@ public:
 
 	CachedPair( const BodyId a, const BodyId b ):
 		BodyIdPair( a, b ),
-		cpA(), cpB(), accumImp(0.f), numContacts( 0 )
+		cpA(), cpB(), accumImp( 0.f ), numContacts( 0 ), idx( 0 )
 	{
 
 	}
 
 	CachedPair( const BodyIdPair& other ) :
 		BodyIdPair( other ),
-		cpA(), cpB(), accumImp(0.f), numContacts( 0 )
+		cpA(), cpB(), accumImp( 0.f ), numContacts( 0 ), idx( 0 )
 	{
 
 	}
@@ -68,6 +69,23 @@ public:
 	/// TODO: move implementation out
 	void addContact(const ContactPoint cp)
 	{
+/*
+		if ( idx == 0 )
+		{
+			cpA = cp;
+			numContacts = 1;
+		}
+		if ( idx == 1 )
+		{
+			cpB = cp;
+
+			if ( numContacts < 2 )
+			{
+				numContacts = 2;
+			}
+		}
+		idx = ( idx + 1 ) % 2;
+*/
 		if ( numContacts == 0 )
 		{
 			cpA = cp;
@@ -97,16 +115,31 @@ public:
 			if ( distToA < 5.f )
 			{
 				cpA = cp;
-				numContacts = 1;
 			}
 			else if ( distToB < 5.f )
+			{
+				cpB = cp;
+			}
+			else
 			{
 				cpA = cp;
 				numContacts = 1;
 			}
-			( distToA < distToB ) ? cpA = cp : cpB = cp;
 		}
 	}
+/*	
+	ContactPoint getContact()
+	{
+		if ( idx == 0 )
+		{
+			return cpA;
+		}
+		if ( idx == 1 )
+		{
+			return cpB;
+		}
+	}
+*/
 };
 
 class physicsWorld : public physicsObject
