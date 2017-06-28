@@ -14,7 +14,7 @@ private:
 	Real m_depth;
 	Vector3 m_posA; /// Contact on A seen by A
 	Vector3 m_posB; /// Contact on B seen by B
-	Vector3 m_norm; /// Contact on B - contact on A seen by world
+	Vector3 m_norm; /// Point from bodyA to bodyB
 
 public:
 

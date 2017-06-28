@@ -74,14 +74,25 @@ void solveConstrainedPairs( const SolverInfo& info,
 				jac.vB( 1 ) * bodyB.mInv * jac.vB( 1 ) +
 				jac.wB( 2 ) * bodyB.iInv * jac.wB( 2 );
 
-			Real impulse = -1.f * ( Jv - ( 0.01f )*( constraint.error / info.m_deltaTime ) ) / JmJ;
+			Real bias = isContact ? 0.1f : 1.f;
+
+			Real impulse = -1.f * ( Jv - bias*( constraint.error / info.m_deltaTime ) ) / JmJ;
 
 			//imp = std::max( imp, std::numeric_limits<Real>::lowest() );
 
 			Assert( !isinf( impulse ), "infinite impulse in solver" );
 			Assert( !isnan( impulse ), "nan impulse in solver" );
 
-			if ( false )
+			if ( Jv < 0.f )
+			{
+				Jv = Jv;
+			}
+			else
+			{
+				Jv = Jv;
+			}
+
+			if ( isContact )
 			{ 
 				Real newImpulse = std::max( pair.accumImp + impulse, 0.f );
 				impulse = newImpulse - pair.accumImp;
@@ -93,10 +104,14 @@ void solveConstrainedPairs( const SolverInfo& info,
 			//drawArrow(bodyB.pos, rB_world, BLUE);
 
 			/// Impulse applied @ contact point
-			drawArrow( bodyA.pos + rA_world, jac.vA * impulse, RED );
-			drawArrow( bodyB.pos + rB_world, jac.vB * impulse, BLUE );
-			drawArrow( bodyA.pos, rA_world, RED );
-			drawArrow( bodyB.pos, rB_world, BLUE );
+			//if ( isContact )
+			if ( false )
+			{
+				drawArrow( bodyA.pos + rA_world, jac.vA * impulse, RED );
+				drawArrow( bodyB.pos + rB_world, jac.vB * impulse, BLUE );
+				drawArrow( bodyA.pos, rA_world, RED );
+				drawArrow( bodyB.pos, rB_world, BLUE );
+			}
 
 			bodyA.v += jac.vA * impulse * bodyA.mInv;
 			bodyB.v += jac.vB * impulse * bodyB.mInv;

@@ -146,7 +146,8 @@ inline void Vector3::operator/=( const Real scale )
 
 inline Real Vector3::dot( const Vector3& other ) const
 {
-	return ( x * other.x + y * other.y + z * other.z );
+	//return ( x * other.x + y * other.y + z * other.z );
+	return ( x * other.x + y * other.y );
 }
 
 inline Vector3 Vector3::cross( const Vector3& other ) const

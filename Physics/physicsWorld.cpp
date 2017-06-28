@@ -197,14 +197,15 @@ void setAsContact( Constraint& constraint, const ContactPoint& contact, const Re
 	constraint.rB = contact.getContactB();
 	constraint.error = contact.getDepth();
 
-	const Vector3& norm = contact.getNormal();
+	Vector3 norm = contact.getNormal();
+	norm.normalize();
 	const Vector3& rA_ws = constraint.rA.getRotatedDir( rotA );
 	const Vector3& rB_ws = constraint.rB.getRotatedDir( rotB );
 
-	constraint.jac.vA = norm;
-	constraint.jac.vB = norm.getNegated();
-	constraint.jac.wA = rA_ws.cross( norm );
-	constraint.jac.wB = rB_ws.cross( norm.getNegated() );
+	constraint.jac.vA = norm.getNegated();
+	constraint.jac.vB = norm;
+	constraint.jac.wA = rA_ws.cross( constraint.jac.vA );
+	constraint.jac.wB = rB_ws.cross( constraint.jac.vB );
 }
 
 void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& existingPairs,
@@ -353,8 +354,9 @@ void physicsWorldEx::solve()
 	updateJointConstraints();
 
 	/// Solve constraints
-	m_solver->solveConstraints( m_solverInfo, false, m_jointSolvePairs, m_solverBodies, m_bodies );
 	m_solver->solveConstraints( m_solverInfo, true, m_contactSolvePairs, m_solverBodies, m_bodies );
+	m_solver->solveConstraints( m_solverInfo, false, m_jointSolvePairs, m_solverBodies, m_bodies );
+
 
 	/// Store contact impulses
 	{

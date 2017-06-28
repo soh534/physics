@@ -22,8 +22,8 @@ int Simulation( int argc, char* argv[] )
 
 	physicsWorldCinfo cinfo;
 	//cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set(0.f, -9.81f);
-	cinfo.m_numIter = 1;
+	cinfo.m_gravity.set(0.f, -98.1f);
+	cinfo.m_numIter = 4;
 	world = new physicsWorld( cinfo );
 
 #if 0

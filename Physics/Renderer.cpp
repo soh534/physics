@@ -224,9 +224,9 @@ int initializeRendering( int width, int height )
 	g_width = width;
 	g_height = height;
 
-	g_left = 0;//-g_width;
+	g_left = -g_width;;
 	g_right = g_width;
-	g_bottom = 0;// -g_height;
+	g_bottom = -g_height;
 	g_top = g_height;
 	g_projection = glm::ortho( ( float )g_left, ( float )g_right, ( float )g_bottom, ( float )g_top );
 

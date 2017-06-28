@@ -222,7 +222,7 @@ void physicsConvexCollider::collide(
 		return;
 	}
 
-	direction.setNormalized( direction ); /// TODO: investigate whether normalization really necessary
+	//direction.setNormalized( direction ); /// TODO: investigate whether normalization really necessary
 	
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
 	Simplex simplex( 3 );
@@ -237,7 +237,7 @@ void physicsConvexCollider::collide(
 
 	/// TODO: find out appropriate eps
 	/// float eps = sqrt(std::numeric_limits<float>::epsilon());
-	Real eps = 0.01f;
+	Real eps = 0.1f;
     
 	for ( int i = 0; i < g_gjkMaxIter; i++ )
     {
@@ -249,11 +249,15 @@ void physicsConvexCollider::collide(
 			return;
 		}
 
-		direction.setNegated( direction );
-		direction.setNormalized( direction );
+		direction.negate();
+		//direction.setNormalized( direction );
 
 		/// Get third simplex triangle vertex
 		getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, simplex[2] );
+
+#if defined D_GJK_SIMPLEX
+		DebugUtils::drawSimplex( simplex );
+#endif
 
 		{ 
 			/// Terminate when origin is enclosed by triangle simplex
@@ -281,7 +285,7 @@ void physicsConvexCollider::collide(
 		if ( dc - da < eps )
         {
 			/// Converged on closest feature on simplex
-			Vector3 L; L.setSub( simplex[1][0], simplex[0][0] );
+			Vector3 L = simplex[1][0] - simplex[0][0];
 
 			Vector3 pointA, pointB;
 
@@ -301,16 +305,15 @@ void physicsConvexCollider::collide(
 				pointB.setInterpolate( simplex[0][2], simplex[1][2], l );
             }
 
-			Vector3 normal;
-			normal.setSub( pointA, pointB );
-			if ( normal.isZero() )
+			if ( direction.isZero() )
 			{
 				/// Exclude touching situations
 				break;
 			}
-			//normal.setNormalized( normal );
 
-			//DebugUtils::drawContactLength( pointA, pointB, normal );
+#if defined D_GJK_CONTACT_LENGTH
+			DebugUtils::drawContactNormal( pointA, direction );
+#endif
 
             return;
         }
@@ -349,14 +352,20 @@ void physicsConvexCollider::collide(
 			simplex[0][2] = simplex[2][2];
 			direction = closest21;
 		}
+#if 0
+		drawCross( simplex[0][1], 45.f * g_degToRad, 50.f, BLUE );
+		drawCross( simplex[1][1], 45.f * g_degToRad, 50.f, RED );
+		drawCross( simplex[0][2], 45.f * g_degToRad, 50.f, BLUE );
+		drawCross( simplex[1][2], 45.f * g_degToRad, 50.f, RED );
+#endif
+		if ( i > 45 )
+		{
+			i = i;
+		}
     }
-
-	DebugUtils::drawTerminationSimplex( simplex );
 
 	SimplexEdge closestEdge;
 	expandingPolytopeAlgorithm( shapeA, shapeB, transformA, transformB, simplex, closestEdge );
-
-	DebugUtils::drawExpandedSimplex( simplex );
 
 	// Determine closest point on simplex edge
 	const size_t szSimplex = simplex.size();
@@ -377,8 +386,19 @@ void physicsConvexCollider::collide(
 	pointA.setInterpolate( simplex[i][1], simplex[j][1], l );
 	pointB.setInterpolate( simplex[i][2], simplex[j][2], l );
 
+	drawCross( simplex[0][1], 30.f * g_degToRad, 50.f, BLUE );
+	drawCross( simplex[1][1], 60.f * g_degToRad, 50.f, RED);
+	drawCross( simplex[0][2], 30.f * g_degToRad, 50.f , BLUE);
+	drawCross( simplex[1][2], 60.f * g_degToRad, 50.f , RED);
+	drawCross( simplex[2][1], 45.f * g_degToRad, 50.f, GREEN );
+	drawCross( simplex[2][2], 45.f * g_degToRad, 50.f, GREEN );
+
+
+
 	// Must be directed from A to B because penetration
-	Vector3 normal = pointB - pointA;
+	// Vector3 normal = pointB - pointA;
+	Vector3 normal = closestEdge.normal;
+	normal *= closestEdge.distSq;
 
 	if ( normal.isZero() )
 	{
@@ -386,7 +406,9 @@ void physicsConvexCollider::collide(
 		/// Shapes aren't penetrated
 	}
 
-	//DebugUtils::drawContactLength( pointA, pointB, normal );
+#if defined D_GJK_CONTACT_LENGTH
+	DebugUtils::drawContactNormal( pointA, normal );
+#endif
 
 	Transform rotationA, rotationB;
 	rotationA.setRotation( transformA.getRotation() );

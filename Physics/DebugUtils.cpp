@@ -22,15 +22,6 @@ void DebugUtils::debug_print_line( const Vector3& p0, const Vector3& p1 )
 #endif
 }
 
-void DebugUtils::debug_draw_triangle( const Vector3& p0, const Vector3& p1, const Vector3& p2 )
-{
-#if defined (D_GJK_CONTACT_LENGTH)
-	drawLine( p0, p1, RED );
-	drawLine( p1, p2, RED );
-	drawLine( p2, p0, RED );
-#endif
-}
-
 void DebugUtils::drawMinkowskiDifference( const physicsConvexCollider* agent )
 {
 #if defined D_GJK_MINKOWSKI
@@ -54,25 +45,24 @@ void DebugUtils::drawMinkowskiDifference( const physicsConvexCollider* agent )
 #endif
 }
 
-void DebugUtils::drawContactLength( const Vector3& pA, const Vector3& pB, const Vector3& n )
+void DebugUtils::drawContactNormal( const Vector3& contactA, const Vector3& normal )
 {
-#if defined D_GJK_CONTACT_LENGTH
-	drawLine( pA, pB, BLUE );
-	Vector3 pos = ( pA + pB ) * .5f;
-	drawText( std::to_string( n.length() ), pos );
-#endif
+	drawArrow( contactA, normal, OLIVE );
+	drawText( std::to_string( normal.length() ), contactA + normal / 2 );
 }
 
-void DebugUtils::drawTerminationSimplex( const physicsConvexCollider::Simplex& simplex )
+void DebugUtils::drawSimplex( const physicsConvexCollider::Simplex& simplex )
 {
-#if defined (D_GJK_TERMINATION_SIMPLEX)	
-	debug_draw_triangle( simplex[0][0], simplex[1][0], simplex[2][0] );
-#endif
+	drawCross( simplex[0][0], 45.f * g_degToRad, 15.f, RED );
+	drawCross( simplex[1][0], 45.f * g_degToRad, 15.f, RED );
+	drawCross( simplex[2][0], 45.f * g_degToRad, 15.f, RED );
+	drawLine( simplex[0][0], simplex[1][0], RED );
+	drawLine( simplex[1][0], simplex[2][0], RED );
+	drawLine( simplex[2][0], simplex[0][0], RED );
 }
 
 void DebugUtils::drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex )
 {
-#if defined (D_GJK_EXPANDED_SIMPLEX)
 	int szSimplex = ( int )simplex.size();
 	for ( int i = 0; i < szSimplex; i++ )
 	{
@@ -82,7 +72,6 @@ void DebugUtils::drawExpandedSimplex( const physicsConvexCollider::Simplex& simp
 		ss << i << std::endl;
 		drawText( ss.str(), simplex[i][0] );
 	}
-#endif
 }
 
 void DebugUtils::drawBodyImpulse( const physicsBody* body, const Vector3& arm, const Vector3& impulse )
