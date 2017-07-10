@@ -224,10 +224,10 @@ int initializeRendering( int width, int height )
 	g_width = width;
 	g_height = height;
 
-	g_left = -g_width;;
-	g_right = g_width;
-	g_bottom = -g_height;
-	g_top = g_height;
+	g_left = -g_width * 0.5;
+	g_right = g_width * 0.8;
+	g_bottom = -g_height * 0.5;
+	g_top = g_height * 0.8;
 	g_projection = glm::ortho( ( float )g_left, ( float )g_right, ( float )g_bottom, ( float )g_top );
 
 #if defined FREETYPE_TEST
@@ -393,8 +393,9 @@ void drawBox( const Vector3& max, const Vector3& min, unsigned int color )
 void drawCircle( const Vector3& pos, const Real radius, unsigned int color )
 {
 	Real step = 2 * (Real)M_PI * STEP_RENDER_CIRCLE;
+	Real full = ( 2.f + STEP_RENDER_CIRCLE ) * M_PI;
 
-	for ( Real i = step; i < 2 * M_PI; i += step )
+	for ( Real i = step; i < full; i += step )
 	{
 		Vector3 na, nb;
 		na.set( radius * cos( i ), radius * sin( i ) );

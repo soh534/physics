@@ -455,3 +455,9 @@ inline bool Vector3::isInf() const
 {
 	return isinf( x ) || isinf( y ) || isinf( z );
 }
+
+/// TODO: could potentially move to Vector3Utils
+inline bool Vector3::isOk() const
+{
+	return ( !isNan() && !isInf() );
+}

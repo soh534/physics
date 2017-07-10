@@ -86,7 +86,7 @@ bool physicsCircleShape::containsPoint( const Vector3& point ) const
 
 void physicsCircleShape::getSupportingVertex( const Vector3& direction, Vector3& point ) const
 {
-	point.setMul( direction, m_radius );
+	point.setMul( direction.getNormalized(), m_radius );
 }
 
 physicsAabb physicsCircleShape::getAabb( const Real rot ) const
@@ -376,9 +376,11 @@ void physicsConvexShape::getSupportingVertex( const Vector3& direction, Vector3&
 
 	int numVertices = ( int )m_vertices.size();
 
+	Vector3 dirNorm = direction.getNormalized();
+
 	for ( int i = 0; i < numVertices; i++ )
 	{
-		potentialMaxDot = direction.dot( m_vertices[i] );
+		potentialMaxDot = dirNorm.dot( m_vertices[i] );
 
 		if ( potentialMaxDot > dotMax )
 		{

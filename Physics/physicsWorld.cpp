@@ -84,7 +84,7 @@ void physicsWorldEx::collide()
 	m_broadphaseBodies.clear(); /// TODO: don't clear this, just overwrite the contents
 
 	std::sort( bpPassedPairs.begin(), bpPassedPairs.end(), bodyIdPairLess );
-
+	std::sort( m_existingPairs.begin(), m_existingPairs.end(), bodyIdPairLess );
 	std::vector<BodyIdPair> bpLostPairs, bpRemainedPairs;
 	BodyIdPairsUtils::classifyPairSets( m_existingPairs, bpPassedPairs, bpLostPairs, bpRemainedPairs, m_newPairs );
 
@@ -197,13 +197,32 @@ void setAsContact( Constraint& constraint, const ContactPoint& contact, const Re
 	constraint.rB = contact.getContactB();
 	constraint.error = contact.getDepth();
 
-	Vector3 norm = contact.getNormal();
-	norm.normalize();
+	Vector3 norm = contact.getNormal(); norm.normalize();
 	const Vector3& rA_ws = constraint.rA.getRotatedDir( rotA );
 	const Vector3& rB_ws = constraint.rB.getRotatedDir( rotB );
 
 	constraint.jac.vA = norm.getNegated();
 	constraint.jac.vB = norm;
+	constraint.jac.wA = rA_ws.cross( constraint.jac.vA );
+	constraint.jac.wB = rB_ws.cross( constraint.jac.vB );
+}
+
+void setAsFriction( Constraint& constraint, const ContactPoint& contact, const Real rotA, const Real rotB )
+{
+	constraint.rA = contact.getContactA();
+	constraint.rB = contact.getContactB();
+	constraint.error = 0.f;
+
+	Transform tangential; tangential.setRotation( 90.f * g_degToRad );
+	Transform tA; tA.setRotation( rotA );
+	Transform tB; tB.setRotation( rotB );
+
+	Vector3 norm = contact.getNormal(); norm.normalize();
+	Vector3 rA_ws; rA_ws.setTransformedPos( tA, constraint.rA );
+	Vector3 rB_ws; rB_ws.setTransformedPos( tB, constraint.rB );
+
+	constraint.jac.vA.setTransformedPos( tangential, norm.getNegated() );
+	constraint.jac.vB = constraint.jac.vA.getNegated();
 	constraint.jac.wA = rA_ws.cross( constraint.jac.vA );
 	constraint.jac.wB = rB_ws.cross( constraint.jac.vB );
 }
@@ -214,6 +233,8 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 	auto iterExisting = existingPairs.begin();
 	auto iterNew = newPairs.begin();
 	auto iterCached = m_cachedPairs.begin();
+
+	std::vector<CachedPair> pairsCachedThisFrame;
 
 	while ( true )
 	{
@@ -286,12 +307,16 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 				ConstrainedPair constrainedPair( currentPair );
 
 				constrainedPair.accumImp = iterCached->accumImp;  /// re-use impulse
-				drawText( std::to_string( constrainedPair.accumImp ), Vector3( 50.f, 50.f ) );
+				//drawText( std::to_string( constrainedPair.accumImp ), Vector3( 50.f, 50.f ) );
 
-				Constraint constraint0;
+				Constraint contactA;
 				//setAsContact( constraint0, iterCached->cpA, bodyA.getRotation(), bodyB.getRotation() );
-				setAsContact( constraint0, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-				constrainedPair.constraints.push_back( constraint0 );
+				setAsContact( contactA, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
+				constrainedPair.constraints.push_back( contactA );
+
+				Constraint frictionA;
+				setAsFriction( frictionA, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
+				constrainedPair.constraints.push_back( frictionA );
 
 				if ( false )
 				//if ( iterCached->numContacts == 2 )
@@ -312,7 +337,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			{
 				CachedPair cachedPair( currentPair );
 				cachedPair.addContact( contacts[0] );
-				m_cachedPairs.push_back( cachedPair );
+				pairsCachedThisFrame.push_back( cachedPair );
 
 				/// Add new contact constraint
 				ConstrainedPair constrainedPair( currentPair );
@@ -326,6 +351,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 		}
 	}
 
+	BodyIdPairsUtils::movePairsBtoA( m_cachedPairs, pairsCachedThisFrame );
 	std::sort( m_cachedPairs.begin(), m_cachedPairs.end(), bodyIdPairLess );
 }
 

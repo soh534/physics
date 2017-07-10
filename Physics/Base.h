@@ -1,7 +1,12 @@
 #pragma once
 
 #define COND(cond) cond
+
+#if defined _DEBUG
 #define Assert(cond, text) if (COND(cond)) {} else { printf("Assert: %s", text); __debugbreak(); }
+#else
+#define Assert(cond, text) cond
+#endif
 
 #define _USE_MATH_DEFINES
 #include <math.h> // fabs

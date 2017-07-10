@@ -15,7 +15,7 @@
 const Real g_collisionTolerance = .5f;
 const Real g_convexRadius = 1.f;
 const int g_gjkMaxIter = 50;
-const Real g_tolerance = 0.001f;
+const Real g_tolerance = 0.01f;
 
 void ContactPointUtils::getContactDifference( const ContactPoint& cpA, const ContactPoint& cpB, Real& res )
 {
@@ -61,6 +61,8 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 
 	Vector3 posA = transformA.getTranslation();
 	Vector3 posB = transformB.getTranslation();
+	Transform rotA; rotA.setRotation( transformA.getRotation() );
+	Transform rotB; rotB.setRotation( transformB.getRotation() );
 
 	Vector3 ab = posB - posA;
 
@@ -81,7 +83,7 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 
 		Vector3 cpA = posA + abHat * radA;
 		Vector3 cpB = posB + baHat * radB;
-		Vector3 norm = cpB - cpA;
+		Vector3 norm = cpA - cpB;
 
 		if ( norm.isZero() )
 		{
@@ -92,7 +94,9 @@ void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA
 		/// TODO: See if we can avoid square rooting
 		norm.normalize();
 
-		ContactPoint contact( depth, cpA - posA, cpB - posB, norm ); /// AB for separation
+		Vector3 cpAinA; cpAinA.setTransformedInversePos( rotA, cpA - posA );
+		Vector3 cpBinB; cpBinB.setTransformedInversePos( rotB, cpB - posB );
+		ContactPoint contact( depth, cpAinA, cpBinB, norm ); /// AB for separation
 
 		contacts.push_back( contact );
 	}
@@ -151,6 +155,9 @@ void physicsConvexCollider::getSimplexVertex( const Vector3& direction,
 	Vector3 supportA, supportB;
 	shapeA->getSupportingVertex( dirLocalA, supportA );
 	shapeB->getSupportingVertex( dirLocalB, supportB );
+
+	Assert( supportA.isOk(), "supportA ain't ok" );
+	Assert( supportB.isOk(), "supportB ain't ok" );
 
 	simplexVertex[1].setTransformedPos( transformA, supportA );
 	simplexVertex[2].setTransformedPos( transformB, supportB );
@@ -227,10 +234,15 @@ void physicsConvexCollider::collide(
 	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
 	Simplex simplex( 3 );
 
+//	drawArrow( transformA.getTranslation(), direction, RED );
+	//drawArrow( transformB.getTranslation(), direction.getNegated(), BLUE );
+
 	getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, simplex[0] );
-	direction.setNegated( direction );
+	direction.negate();
 	getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, simplex[1] );
-	
+//	drawCross( simplex[0][1], 45.f * g_degToRad, 30.f, RED );
+	//drawCross( simplex[0][2], 45.f * g_degToRad, 30.f, BLUE );
+
 	const Vector3 origin( 0.f, 0.f );
 	
 	physicsCd::calcClosestPointOnLine( simplex[0][0], simplex[1][0], origin, direction );
@@ -239,7 +251,7 @@ void physicsConvexCollider::collide(
 	/// float eps = sqrt(std::numeric_limits<float>::epsilon());
 	Real eps = 0.1f;
     
-	for ( int i = 0; i < g_gjkMaxIter; i++ )
+	for ( int previousIdx = 0; previousIdx < g_gjkMaxIter; previousIdx++ )
     {
 		/// TODO: Fix bug where direction becomes IND000
 
@@ -256,7 +268,7 @@ void physicsConvexCollider::collide(
 		getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, simplex[2] );
 
 #if defined D_GJK_SIMPLEX
-		DebugUtils::drawSimplex( simplex );
+		//DebugUtils::drawSimplex( simplex );
 #endif
 
 		{ 
@@ -312,7 +324,7 @@ void physicsConvexCollider::collide(
 			}
 
 #if defined D_GJK_CONTACT_LENGTH
-			DebugUtils::drawContactNormal( pointA, direction );
+			//DebugUtils::drawContactNormal( pointA, direction );
 #endif
 
             return;
@@ -358,68 +370,134 @@ void physicsConvexCollider::collide(
 		drawCross( simplex[0][2], 45.f * g_degToRad, 50.f, BLUE );
 		drawCross( simplex[1][2], 45.f * g_degToRad, 50.f, RED );
 #endif
-		if ( i > 45 )
+		if ( previousIdx > 45 )
 		{
-			i = i;
+			previousIdx = previousIdx;
 		}
     }
+
+#if defined D_GJK_MINKOWSKI
+	DebugUtils::drawMinkowskiDifference( shapeA, shapeB, transformA, transformB );
+#endif
 
 	SimplexEdge closestEdge;
 	expandingPolytopeAlgorithm( shapeA, shapeB, transformA, transformB, simplex, closestEdge );
 
 	// Determine closest point on simplex edge
 	const size_t szSimplex = simplex.size();
-	unsigned int i, j;
-	j = closestEdge.index;
-	i = j == 0 ? szSimplex - 1 : j - 1;
-
+	int closestIdx = closestEdge.index;
+	int previousIdx = closestIdx == 0 ? szSimplex - 1 : closestIdx - 1;
+	
 	// Todo: Find out why two same vertices exist in simplex
-	Vector3 L = simplex[j][0] - simplex[i][0];
+	Vector3 L = simplex[closestIdx][0] - simplex[previousIdx][0];
+	//drawArrow( simplex[previousIdx][0], L, PURPLE );
+	//drawCross( simplex[previousIdx][0], 30.f * g_degToRad, 50.f, RED );
+	//drawCross( simplex[closestIdx][0], 30.f * g_degToRad, 50.f, BLUE );
+	
 	if ( L.isZero() )
 	{
 		return;
 	}
-
-	Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
-
+	
+	Real l = -1.f * simplex[previousIdx][0].dot( L ) / L.dot( L );
+	
 	Vector3 pointA, pointB;
-	pointA.setInterpolate( simplex[i][1], simplex[j][1], l );
-	pointB.setInterpolate( simplex[i][2], simplex[j][2], l );
-
-	drawCross( simplex[0][1], 30.f * g_degToRad, 50.f, BLUE );
-	drawCross( simplex[1][1], 60.f * g_degToRad, 50.f, RED);
-	drawCross( simplex[0][2], 30.f * g_degToRad, 50.f , BLUE);
-	drawCross( simplex[1][2], 60.f * g_degToRad, 50.f , RED);
-	drawCross( simplex[2][1], 45.f * g_degToRad, 50.f, GREEN );
-	drawCross( simplex[2][2], 45.f * g_degToRad, 50.f, GREEN );
-
-
-
+	pointA.setInterpolate( simplex[previousIdx][1], simplex[closestIdx][1], l );
+	pointB.setInterpolate( simplex[previousIdx][2], simplex[closestIdx][2], l );
+	//drawCross( pointA, 30.f * g_degToRad, 50.f, RED );
 	// Must be directed from A to B because penetration
-	// Vector3 normal = pointB - pointA;
 	Vector3 normal = closestEdge.normal;
 	normal *= closestEdge.distSq;
-
+	
 	if ( normal.isZero() )
 	{
 		return;
 		/// Shapes aren't penetrated
 	}
-
+	
 #if defined D_GJK_CONTACT_LENGTH
-	DebugUtils::drawContactNormal( pointA, normal );
+	//DebugUtils::drawContactNormal( pointA, normal );
 #endif
-
+	
 	Transform rotationA, rotationB;
 	rotationA.setRotation( transformA.getRotation() );
 	rotationB.setRotation( transformB.getRotation() );
-
+	
 	Vector3 cpInA; cpInA.setTransformedInversePos( rotationA, pointA - posA );
 	Vector3 cpInB; cpInB.setTransformedInversePos( rotationB, pointB - posB );
-
+	
 	ContactPoint contact( normal.length(), cpInA, cpInB, normal );
-
+	
 	contacts.push_back( contact );
+	
+	/// Detect planar contacts
+	Transform t;
+	const float pt = 15.f * g_degToRad;
+	t.setRotation( pt );
+
+	Vector3 d1, d2;
+	d1.setTransformedPos( t, closestEdge.normal );
+	d2.setTransformedInversePos( t, closestEdge.normal );
+	
+	SimplexVertex newSimplexVertex1, newSimplexVertex2;
+	getSimplexVertex( d1, shapeA, shapeB, transformA, transformB, newSimplexVertex1 );
+	getSimplexVertex( d2, shapeA, shapeB, transformA, transformB, newSimplexVertex2 );
+
+	//drawCross( newSimplexVertex1[1], 30.f * g_degToRad, 50.f, BLUE );
+	//drawCross( newSimplexVertex1[2], 45.f * g_degToRad, 50.f, BLUE );
+	//drawArrow( newSimplexVertex1[0] - d2 * 50.f, d2 * 50.f, BLUE );
+	//drawCross( newSimplexVertex2[1], 60.f * g_degToRad, 50.f, RED );
+	//drawCross( newSimplexVertex2[2], 75.f * g_degToRad, 50.f, RED );
+	//drawArrow( newSimplexVertex2[0] - d2 * 50.f, d2 * 50.f, RED );
+	// Determine closest point on simplex edge
+	const size_t szSimplexx = simplex.size();
+	int ii = closestEdge.index == 0 ? szSimplexx - 1 : closestEdge.index - 1;
+	//drawCross( simplex[ii][0], 45.f * g_degToRad, 50.f, GREEN );
+	//drawCross( simplex[ii][1], 45.f * g_degToRad, 50.f, GREEN );
+	//drawCross( simplex[ii][2], 45.f * g_degToRad, 50.f, GREEN );
+	{
+		// Determine closest point on simplex edge
+		const size_t szSimplex = simplex.size();
+		int i = closestEdge.index == 0 ? szSimplex - 1 : closestEdge.index - 1;
+
+		// Todo: Find out why two same vertices exist in simplex
+		Vector3 L = newSimplexVertex1[0] - simplex[i][0];
+		//drawArrow( simplex[i][0], L, BLUE );
+		if ( L.isZero() )
+		{
+			return;
+		}
+
+		Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
+
+		Vector3 pointA, pointB;
+		pointA.setInterpolate( simplex[i][1], newSimplexVertex1[1], l );
+		pointB.setInterpolate( simplex[i][2], newSimplexVertex1[2], l );
+		//drawCross(pointA, 30.f * g_degToRad, 50.f, BLUE);
+		//drawCross(pointB, 60.f * g_degToRad, 50.f, BLUE);
+	}
+
+	{
+		// Determine closest point on simplex edge
+		const size_t szSimplex = simplex.size();
+		int i = closestEdge.index == 0 ? szSimplex - 1 : closestEdge.index - 1;
+
+		// Todo: Find out why two same vertices exist in simplex
+		Vector3 L = newSimplexVertex2[0] - simplex[i][0];
+		//drawArrow( simplex[i][0], L, RED );
+		if ( L.isZero() )
+		{
+			return;
+		}
+
+		Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
+
+		Vector3 pointA, pointB;
+		pointA.setInterpolate( simplex[i][1], newSimplexVertex2[1], l );
+		pointB.setInterpolate( simplex[i][2], newSimplexVertex2[2], l );
+		//drawCross(pointA, 30.f * g_degToRad, 50.f, RED);
+		//drawCross(pointB, 60.f * g_degToRad, 50.f, RED);
+	}
 }
 
 void physicsConvexCollider::expandingPolytopeAlgorithm(
@@ -430,6 +508,10 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 	Simplex& simplex,
 	SimplexEdge& closestEdge)
 {	
+	//int idx = 0;
+
+	//DebugUtils::drawSimplex( simplex, RED );
+
 	while ( true )
 	{
 		// TODO: freezes here in some collisions
@@ -450,8 +532,14 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 			// Expand simplex
 			Simplex::iterator iter = simplex.begin();
 			simplex.insert( iter + closestEdge.index, newSimplexVertex );
+			//drawText( std::to_string( idx ), newSimplexVertex[0], 1.f );
+			//idx++;
 		}
 	}
+
+#if defined D_EPA_SIMPLEX
+	DebugUtils::drawSimplex( simplex, BLUE );
+#endif
 }
 
 void physicsConvexCollider::getClosestEdgeToOrigin( const Simplex& simplex, SimplexEdge& edge )
@@ -461,19 +549,13 @@ void physicsConvexCollider::getClosestEdgeToOrigin( const Simplex& simplex, Simp
 
 	for ( int i = 0; i < szSimplex; i++ )
 	{
-		int j = ( i + 1 == szSimplex ) ? 0 : i + 1;
+		int j = ( i + 1 ) % szSimplex;
 
 		Vector3 edgeCw = simplex[j][0] - simplex[i][0];
 
-		// Get vector from origin to edge, which is direction we want to expand to
-		Vector3 n = edgeCw.cross( edgeCw.cross( simplex[i][0] ) );
-		n.negate();
-
-		// For cases where simplex is touching the origin
-		if ( !n.isZero() )
-		{
-			n.normalize();
-		}
+		/// Get vector from origin to edge, which is direction we want to expand to
+		Vector3 n( edgeCw( 1 ), -1.f * edgeCw( 0 ) );
+		n.normalize();
 
 		Real len = n.dot( simplex[i][0] );
 

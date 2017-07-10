@@ -145,6 +145,8 @@ public:
 
 	inline bool isInf() const;
 
+	inline bool isOk() const;
+
 	///
 	/// Non-inline functions
 	void setTransformedPos( const Transform& t, const Vector3& v );

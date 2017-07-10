@@ -8,9 +8,9 @@
 
 // Narrowphase
 //#define D_GJK_MINKOWSKI
-#define D_GJK_CONTACT_LENGTH
-#define D_GJK_SIMPLEX
-//#define D_GJK_EXPANDED_SIMPLEX
+//#define D_GJK_CONTACT_LENGTH
+//#define D_GJK_SIMPLEX
+//#define D_EPA_SIMPLEX
 
 // Solver
 #define D_SOLVER_IMPULSE
@@ -31,9 +31,12 @@ namespace DebugUtils
 	void debug_print_line( const Vector3& p0, const Vector3& p1 );
 
 	// Narrowphase
-	void drawMinkowskiDifference( const physicsConvexCollider* agent );
+	void drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
+								  const std::shared_ptr<physicsShape>& shapeB,
+								  const Transform& transformA,
+								  const Transform& transformB );
 	void drawContactNormal( const Vector3& contactA, const Vector3& normal );
-	void drawSimplex( const physicsConvexCollider::Simplex& simplex );
+	void drawSimplex( const physicsConvexCollider::Simplex& simplex, unsigned int color );
 	void drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex );
 
 	// Solver

@@ -1,6 +1,6 @@
 #include <physicsCd.h>
 
-/// Finds closest point in line 'p1' to 'p2' from 'point'
+/// Finds closest point on line 'p1'---'p2' to 'point'
 void physicsCd::calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, const Vector3& point, Vector3& closest)
 {
 	Assert(p1 != p2, "Edge is a point");

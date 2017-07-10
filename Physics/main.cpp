@@ -22,19 +22,11 @@ int Simulation( int argc, char* argv[] )
 
 	physicsWorldCinfo cinfo;
 	//cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set(0.f, -98.1f);
+	cinfo.m_gravity.set( 0.f, -981.f );
 	cinfo.m_numIter = 4;
 	world = new physicsWorld( cinfo );
 
-#if 0
-	std::vector<physicsBody*> bodies;
-	DemoUtils::createPackedCircles( bodies, 200 );
-
-	for ( int i = 0; i < (int)bodies.size(); i++ )
-	{
-		world->addBody( bodies[ i ] );
-	}
-#endif
+	DemoUtils::createPackedCircles( world, Vector3( 400.f, 400.f ), 50.f, 30 );
 
 #if 0 /// TODO: Holding doesn't work properly on smaller box
 	{
@@ -129,7 +121,7 @@ int Simulation( int argc, char* argv[] )
 	config.bodyIdB = bIdB;
 	world->addJoint( config );
 #endif
-#if 0
+#if 1
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -158,18 +150,58 @@ int Simulation( int argc, char* argv[] )
 		vertices.push_back( Vector3( -40.0f, -40.0f ) );
 		vertices.push_back( Vector3( -40.0f, 40.0f ) );
 		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
-		cinfo.m_pos.set( 712.f, 384.f );
+		cinfo.m_pos.set( 512.f, 384.f );
 		cinfo.m_ori = 77 * g_degToRad;
 		//cinfo.m_linearVelocity.set( 50.f, 0. );
 		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
 		world->createBody( cinfo );
 	}
 #endif
-#if 0
+#if 1
+	{
+		physicsBodyCinfo cinfo;
+		vector<Vector3> vertices;
+		vertices.push_back( Vector3( 40.0f, -40.0f ) );
+		vertices.push_back( Vector3( 40.0f, 40.0f ) );
+		vertices.push_back( Vector3( -40.0f, -40.0f ) );
+		vertices.push_back( Vector3( -40.0f, 40.0f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_pos.set( 562.f, 384.f );
+		cinfo.m_ori = 77 * g_degToRad;
+		//cinfo.m_linearVelocity.set( 50.f, 0. );
+		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
+		world->createBody( cinfo );
+	}
+#endif
+#if 1
+	{
+		physicsBodyCinfo cinfo;
+		vector<Vector3> vertices;
+		vertices.push_back( Vector3( 40.0f, -40.0f ) );
+		vertices.push_back( Vector3( 40.0f, 40.0f ) );
+		vertices.push_back( Vector3( -40.0f, -40.0f ) );
+		vertices.push_back( Vector3( -40.0f, 40.0f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_pos.set( 450.f, 384.f );
+		cinfo.m_ori = 77 * g_degToRad;
+		//cinfo.m_linearVelocity.set( 50.f, 0. );
+		//cinfo.m_angularSpeed = -50.0f * g_degToRad;
+		world->createBody( cinfo );
+	}
+#endif
+#if 1
 	{
 		physicsBodyCinfo info;
 		info.m_shape = physicsCircleShape::create( 40.f );
 		info.m_pos.set( 500.f, 500.f );
+		world->createBody( info );
+	}
+#endif
+#if 1
+	{
+		physicsBodyCinfo info;
+		info.m_shape = physicsCircleShape::create( 40.f );
+		info.m_pos.set( 600.f, 500.f );
 		world->createBody( info );
 	}
 #endif

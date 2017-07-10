@@ -1,7 +1,5 @@
 #include <Base.h>
 #include <DemoUtils.h>
-
-#include <physicsBody.h>
 #include <physicsShape.h>
 #include <physicsWorld.h>
 
@@ -43,12 +41,13 @@ void DemoUtils::releaseControl( ControlInfo& controlInfo, physicsWorld* world, B
 	controlInfo.dummyJointId = invalidId;
 }
 
-void DemoUtils::createPackedCircles( std::vector<physicsBody>& bodies, int numCircles )
+void DemoUtils::createPackedCircles( physicsWorld* world,
+									 const Vector3& pos,
+									 const Real radius,
+									 const int numCircles )
 {
-	Real radiusCircle = 5.0f;
-
-	Vector3 arm( 0.0f, -981.0f );
-	Real radius = 0.0f;
+	Vector3 arm( 0.0f, 0.0f );
+	Real armRadius = 0.0f;
 	Real angle = 0.0f;
 	int limitLayer = 1;
 
@@ -56,19 +55,20 @@ void DemoUtils::createPackedCircles( std::vector<physicsBody>& bodies, int numCi
 	{
 		if ( j == limitLayer )
 		{
-			radius += 2.f * radiusCircle;
-			limitLayer = ( int )( radius * ( Real )M_PI / radiusCircle );
+			armRadius += 2.f * radius;
+			limitLayer = ( int )( ( Real )M_PI * armRadius ) / radius;
 			angle = ( 360.f / limitLayer ) * g_degToRad;
-			arm.set( radius, 0.f );
+			arm.set( armRadius, 0.f );
 			j = 0;
 		}
 
 		physicsBodyCinfo cinfo;
-		cinfo.m_shape = physicsCircleShape::create( radiusCircle );
+		{
+			cinfo.m_shape = physicsCircleShape::create( radius );
+			Vector3 buf; buf.setRotatedDir( arm, angle*j );
+			cinfo.m_pos = buf + pos;
+		}
 
-		Vector3 buf; buf.setRotatedDir( arm, angle*j );
-
-		cinfo.m_pos = buf;
-		bodies.push_back( physicsBody( cinfo ) );
+		world->createBody( cinfo );
 	}
 }

@@ -25,5 +25,5 @@ namespace DemoUtils
 	void releaseControl( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
 
 	/// Create packed circles for mass simulation
-	void createPackedCircles( std::vector<physicsBody>& bodies, int numCircles );
+	void createPackedCircles( physicsWorld* world, const Vector3& pos, const Real radius, const int numCircles );
 }

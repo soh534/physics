@@ -180,6 +180,7 @@ void stepRender( GLFWwindow* window )
 	g_world->render();
 	g_world->step();
 
+/*
 	/// Print total momentum
 	Vector3 totLinMomentum; totLinMomentum.setZero();
 	const std::vector<BodyId>& activeBodyIds = g_world->getActiveBodyIds();
@@ -192,7 +193,7 @@ void stepRender( GLFWwindow* window )
 	std::stringstream ss;
 	ss << totLinMomentum( 0 ) << ", " << totLinMomentum( 1 ) << std::endl;
 	drawText( ss.str(), g_topLeft );
-
+*/
 	step();
 
 	glfwSwapBuffers( window );

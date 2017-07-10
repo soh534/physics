@@ -22,27 +22,26 @@ void DebugUtils::debug_print_line( const Vector3& p0, const Vector3& p1 )
 #endif
 }
 
-void DebugUtils::drawMinkowskiDifference( const physicsConvexCollider* agent )
+void DebugUtils::drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
+										  const std::shared_ptr<physicsShape>& shapeB,
+										  const Transform& transformA,
+										  const Transform& transformB )
 {
-#if defined D_GJK_MINKOWSKI
-	Vector3 vertex0, vertex1, dummy0, dummy1;
 	Vector3 direction( 1.0f, 0.0f );
 
-	agent->getSimplexVertex( direction, vertex0, dummy0, dummy1 );
+	physicsConvexCollider::SimplexVertex vert0, vert1;
+	physicsConvexCollider::getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, vert0 );
 
 	const int numIntervals = 10;
 	const Real degPerInterval = 360.f / numIntervals;
 
-	for ( int i = 1; i < numIntervals; i++ )
+	for ( int i = 1; i <= numIntervals; i++ )
 	{
-		direction.setRotatedDir( direction, degPerInterval );
-		agent->getSimplexVertex( direction, vertex1, dummy0, dummy1 );
-
-		drawLine( vertex0, vertex1, LIME );
-
-		vertex0 = vertex1;
+		direction.setRotatedDir( direction, degPerInterval * g_degToRad );
+		physicsConvexCollider::getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, vert1 );
+		drawLine( vert0[0], vert1[0], GREEN );
+		vert0 = vert1;
 	}
-#endif
 }
 
 void DebugUtils::drawContactNormal( const Vector3& contactA, const Vector3& normal )
@@ -51,14 +50,23 @@ void DebugUtils::drawContactNormal( const Vector3& contactA, const Vector3& norm
 	drawText( std::to_string( normal.length() ), contactA + normal / 2 );
 }
 
-void DebugUtils::drawSimplex( const physicsConvexCollider::Simplex& simplex )
+void DebugUtils::drawSimplex( const physicsConvexCollider::Simplex& simplex, unsigned int color )
 {
-	drawCross( simplex[0][0], 45.f * g_degToRad, 15.f, RED );
-	drawCross( simplex[1][0], 45.f * g_degToRad, 15.f, RED );
-	drawCross( simplex[2][0], 45.f * g_degToRad, 15.f, RED );
-	drawLine( simplex[0][0], simplex[1][0], RED );
-	drawLine( simplex[1][0], simplex[2][0], RED );
-	drawLine( simplex[2][0], simplex[0][0], RED );
+	int szSimplex = ( int )simplex.size();
+
+	for ( int i = 0; i < szSimplex; i++ )
+	{
+		drawCross( simplex[i][0], 45.f * g_degToRad, 40.f, color );
+
+		if ( i == szSimplex - 1 )
+		{
+			drawLine( simplex[szSimplex - 1][0], simplex[0][0], color );
+		}
+		else
+		{
+			drawLine( simplex[i][0], simplex[i + 1][0], color );
+		}
+	}
 }
 
 void DebugUtils::drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex )

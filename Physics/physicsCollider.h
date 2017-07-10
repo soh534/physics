@@ -122,11 +122,6 @@ public:
 		Vector3 normal;
 	};
 
-private:
-
-
-	physicsConvexCollider();
-
 	/// Finds simplex vertex and it's support vertices local to A
 	static void getSimplexVertex( const Vector3& direction,
 								  const std::shared_ptr<physicsShape>& shapeA,
@@ -134,6 +129,12 @@ private:
 								  const Transform& transformA,
 								  const Transform& transformB,
 								  SimplexVertex& simplexVert );
+
+private:
+
+
+	physicsConvexCollider();
+
 
 	static void expandingPolytopeAlgorithm( const std::shared_ptr<physicsShape>& shapeA,
 											const std::shared_ptr<physicsShape>& shapeB,

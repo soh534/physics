@@ -25,7 +25,7 @@ struct physicsWorldCinfo
 	int m_numIter;
 
 	physicsWorldCinfo() :
-		m_gravity( 0.f, -98.f ),
+		m_gravity( 0.f, -98.1f ),
 		m_deltaTime( .016f ),
 		m_cor( 1.f ),
 		m_numIter( 8 ) {}
