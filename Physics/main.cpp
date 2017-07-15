@@ -28,29 +28,23 @@ int Simulation( int argc, char* argv[] )
 
 	DemoUtils::createPackedCircles( world, Vector3( 400.f, 400.f ), 50.f, 30 );
 
-#if 0 /// TODO: Holding doesn't work properly on smaller box
+#if 0
 	{
 		physicsBodyCinfo cinfo;
-		cinfo.m_shape = new physicsBoxShape( Vector3f( 60.0f, 60.0f ) );
-		cinfo.m_pos.set( 180.0f, 180.0f );
-		cinfo.m_rot = 30.0f * g_degToRad;
-		cinfo.m_mass = 17.0f;
-		cinfo.m_inertia = cinfo.m_mass;
+		cinfo.m_shape = physicsBoxShape::create( Vector3( 10.f, 10.f ) );
+		cinfo.m_pos.set( 250.0f, 200.0f );
+		cinfo.m_ori = 30.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( -10.f, -10.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 
 	{
 		physicsBodyCinfo cinfo;
-		cinfo.m_shape = new physicsBoxShape( Vector3f( 20.0f, 30.0f ) );
-		cinfo.m_pos.set( -50.0f, -50.0f );
-		cinfo.m_rot = 45.0f * g_degToRad;
-		cinfo.m_mass = 7.0f;
-		cinfo.m_inertia = cinfo.m_mass;
+		cinfo.m_shape = physicsBoxShape::create( Vector3( 20.f, 30.f ) );
+		cinfo.m_pos.set( 300.0f, 200.0f );
+		cinfo.m_ori = 45.0f * g_degToRad;
 		cinfo.m_linearVelocity.set( 20.f, 20.f );
-		physicsBody* body = new physicsBody( cinfo );
-		world->addBody( body );
+		world->createBody( cinfo );
 	}
 #endif
 
@@ -121,7 +115,7 @@ int Simulation( int argc, char* argv[] )
 	config.bodyIdB = bIdB;
 	world->addJoint( config );
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -141,7 +135,7 @@ int Simulation( int argc, char* argv[] )
 		world->createBody( cinfo );
 	}
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -157,7 +151,7 @@ int Simulation( int argc, char* argv[] )
 		world->createBody( cinfo );
 	}
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -173,7 +167,7 @@ int Simulation( int argc, char* argv[] )
 		world->createBody( cinfo );
 	}
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo cinfo;
 		vector<Vector3> vertices;
@@ -189,7 +183,7 @@ int Simulation( int argc, char* argv[] )
 		world->createBody( cinfo );
 	}
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo info;
 		info.m_shape = physicsCircleShape::create( 40.f );
@@ -197,7 +191,7 @@ int Simulation( int argc, char* argv[] )
 		world->createBody( info );
 	}
 #endif
-#if 1
+#if 0
 	{
 		physicsBodyCinfo info;
 		info.m_shape = physicsCircleShape::create( 40.f );

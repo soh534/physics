@@ -1,25 +1,12 @@
 #include <Base.h>
 
 #include <DebugUtils.h>
-
-/// TODO: these debug macros should be checked for in the calling function
-/// instead of having these functions being called @ default
+#include <physicsCollider.h>
 
 void DebugUtils::drawBpAabb( const physicsBody& body )
 {
-#if defined D_BROADPHASE
 	const physicsAabb& aabb = body.getAabb();
 	drawBox( aabb.m_max, aabb.m_min, RED );
-#endif
-}
-
-void DebugUtils::debug_print_line( const Vector3& p0, const Vector3& p1 )
-{
-#if defined (D_GJK_CONTACT_LENGTH)
-	drawLine( p0, p1 );
-	Vector3 pos = p0 + p1;
-	drawText( std::to_string( ( p0 - p1 ).length() ), pos / 2.f );
-#endif
 }
 
 void DebugUtils::drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
@@ -80,11 +67,4 @@ void DebugUtils::drawExpandedSimplex( const physicsConvexCollider::Simplex& simp
 		ss << i << std::endl;
 		drawText( ss.str(), simplex[i][0] );
 	}
-}
-
-void DebugUtils::drawBodyImpulse( const physicsBody* body, const Vector3& arm, const Vector3& impulse )
-{
-#if defined (D_SOLVER_IMPULSE)
-	drawArrow( body->getPosition() + arm, impulse, RED );
-#endif
 }

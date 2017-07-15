@@ -28,7 +28,6 @@ namespace DebugUtils
 {
 	// Broadphase
 	void drawBpAabb( const physicsBody& body );
-	void debug_print_line( const Vector3& p0, const Vector3& p1 );
 
 	// Narrowphase
 	void drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
@@ -38,7 +37,4 @@ namespace DebugUtils
 	void drawContactNormal( const Vector3& contactA, const Vector3& normal );
 	void drawSimplex( const physicsConvexCollider::Simplex& simplex, unsigned int color );
 	void drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex );
-
-	// Solver
-	void drawBodyImpulse( const physicsBody* body, const Vector3& arm, const Vector3& impulse );
 }

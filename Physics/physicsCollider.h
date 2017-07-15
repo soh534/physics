@@ -36,7 +36,6 @@ namespace ContactPointUtils
 	void getContactDifference( const ContactPoint& cpA, const ContactPoint& cpB, Real& res );
 }
 
-/// TODO: since no more agents make these not a class?
 class physicsCollider : public physicsObject
 {
 public:

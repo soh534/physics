@@ -29,7 +29,7 @@
 
 int initializeRendering(int width, int height);
 int closeRendering();
-int step();
+int stepRenderer();
 
 void getDimensions( float& left, float& right, float& bottom, float& top );
 void drawLine(const Vector3& p1, const Vector3& p2, unsigned int = BLACK);

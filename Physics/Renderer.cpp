@@ -31,8 +31,6 @@ static GLuint g_txtProgramID = 0;
 static GLuint g_txtVAO = 0;
 static GLuint g_txtVBO = { 0 };
 
-static int g_width = 0;
-static int g_height = 0;
 static int g_left;
 static int g_right;
 static int g_bottom;
@@ -220,14 +218,10 @@ int initializeRendering( int width, int height )
 	GLenum err = glewInit();
 	Assert( err == GLEW_OK, "failed to initialize glew" );
 
-	/// TODO: clean-up
-	g_width = width;
-	g_height = height;
-
-	g_left = -g_width * 0.5;
-	g_right = g_width * 0.8;
-	g_bottom = -g_height * 0.5;
-	g_top = g_height * 0.8;
+	g_left = -width * 0.5;
+	g_right = width * 0.8;
+	g_bottom = -height * 0.5;
+	g_top = height * 0.8;
 	g_projection = glm::ortho( ( float )g_left, ( float )g_right, ( float )g_bottom, ( float )g_top );
 
 #if defined FREETYPE_TEST
@@ -273,7 +267,7 @@ int closeRendering()
 	return 0;
 }
 
-int step()
+int stepRenderer()
 {
 	for ( int i = 0; i < (int)g_renderLines.size(); i++ )
 	{

@@ -38,7 +38,7 @@ int main( int argc, char* argv[] )
 		drawText( "eeeeeee", Vector3( 0.f, 400.f ), LIME );
 		drawText( "123456", Vector3( 0.f, 200.f ) );
 
-		step();
+		stepRenderer();
 
 		glfwSwapBuffers( window );
 	}

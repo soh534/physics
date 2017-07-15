@@ -8,20 +8,18 @@
 #include <DemoUtils.h>
 #include <Framework.h>
 
-/// TODO: wrap these global variables
-int g_widthWindow;
-int g_heightWindow;
-unsigned int g_framesPerSecond;
-Vector3 g_topLeft;
+/// Globally passed variables to GLFW callbacks
+namespace
+{
+	/// Parameters related to holding bodies
+	bool g_bodyHeld = false;
+	Vector3 g_arm; // Local to body
+	Vector3 g_cursorPos; // In world
+	int g_bodyId = -1;
+	DemoUtils::ControlInfo g_controlInfo;
 
-// Body holding
-bool g_bodyHeld = false;
-Vector3 g_arm; // Local
-Vector3 g_cursorPos; // World
-int g_bodyId = -1;
-
-physicsWorld* g_world;
-DemoUtils::ControlInfo g_controlInfo;
+	physicsWorld* g_world;
+}
 
 enum State
 {
@@ -30,11 +28,6 @@ enum State
 };
 
 static State g_state;
-
-static void error_callback( int error, const char* description )
-{
-	fputs( description, stderr );
-}
 
 void transformPointGLFWtoGL( GLFWwindow* window, const Vector3& pointGLFW, Vector3& pointGL )
 {
@@ -177,29 +170,16 @@ void stepRender( GLFWwindow* window )
 	drawAxis();
 	drawCursorMarker();
 
+	/// Step physics
 	g_world->render();
 	g_world->step();
 
-/*
-	/// Print total momentum
-	Vector3 totLinMomentum; totLinMomentum.setZero();
-	const std::vector<BodyId>& activeBodyIds = g_world->getActiveBodyIds();
-	for ( auto i = 0; i < activeBodyIds.size(); i++ )
-	{
-		const physicsBody& body = g_world->getBody( activeBodyIds[i] );
-		totLinMomentum += body.getLinearVelocity() * body.getMass();
-	}
-
-	std::stringstream ss;
-	ss << totLinMomentum( 0 ) << ", " << totLinMomentum( 1 ) << std::endl;
-	drawText( ss.str(), g_topLeft );
-*/
-	step();
-
+	/// Draw
+	stepRenderer();
 	glfwSwapBuffers( window );
 }
 
-static void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods )
+static void keyCallback( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
 	if ( action == GLFW_PRESS )
 	{
@@ -248,7 +228,7 @@ int initializeWindow( GLFWwindow*& window, const WindowCinfo& cinfo )
 
 	glfwMakeContextCurrent( window );
 
-	glfwSetKeyCallback( window, key_callback );
+	glfwSetKeyCallback( window, keyCallback );
 	glfwSetCursorPosCallback( window, cursorPositionCallback );
 	glfwSetMouseButtonCallback( window, mouseButtonCallback );
 
@@ -264,10 +244,6 @@ void BeginGraphics( const WindowCinfo& cinfo )
 	Assert( cinfo.widthWindow > 0, "Width of window is negative" );
 	Assert( cinfo.heightWindow > 0, "Height of window is negative" );
 
-	g_widthWindow = cinfo.widthWindow;
-	g_heightWindow = cinfo.heightWindow;
-	g_framesPerSecond = cinfo.framesPerSecond;
-	g_topLeft.set( -g_widthWindow / 3.f, g_heightWindow / 3.f );
 	g_world = cinfo.world;
 	g_state = Paused;
 	g_controlInfo.dummyBodyId = -1;

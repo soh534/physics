@@ -73,8 +73,10 @@ void physicsWorldEx::collide()
 
 		body.updateAabb();
 
+#if defined D_BROADPHASE
 		DebugUtils::drawBpAabb( body ); /// TODO: move this out
-		
+#endif		
+
 		BroadphaseBody bpBody( body.getBodyId(), body.getAabb() );
 		m_broadphaseBodies.push_back( bpBody ); /// TODO: don't push_back this, just overwrite the contents
 	}
