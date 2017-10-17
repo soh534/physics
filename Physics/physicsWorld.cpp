@@ -318,7 +318,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 
 				Constraint frictionA;
 				setAsFriction( frictionA, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-				constrainedPair.constraints.push_back( frictionA );
+				//constrainedPair.constraints.push_back( frictionA );
 
 				if ( false )
 				//if ( iterCached->numContacts == 2 )

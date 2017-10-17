@@ -23,10 +23,10 @@ int Simulation( int argc, char* argv[] )
 	physicsWorldCinfo cinfo;
 	//cinfo.m_gravity.setZero();
 	cinfo.m_gravity.set( 0.f, -981.f );
-	cinfo.m_numIter = 4;
+	cinfo.m_numIter = 1;
 	world = new physicsWorld( cinfo );
 
-	DemoUtils::createPackedCircles( world, Vector3( 400.f, 400.f ), 50.f, 30 );
+	DemoUtils::createPackedCircles( world, Vector3( 500.f, 400.f ), 1.f, 1000 );
 
 #if 0
 	{

@@ -171,8 +171,8 @@ void stepRender( GLFWwindow* window )
 	drawCursorMarker();
 
 	/// Step physics
-	g_world->render();
 	g_world->step();
+	g_world->render();
 
 	/// Draw
 	stepRenderer();
@@ -249,7 +249,7 @@ void BeginGraphics( const WindowCinfo& cinfo )
 	g_controlInfo.dummyBodyId = -1;
 	g_controlInfo.dummyJointId = -1;
 
-	GLFWwindow* window;
+	GLFWwindow* window = nullptr;
 
 	initializeWindow( window, cinfo );
 
