@@ -176,7 +176,9 @@
   <ItemGroup>
     <None Include="FragmentShader.shader" />
     <None Include="Matrix.inl" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Transform.inl" />
     <None Include="physicsBody.inl" />
     <None Include="physicsWorld.inl" />
