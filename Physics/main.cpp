@@ -1,6 +1,14 @@
+#define _USE_MATH_DEFINES
+#include <math.h> // For M_PI
+#include <cassert>
+
+#include <physicsWorld.h>
+#include <physicsShape.h>
+
+#include <DemoUtils.h>
+
 #include <Framework.h>
 
-<<<<<<< HEAD
 using namespace std;
 
 physicsWorld* world;
@@ -378,10 +386,18 @@ int Simulation( int argc, char* argv[] )
 	return 0;
 }
 
-=======
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
 int main( int argc, char* argv[] )
 {
-	startSimulationAndRender( argc, argv );
+	Simulation( argc, argv );
+
+	WindowCinfo cinfo;
+	{
+		cinfo.widthWindow = 1366;
+		cinfo.heightWindow = 768;
+		cinfo.framesPerSecond = 30;
+		cinfo.world = world;
+	}
+
+	BeginGraphics( cinfo );
 	return 0;
 }

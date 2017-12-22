@@ -3,7 +3,7 @@
 #include <physicsShape.h>
 #include <physicsWorld.h>
 
-void DemoUtils::grab( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos )
+void DemoUtils::controlBody( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos )
 {
 	// Grab bodies by attaching a dummy body to it using a joint constraint
 	if ( controlInfo.dummyBodyId == invalidId &&
@@ -19,7 +19,7 @@ void DemoUtils::grab( ControlInfo& controlInfo, physicsWorld* world, BodyId body
 
 		controlInfo.dummyBodyId = world->createBody( cinfo );
 
-		JointConfig config;
+		JointCinfo config;
 		{
 			config.pivot = pos;
 			config.bodyIdA = bodyId;
@@ -32,7 +32,7 @@ void DemoUtils::grab( ControlInfo& controlInfo, physicsWorld* world, BodyId body
 	world->setPosition( controlInfo.dummyBodyId, pos );
 }
 
-void DemoUtils::release( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId )
+void DemoUtils::releaseControl( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId )
 {
 	world->removeBody( controlInfo.dummyBodyId );
 	world->removeJoint( controlInfo.dummyJointId );

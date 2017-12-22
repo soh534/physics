@@ -456,7 +456,7 @@ void physicsWorldEx::updateJointConstraints()
 	}
 }
 
-physicsWorld::physicsWorld( const physicsWorldConfig& cinfo ) :
+physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
 	m_gravity( cinfo.m_gravity ),
 	m_cor( cinfo.m_cor ),
 	m_firstFreeBodyId( 0 )
@@ -542,7 +542,7 @@ const physicsBody& physicsWorld::getBody( const BodyId bodyId ) const
 	return m_bodies[bodyId];
 }
 
-int physicsWorld::addJoint( const JointConfig& config )
+int physicsWorld::addJoint( const JointCinfo& config )
 {
 	ConstrainedPair joint( config.bodyIdA, config.bodyIdB );
 	{

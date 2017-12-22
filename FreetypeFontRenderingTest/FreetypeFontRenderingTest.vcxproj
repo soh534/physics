@@ -1,10 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-=======
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props" Condition="Exists('..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props')" />
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -24,11 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-<<<<<<< HEAD
     <ProjectGuid>{B0FD3B1B-4C92-47CA-A5CD-880E00194B4E}</ProjectGuid>
-=======
-    <ProjectGuid>{28CA84FF-0ECB-4E3A-9F8C-2A4BDE5DBBAD}</ProjectGuid>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     <RootNamespace>FreetypeFontRenderingTest</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -83,13 +74,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-<<<<<<< HEAD
       <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>../Physics</AdditionalIncludeDirectories>
-=======
-      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -100,13 +86,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-<<<<<<< HEAD
       <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>../Physics</AdditionalIncludeDirectories>
-=======
-      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -119,13 +100,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-<<<<<<< HEAD
       <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>../Physics</AdditionalIncludeDirectories>
-=======
-      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -140,13 +116,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-<<<<<<< HEAD
       <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>../Physics</AdditionalIncludeDirectories>
-=======
-      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -161,15 +132,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-=======
-    <ClInclude Include="..\Physics\Base.hpp" />
-    <ClInclude Include="..\Physics\FileIO.hpp" />
-    <ClInclude Include="..\Physics\Renderer.hpp" />
-    <ClInclude Include="..\Physics\Vector3.hpp" />
-  </ItemGroup>
-  <ItemGroup>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     <None Include="..\Physics\FragmentShader.shader" />
     <None Include="..\Physics\TextFragmentShader.shader" />
     <None Include="..\Physics\TextVertexShader.shader" />
@@ -177,7 +139,6 @@
     <None Include="..\Physics\VertexShader.shader" />
     <None Include="packages.config" />
   </ItemGroup>
-<<<<<<< HEAD
   <ItemGroup>
     <ClInclude Include="..\Physics\Base.hpp" />
     <ClInclude Include="..\Physics\FileIO.hpp" />
@@ -192,34 +153,16 @@
     <Import Project="..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets" Condition="Exists('..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets')" />
     <Import Project="..\packages\freetype.2.7.1.1\build\native\freetype.targets" Condition="Exists('..\packages\freetype.2.7.1.1\build\native\freetype.targets')" />
     <Import Project="..\packages\unofficial.flayan.glm.0.9.8.4\build\native\unofficial.flayan.glm.targets" Condition="Exists('..\packages\unofficial.flayan.glm.0.9.8.4\build\native\unofficial.flayan.glm.targets')" />
-=======
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets" Condition="Exists('..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets')" />
-    <Import Project="..\packages\freetype.2.7.1.1\build\native\freetype.targets" Condition="Exists('..\packages\freetype.2.7.1.1\build\native\freetype.targets')" />
-    <Import Project="..\packages\glew.v140.1.12.0\build\native\glew.v140.targets" Condition="Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" />
-    <Import Project="..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets" Condition="Exists('..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets')" />
-    <Import Project="..\packages\glfw.3.2.1\build\native\glfw.targets" Condition="Exists('..\packages\glfw.3.2.1\build\native\glfw.targets')" />
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-<<<<<<< HEAD
     <Error Condition="!Exists('..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets'))" />
     <Error Condition="!Exists('..\packages\glfw.3.2.1\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.2.1\build\native\glfw.targets'))" />
     <Error Condition="!Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glew.v140.1.12.0\build\native\glew.v140.targets'))" />
     <Error Condition="!Exists('..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets'))" />
     <Error Condition="!Exists('..\packages\freetype.2.7.1.1\build\native\freetype.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freetype.2.7.1.1\build\native\freetype.targets'))" />
     <Error Condition="!Exists('..\packages\unofficial.flayan.glm.0.9.8.4\build\native\unofficial.flayan.glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\unofficial.flayan.glm.0.9.8.4\build\native\unofficial.flayan.glm.targets'))" />
-=======
-    <Error Condition="!Exists('..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freetype.redist.2.7.1.1\build\native\freetype.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\freetype.2.7.1.1\build\native\freetype.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freetype.2.7.1.1\build\native\freetype.targets'))" />
-    <Error Condition="!Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glew.v140.1.12.0\build\native\glew.v140.targets'))" />
-    <Error Condition="!Exists('..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\glfw.3.2.1\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.2.1\build\native\glfw.targets'))" />
-    <Error Condition="!Exists('..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props'))" />
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   </Target>
 </Project>

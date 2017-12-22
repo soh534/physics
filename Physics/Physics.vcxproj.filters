@@ -15,7 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <None Include="Vector3.inl">
       <Filter>Source Files</Filter>
     </None>
@@ -59,73 +58,6 @@
     <ClCompile Include="DebugUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-=======
-    <ClInclude Include="physicsShapeUtils.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Base.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugUtils.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DemoUtils.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileIO.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Framework.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsAabb.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsBody.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsCd.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsCollider.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsInternalTypes.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsObject.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsShape.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsSolver.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsTypes.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physicsWorld.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector3.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     <ClCompile Include="DemoUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -153,19 +85,15 @@
     <ClCompile Include="physicsCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="physicsInternalTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-=======
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     <ClCompile Include="physicsObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="physicsShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="physicsShapeUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -237,64 +165,5 @@
     <ClInclude Include="Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-=======
-    <ClCompile Include="physicsSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="physicsWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="physicsInternalTypes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="physicsShapeUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Matrix.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="physicsBody.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Vector3.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="FragmentShader.shader">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="TextFragmentShader.shader">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="TextVertexShader.shader">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="VertexShader.shader">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="physicsWorld.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Transform.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="packages.config" />
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   </ItemGroup>
 </Project>
