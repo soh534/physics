@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props" Condition="Exists('..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,8 +20,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B946BA73-AF73-4F31-8921-101AC071429C}</ProjectGuid>
-    <RootNamespace>Physics</RootNamespace>
+    <ProjectGuid>{28CA84FF-0ECB-4E3A-9F8C-2A4BDE5DBBAD}</ProjectGuid>
+    <RootNamespace>FreetypeFontRenderingTest</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -68,25 +69,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>./;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>./;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>./;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>./;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <Link />
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -96,8 +87,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <Link />
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -109,6 +101,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -123,6 +117,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DFREETYPE_TEST %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -131,63 +127,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Base.h" />
-    <ClInclude Include="DebugUtils.h" />
-    <ClInclude Include="DemoUtils.h" />
-    <ClInclude Include="FileIO.h" />
-    <ClInclude Include="Framework.h" />
-    <ClInclude Include="Matrix.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="physicsAabb.h" />
-    <ClInclude Include="physicsBody.h" />
-    <ClInclude Include="physicsCd.h" />
-    <ClInclude Include="physicsCollider.h" />
-    <ClInclude Include="physicsInternalTypes.h" />
-    <ClInclude Include="physicsObject.h" />
-    <ClInclude Include="physicsShape.h" />
-    <ClInclude Include="physicsShapeUtils.h" />
-    <ClInclude Include="physicsSolver.h" />
-    <ClInclude Include="physicsTypes.h" />
-    <ClInclude Include="physicsWorld.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Vector3.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DebugUtils.cpp" />
-    <ClCompile Include="DemoUtils.cpp" />
-    <ClCompile Include="FileIO.cpp" />
-    <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="..\Physics\FileIO.cpp" />
+    <ClCompile Include="..\Physics\Renderer.cpp" />
+    <ClCompile Include="..\Physics\Vector3.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Matrix.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="physicsAabb.cpp" />
-    <ClCompile Include="physicsBody.cpp" />
-    <ClCompile Include="physicsCd.cpp" />
-    <ClCompile Include="physicsCollider.cpp" />
-    <ClCompile Include="physicsInternalTypes.cpp" />
-    <ClCompile Include="physicsObject.cpp" />
-    <ClCompile Include="physicsShape.cpp" />
-    <ClCompile Include="physicsShapeUtils.cpp" />
-    <ClCompile Include="physicsSolver.cpp" />
-    <ClCompile Include="physicsWorld.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FragmentShader.shader" />
-    <None Include="Matrix.inl" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Transform.inl" />
-    <None Include="physicsBody.inl" />
-    <None Include="physicsWorld.inl" />
-    <None Include="TextFragmentShader.shader" />
-    <None Include="TextVertexShader.shader" />
-    <None Include="Vector3.inl" />
-    <None Include="VertexShader.shader" />
+    <ClInclude Include="..\Physics\Base.hpp" />
+    <ClInclude Include="..\Physics\FileIO.hpp" />
+    <ClInclude Include="..\Physics\Renderer.hpp" />
+    <ClInclude Include="..\Physics\Vector3.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Physics\FragmentShader.shader" />
+    <None Include="..\Physics\TextFragmentShader.shader" />
+    <None Include="..\Physics\TextVertexShader.shader" />
+    <None Include="..\Physics\Vector3.inl" />
+    <None Include="..\Physics\VertexShader.shader" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -196,7 +153,6 @@
     <Import Project="..\packages\glew.v140.1.12.0\build\native\glew.v140.targets" Condition="Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" />
     <Import Project="..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets" Condition="Exists('..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets')" />
     <Import Project="..\packages\glfw.3.2.1\build\native\glfw.targets" Condition="Exists('..\packages\glfw.3.2.1\build\native\glfw.targets')" />
-    <Import Project="..\packages\glm.0.9.8.4\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -207,6 +163,6 @@
     <Error Condition="!Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glew.v140.1.12.0\build\native\glew.v140.targets'))" />
     <Error Condition="!Exists('..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.redist.3.2.1\build\native\glfw.redist.targets'))" />
     <Error Condition="!Exists('..\packages\glfw.3.2.1\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.2.1\build\native\glfw.targets'))" />
-    <Error Condition="!Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.8.4\build\native\glm.targets'))" />
+    <Error Condition="!Exists('..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props'))" />
   </Target>
 </Project>

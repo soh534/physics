@@ -318,7 +318,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 
 				Constraint frictionA;
 				setAsFriction( frictionA, contacts[0], bodyA.getRotation(), bodyB.getRotation() );
-				//constrainedPair.constraints.push_back( frictionA );
+				constrainedPair.constraints.push_back( frictionA );
 
 				if ( false )
 				//if ( iterCached->numContacts == 2 )
@@ -456,7 +456,7 @@ void physicsWorldEx::updateJointConstraints()
 	}
 }
 
-physicsWorld::physicsWorld( const physicsWorldCinfo& cinfo ) :
+physicsWorld::physicsWorld( const physicsWorldConfig& cinfo ) :
 	m_gravity( cinfo.m_gravity ),
 	m_cor( cinfo.m_cor ),
 	m_firstFreeBodyId( 0 )
@@ -542,7 +542,7 @@ const physicsBody& physicsWorld::getBody( const BodyId bodyId ) const
 	return m_bodies[bodyId];
 }
 
-int physicsWorld::addJoint( const JointCinfo& config )
+int physicsWorld::addJoint( const JointConfig& config )
 {
 	ConstrainedPair joint( config.bodyIdA, config.bodyIdB );
 	{

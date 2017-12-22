@@ -87,10 +87,10 @@ void physicsBody::render() const
 	/// TODO: move this function outside of physics
 
 	/// Mark central point and lines constructing body's shape
-	//drawArrow( m_pos, Vector3( 0.f, 10.f ).getRotatedDir( m_ori ) );
+	drawArrow( m_pos, Vector3( 0.f, 10.f ).getRotatedDir( m_ori ) );
 
 	Vector3 offset( 5.f, 5.f );
-//	drawText( std::to_string( m_bodyId ), m_pos + offset );
+	drawText( std::to_string( m_bodyId ), m_pos + offset );
 	m_shape->render( m_pos, m_ori );
 }
 

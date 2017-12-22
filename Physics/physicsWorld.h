@@ -17,21 +17,21 @@ typedef void( *ColliderFuncPtr )( const std::shared_ptr<physicsShape>& shapeA,
 								  const Transform& transformB,
 								  std::vector<ContactPoint>& contacts);
 
-struct physicsWorldCinfo
+struct physicsWorldConfig
 {
 	Vector3 m_gravity;
 	Real m_deltaTime;
 	Real m_cor;
 	int m_numIter;
 
-	physicsWorldCinfo() :
+	physicsWorldConfig() :
 		m_gravity( 0.f, -98.1f ),
 		m_deltaTime( .016f ),
 		m_cor( 1.f ),
 		m_numIter( 8 ) {}
 };
 
-struct JointCinfo
+struct JointConfig
 {
 	int bodyIdA;
 	int bodyIdB;
@@ -146,7 +146,7 @@ class physicsWorld : public physicsObject
 {
 public:
 
-	physicsWorld( const physicsWorldCinfo& cinfo );
+	physicsWorld( const physicsWorldConfig& cinfo );
 
 	~physicsWorld();
 
@@ -158,7 +158,7 @@ public:
 
 	const physicsBody& getBody( const BodyId bodyId ) const;
 
-	int addJoint( const JointCinfo& config );
+	int addJoint( const JointConfig& config );
 
 	void removeJoint( JointId jointId );
 

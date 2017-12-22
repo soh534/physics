@@ -15,15 +15,15 @@ namespace DemoUtils
 
 		ControlInfo()
 		{
-			dummyBodyId = -1;
-			dummyJointId = -1;
+			dummyBodyId = invalidId;
+			dummyJointId = invalidId;
 		}
 	};
 
-	/// Allow key-framed control of bodies in world
-	void controlBody( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos );
-	void releaseControl( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
+	// Allow mouse-picked control of bodies in world
+	void grab( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos );
+	void release( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
 
-	/// Create packed circles for mass simulation
+	// Create packed circles for mass simulation
 	void createPackedCircles( physicsWorld* world, const Vector3& pos, const Real radius, const int numCircles );
 }
