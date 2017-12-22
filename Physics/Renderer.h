@@ -27,8 +27,10 @@
 #define TEAL COLOR_IN_RGB(0, 128, 128)
 #define NAVY COLOR_IN_RGB(0, 0, 128)
 
-int initializeRendering(int width, int height);
-int closeRendering();
+// TODO: wrap this in Renderer namespace
+
+int initRenderer(int width, int height);
+int closeRenderer();
 int stepRenderer();
 
 void getDimensions( float& left, float& right, float& bottom, float& top );

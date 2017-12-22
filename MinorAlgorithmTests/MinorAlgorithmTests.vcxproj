@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<<<<<<< HEAD
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+=======
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+>>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,7 +23,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+<<<<<<< HEAD
     <ProjectGuid>{9DFB82D8-EAD8-483F-9304-1022C646716B}</ProjectGuid>
+=======
+    <ProjectGuid>{4959DF12-EABE-4F22-8143-2805368D565E}</ProjectGuid>
+>>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
     <RootNamespace>MinorAlgorithmTests</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -115,6 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Physics\physicsInternalTypes.cpp" />
+<<<<<<< HEAD
     <ClCompile Include="..\Physics\Transform.cpp" />
     <ClCompile Include="..\Physics\Vector3.cpp" />
     <ClCompile Include="main.cpp" />
@@ -126,6 +135,13 @@
   <ItemGroup>
     <None Include="..\Physics\Transform.inl" />
     <None Include="..\Physics\Vector3.inl" />
+=======
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Physics\physicsInternalTypes.h" />
+    <ClInclude Include="..\Physics\physicsTypes.h" />
+>>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

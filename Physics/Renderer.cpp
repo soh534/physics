@@ -213,7 +213,7 @@ int initializeFreeType()
 	return 0;
 }
 
-int initializeRendering( int width, int height )
+int initRenderer( int width, int height )
 {
 	GLenum err = glewInit();
 	Assert( err == GLEW_OK, "failed to initialize glew" );
@@ -246,8 +246,6 @@ int initializeRendering( int width, int height )
 
 	glBindVertexArray( 0 );
 
-
-
 #if defined FREETYPE_TEST
 	g_txtProgramID = LoadShaders( "../Physics/TextVertexShader.shader", "../Physics/TextFragmentShader.shader" );
 #else
@@ -259,7 +257,7 @@ int initializeRendering( int width, int height )
 	return 0;
 }
 
-int closeRendering()
+int closeRenderer()
 {
 	glDeleteProgram( g_lineProgramID );
 	glDeleteProgram( g_txtProgramID );

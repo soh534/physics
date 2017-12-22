@@ -1,24 +1,17 @@
-#include <Framework.h>
+#include <Scene.h>
 
-<<<<<<< HEAD
-using namespace std;
+#include <physicsWorld.h>
+#include <DemoUtils.h>
 
-physicsWorld* world;
-
-int Simulation( int argc, char* argv[] )
+int initPhysicsScene( physicsWorld*& world )
 {
-	/// Raise floating point exceptions
-	unsigned int currentState = 0;
-	_controlfp_s( &currentState, 0, 0 );
-	_controlfp_s( &currentState, _EM_INEXACT | _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
-
-	physicsWorldCinfo cinfo;
+	physicsWorldConfig cinfo;
 	//cinfo.m_gravity.setZero();
 	cinfo.m_gravity.set( 0.f, -981.f );
-	cinfo.m_numIter = 1;
+	cinfo.m_numIter = 4;
 	world = new physicsWorld( cinfo );
 
-	DemoUtils::createPackedCircles( world, Vector3( 500.f, 400.f ), 1.f, 1000 );
+	DemoUtils::createPackedCircles( world, Vector3( 400.f, 400.f ), 50.f, 30 );
 
 #if 0
 	{
@@ -102,7 +95,7 @@ int Simulation( int argc, char* argv[] )
 	}
 
 	JointCinfo config;
-	config.pivot.set(512.f, 384.f);
+	config.pivot.set( 512.f, 384.f );
 	config.bodyIdA = bIdA;
 	config.bodyIdB = bIdB;
 	world->addJoint( config );
@@ -318,7 +311,7 @@ int Simulation( int argc, char* argv[] )
 	{
 		/// Eastern wall
 		physicsBodyCinfo cinfo;
-		vector<Vector3> vertices;
+		std::vector<Vector3> vertices;
 		vertices.push_back( Vector3( 25.f, 200.f ) );
 		vertices.push_back( Vector3( -25.f, 250.f ) );
 		vertices.push_back( Vector3( -25.f, -250.f ) );
@@ -333,7 +326,7 @@ int Simulation( int argc, char* argv[] )
 	{
 		/// Northern wall
 		physicsBodyCinfo cinfo;
-		vector<Vector3> vertices;
+		std::vector<Vector3> vertices;
 		vertices.push_back( Vector3( -400.f, -25.f ) );
 		vertices.push_back( Vector3( -450.f, 25.f ) );
 		vertices.push_back( Vector3( 450.f, 25.f ) );
@@ -348,7 +341,7 @@ int Simulation( int argc, char* argv[] )
 	{
 		/// Western wall
 		physicsBodyCinfo cinfo;
-		vector<Vector3> vertices;
+		std::vector<Vector3> vertices;
 		vertices.push_back( Vector3( -25.f, 200.f ) );
 		vertices.push_back( Vector3( 25.f, 250.f ) );
 		vertices.push_back( Vector3( 25.f, -250.f ) );
@@ -363,7 +356,7 @@ int Simulation( int argc, char* argv[] )
 	{
 		/// Southern wall
 		physicsBodyCinfo cinfo;
-		vector<Vector3> vertices;
+		std::vector<Vector3> vertices;
 		vertices.push_back( Vector3( -400.f, 25.f ) );
 		vertices.push_back( Vector3( -450.f, -25.f ) );
 		vertices.push_back( Vector3( 450.f, -25.f ) );
@@ -375,13 +368,5 @@ int Simulation( int argc, char* argv[] )
 	}
 #endif
 
-	return 0;
-}
-
-=======
->>>>>>> 7ee43dfad48b70d112946b65bd80039d1e648a07
-int main( int argc, char* argv[] )
-{
-	startSimulationAndRender( argc, argv );
 	return 0;
 }
