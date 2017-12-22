@@ -7,19 +7,42 @@
 #include <Renderer.h>
 #include <DemoUtils.h>
 #include <Framework.h>
+#include <Scene.h>
 
-/// Globally passed variables to GLFW callbacks
-namespace
+struct RenderConfig
 {
-	/// Parameters related to holding bodies
-	bool g_bodyHeld = false;
-	Vector3 g_arm; // Local to body
-	Vector3 g_cursorPos; // In world
-	int g_bodyId = -1;
-	DemoUtils::ControlInfo g_controlInfo;
+	unsigned int windowWidth;
+	unsigned int windowHeight;
+	unsigned int fps; // TODO: actually make use of this variable
+};
 
-	physicsWorld* g_world;
-}
+struct MousePickingContext
+{
+	MousePickingContext( physicsWorld* world )
+	{
+		arm.setZero();
+		bodyId = invalidId;
+		this->world = world;
+	}
+
+	Vector3 arm; // Body-local grabbed position
+	int bodyId; // Id of body grabbed
+	DemoUtils::ControlInfo controlInfo; // 
+	physicsWorld* world; // Physics world simulating the body
+};
+
+struct KeyPressContext
+{
+	KeyPressContext()
+	{
+		escPressed = spacePressed = enterPressed = false;
+	}
+
+	// Flags used to determine first-time key presses
+	bool escPressed;
+	bool spacePressed;
+	bool enterPressed;
+};
 
 enum State
 {
@@ -27,9 +50,7 @@ enum State
 	Paused
 };
 
-static State g_state;
-
-void transformPointGLFWtoGL( GLFWwindow* window, const Vector3& pointGLFW, Vector3& pointGL )
+void transformPointGLFWtoGL( GLFWwindow* window, double xPos, double yPos, Vector3& pointGL )
 {
 	float left, right, bottom, top;
 	getDimensions( left, right, bottom, top );
@@ -40,6 +61,8 @@ void transformPointGLFWtoGL( GLFWwindow* window, const Vector3& pointGLFW, Vecto
 	/// Reflect monitor-space across x-axis
 	Vector3 axisX( 1.f, 0.f );
 	Transform axisXReflection; axisXReflection.setReflection( axisX );
+
+	Vector3 pointGLFW( xPos, yPos );
 	pointGL.setTransformedPos( axisXReflection, pointGLFW );
 
 	/// Shift origin back to zero
@@ -57,52 +80,52 @@ void transformPointGLFWtoGL( GLFWwindow* window, const Vector3& pointGLFW, Vecto
 	pointGL.setTransformedPos( tBottomLeft, pointGL );
 }
 
-static void cursorPositionCallback( GLFWwindow* window, double xpos, double ypos )
+void handleCursorPosition( GLFWwindow* window, MousePickingContext* context )
 {
-	Vector3 posGlfw( static_cast< Real >( xpos ), static_cast< Real >( ypos ) );
-	transformPointGLFWtoGL( window, posGlfw, g_cursorPos );
+	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
+	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
 
-	if ( g_bodyId >= 0 )
+	if ( context->bodyId != invalidId )
 	{
-		DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
+		DemoUtils::grab( context->controlInfo, context->world, context->bodyId, posGL );
 	}
 }
 
-void mouseButtonCallback( GLFWwindow* window, int button, int action, int mods )
+void handleMouseButton( GLFWwindow* window, MousePickingContext* context )
 {
-	double x, y;
-	glfwGetCursorPos( window, &x, &y );
+	int leftMouseButtonAction = glfwGetMouseButton( window, GLFW_MOUSE_BUTTON_LEFT );
 
-	Vector3 posGlfw( static_cast< Real >( x ), static_cast< Real >( y ) );
-	transformPointGLFWtoGL( window, posGlfw, g_cursorPos );
+	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
+	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
 
-	if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !g_bodyHeld )
+	if ( leftMouseButtonAction == GLFW_PRESS && context->bodyId == invalidId )
 	{
-		const std::vector<BodyId>& activeBodyIds = g_world->getActiveBodyIds();
+		const physicsWorld* world = context->world;
+
+		const std::vector<BodyId>& activeBodyIds = world->getActiveBodyIds();
 		for ( auto i = 0; i < activeBodyIds.size(); i++ )
 		{
-			const physicsBody& body = g_world->getBody( activeBodyIds[i] );
+			const physicsBody& body = world->getBody( activeBodyIds[i] );
 
 			if ( body.isStatic() ) continue;
 
-			if ( body.containsPoint( g_cursorPos ) )
+			if ( body.containsPoint( posGL ) )
 			{
-				g_bodyId = body.getBodyId();
-				g_arm.setSub( g_cursorPos, body.getPosition() );
-				g_bodyHeld = true;
-				DemoUtils::controlBody( g_controlInfo, g_world, g_bodyId, g_cursorPos );
+				context->bodyId = body.getBodyId();
+				context->arm.setSub( posGL, body.getPosition() );
+				DemoUtils::grab( context->controlInfo, context->world, context->bodyId, posGL );
 				break;
 			}
 		}
 	}
-	else if ( button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && g_bodyHeld )
+	else if ( leftMouseButtonAction == GLFW_RELEASE && context->bodyId != invalidId )
 	{
-		DemoUtils::releaseControl( g_controlInfo, g_world, g_bodyId );
-		g_bodyId = -1;
-		g_arm.setZero();
-		g_bodyHeld = false;
+		DemoUtils::release( context->controlInfo, context->world, context->bodyId );
+		context->bodyId = invalidId;
+		context->arm.setZero();
 	}
 }
+
 
 void drawAxis()
 {
@@ -156,81 +179,47 @@ void drawAxis()
 	}
 }
 
-void drawCursorMarker()
+void drawCursorMarker( GLFWwindow* window )
 {
-	drawCross( g_cursorPos, 45.f * g_degToRad, 50.f, PURPLE );
+	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
+	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
+	drawCross( posGL, 45.f * g_degToRad, 50.f, PURPLE );
 }
 
-void stepRender( GLFWwindow* window )
+void stepFramework( GLFWwindow* window, MousePickingContext* mousePickingContext )
 {
 	glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
 	glColor3f( 0.0f, 0.0f, 0.0f );
 
 	drawAxis();
-	drawCursorMarker();
+	drawCursorMarker( window );
 
-	/// Step physics
-	g_world->render();
-	g_world->step();
+	// Step physics
+	mousePickingContext->world->render();
+	mousePickingContext->world->step();
 
-	/// Draw
+	// Step framework controls
+	handleCursorPosition( window, mousePickingContext );
+	handleMouseButton( window, mousePickingContext );
+
+	// Draw
 	stepRenderer();
 	glfwSwapBuffers( window );
 }
 
-static void keyCallback( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-	if ( action == GLFW_PRESS )
-	{
-		if ( key == GLFW_KEY_ESCAPE )
-		{
-			glfwSetWindowShouldClose( window, GL_TRUE );
-			return;
-		}
-
-		if ( key == GLFW_KEY_SPACE )
-		{
-			if ( g_state == Paused )
-			{
-				stepRender( window );
-			}
-			return;
-		}
-
-		if ( key == GLFW_KEY_ENTER )
-		{
-			if ( g_state == Running )
-			{
-				g_state = Paused;
-				return;
-			}
-
-			if ( g_state = Paused )
-			{
-				g_state = Running;
-				return;
-			}
-		}
-	}
-}
-
-int initializeWindow( GLFWwindow*& window, const WindowCinfo& cinfo )
+int initWindow( GLFWwindow*& window, const RenderConfig& cinfo )
 {
 	if ( !glfwInit() )
 	{
 		return -1;
 	}
 
-	window = glfwCreateWindow( cinfo.widthWindow, cinfo.heightWindow, "Simulation", nullptr, nullptr );
+	window = glfwCreateWindow( cinfo.windowWidth, cinfo.windowHeight, "Simulation", nullptr, nullptr );
 
 	Assert( window, "glfwCreateWindow failed" );
 
 	glfwMakeContextCurrent( window );
-
-	glfwSetKeyCallback( window, keyCallback );
-	glfwSetCursorPosCallback( window, cursorPositionCallback );
-	glfwSetMouseButtonCallback( window, mouseButtonCallback );
 
 	glfwWindowHint( GLFW_SAMPLES, 4 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
@@ -239,39 +228,111 @@ int initializeWindow( GLFWwindow*& window, const WindowCinfo& cinfo )
 	return 0;
 }
 
-void BeginGraphics( const WindowCinfo& cinfo )
+int initPhysicsMathSettings()
 {
-	Assert( cinfo.widthWindow > 0, "Width of window is negative" );
-	Assert( cinfo.heightWindow > 0, "Height of window is negative" );
+	// Raise floating point exceptions
+	unsigned int currentState = 0;
+	_controlfp_s( &currentState, 0, 0 );
+	_controlfp_s( &currentState, _EM_INEXACT | _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
 
-	g_world = cinfo.world;
-	g_state = Paused;
-	g_controlInfo.dummyBodyId = -1;
-	g_controlInfo.dummyJointId = -1;
+	return 0;
+}
+
+void handleKeyPress( GLFWwindow* window, State* state, KeyPressContext* keyPressContext, MousePickingContext* mousePickingContext )
+{
+	if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS && !keyPressContext->escPressed )
+	{
+		keyPressContext->escPressed = true;
+		glfwSetWindowShouldClose( window, GL_TRUE );
+		return;
+	}
+	else if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_RELEASE )
+	{
+		keyPressContext->escPressed = false;
+	}
+
+	if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS && !keyPressContext->spacePressed )
+	{
+		keyPressContext->spacePressed = true;
+		if ( *state == Paused )
+		{
+			stepFramework( window, mousePickingContext);
+		}
+		return;
+	}
+	else if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_RELEASE )
+	{
+		keyPressContext->spacePressed = false;
+	}
+
+	if ( glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_PRESS && !keyPressContext->enterPressed )
+	{
+		keyPressContext->enterPressed = true;
+		if ( *state == Running )
+		{
+			*state = Paused;
+			return;
+		}
+
+		if ( *state == Paused )
+		{
+			*state = Running;
+			return;
+		}
+	}
+	else if ( glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_RELEASE )
+	{
+		keyPressContext->enterPressed = false;
+	}
+}
+
+void startSimulationAndRender( int argc, char* argv[] )
+{
+	// Set control bits
+	initPhysicsMathSettings();
+
+	// Setup physics world with bodies
+	physicsWorld* world;
+	initPhysicsScene( world );
+
+	RenderConfig cinfo;
+	{
+		cinfo.windowWidth = 1366; // Taken arbitrarily from my own machine
+		cinfo.windowHeight = 768;
+		cinfo.fps = 30;
+	}
+
+	Assert( cinfo.windowWidth > 0, "Width of window is negative" );
+	Assert( cinfo.windowHeight > 0, "Height of window is negative" );
 
 	GLFWwindow* window;
-
-	initializeWindow( window, cinfo );
-
-	initializeRendering( cinfo.widthWindow, cinfo.heightWindow );
+	initWindow( window, cinfo );
+	initRenderer( cinfo.windowWidth, cinfo.windowHeight );
 
 	glfwPollEvents();
-	stepRender( window );
+
+	MousePickingContext mousePickingContext( world );
+	KeyPressContext keyPressContext;
+	State state = Paused;
+
+	stepFramework( window, &mousePickingContext );
 
 	while ( !glfwWindowShouldClose( window ) )
 	{
-		if ( g_state == Running )
+		handleKeyPress( window, &state, &keyPressContext, &mousePickingContext );
+
+		if ( state == Running )
 		{
 			glfwPollEvents();
-			stepRender( window );
+			stepFramework( window, &mousePickingContext );
 		}
-		else if ( g_state == Paused )
+		else if ( state == Paused )
 		{
 			glfwWaitEvents();
 		}
 	}
 
-	closeRendering();
+	closeRenderer();
 
 	glfwDestroyWindow( window );
 
