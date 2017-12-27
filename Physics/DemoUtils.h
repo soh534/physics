@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <physicsTypes.h>
 
 class physicsBody;
@@ -24,6 +23,7 @@ namespace DemoUtils
 	void grab( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos );
 	void release( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
 
-	// Create packed circles for mass simulation
 	void createPackedCircles( physicsWorld* world, const Vector3& pos, const Real radius, const int numCircles );
+	void createWalls( physicsWorld*& world );
+	void createConstrainedBodies( physicsWorld*& world );
 }

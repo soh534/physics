@@ -2,6 +2,7 @@
 #include <DemoUtils.h>
 #include <physicsShape.h>
 #include <physicsWorld.h>
+#include <vector>
 
 void DemoUtils::grab( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos )
 {
@@ -71,4 +72,112 @@ void DemoUtils::createPackedCircles( physicsWorld* world,
 
 		world->createBody( cinfo );
 	}
+}
+
+void DemoUtils::createWalls( physicsWorld*& world )
+{
+#if 1
+	{
+		/// Eastern wall
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( 25.f, 200.f ) );
+		vertices.push_back( Vector3( -25.f, 250.f ) );
+		vertices.push_back( Vector3( -25.f, -250.f ) );
+		vertices.push_back( Vector3( 25.f, -200.f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_motionType = physicsMotionType::STATIC;
+		cinfo.m_pos.set( 87.f, 384.f );
+		world->createBody( cinfo );
+	}
+#endif
+#if 1
+	{
+		/// Northern wall
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( -400.f, -25.f ) );
+		vertices.push_back( Vector3( -450.f, 25.f ) );
+		vertices.push_back( Vector3( 450.f, 25.f ) );
+		vertices.push_back( Vector3( 400.f, -25.f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_motionType = physicsMotionType::STATIC;
+		cinfo.m_pos.set( 512.f, 609.f );
+		world->createBody( cinfo );
+	}
+#endif
+#if 1
+	{
+		/// Western wall
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( -25.f, 200.f ) );
+		vertices.push_back( Vector3( 25.f, 250.f ) );
+		vertices.push_back( Vector3( 25.f, -250.f ) );
+		vertices.push_back( Vector3( -25.f, -200.f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_motionType = physicsMotionType::STATIC;
+		cinfo.m_pos.set( 937.f, 384.f );
+		world->createBody( cinfo );
+	}
+#endif
+#if 1
+	{
+		/// Southern wall
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( -400.f, 25.f ) );
+		vertices.push_back( Vector3( -450.f, -25.f ) );
+		vertices.push_back( Vector3( 450.f, -25.f ) );
+		vertices.push_back( Vector3( 400.f, 25.f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_motionType = physicsMotionType::STATIC;
+		cinfo.m_pos.set( 512.f, 159.f );
+		world->createBody( cinfo );
+	}
+#endif
+}
+
+void DemoUtils::createConstrainedBodies( physicsWorld*& world )
+{
+	int bIdA, bIdB;
+	{
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( -18.0f, 36.0f ) );
+		vertices.push_back( Vector3( -30.0f, 6.0f ) );
+		vertices.push_back( Vector3( 42.0, -6.0 ) );
+		vertices.push_back( Vector3( -30.0f, -30.0f ) );
+		vertices.push_back( Vector3( 12.0f, -60.0f ) );
+		vertices.push_back( Vector3( 30.0f, 18.0f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_pos.set( 462.0f, 334.0f );
+		/// cinfo.m_rot = 45.0f * g_degToRad;
+		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
+		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
+		bIdA = world->createBody( cinfo );
+	}
+
+	{
+		physicsBodyCinfo cinfo;
+		std::vector<Vector3> vertices;
+		vertices.push_back( Vector3( -18.0f, 36.0f ) );
+		vertices.push_back( Vector3( -30.0f, 6.0f ) );
+		vertices.push_back( Vector3( 42.0, -6.0 ) );
+		vertices.push_back( Vector3( -30.0f, -30.0f ) );
+		vertices.push_back( Vector3( 12.0f, -60.0f ) );
+		vertices.push_back( Vector3( 30.0f, 18.0f ) );
+		cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+		cinfo.m_pos.set( 562.0f, 434.0f );
+		/// cinfo.m_rot = 45.0f * g_degToRad;
+		cinfo.m_linearVelocity.set( 50.0f, 50.0f );
+		//cinfo.m_angularSpeed = 45.0f * g_degToRad;
+		bIdB = world->createBody( cinfo );
+	}
+
+	JointConfig config;
+	config.pivot.set( 512.f, 384.f );
+	config.bodyIdA = bIdA;
+	config.bodyIdB = bIdB;
+	world->addJoint( config );
 }
