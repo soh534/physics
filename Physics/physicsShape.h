@@ -7,7 +7,7 @@
 
 class physicsAabb;
 
-/// Base class for all shapes
+// Base class for all shapes
 class physicsShape : public physicsObject
 {
 public:
@@ -35,16 +35,14 @@ public:
 
 	virtual Real calculateInertia() const = 0;
 
-    virtual void render(const Vector3& pos, const Real rot) const = 0;
+    virtual bool containsPoint(const Vector4& point) const = 0;
 
-    virtual bool containsPoint(const Vector3& point) const = 0;
-
-    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const = 0;
+    virtual void getSupportingVertex(const Vector4& direction, Vector4& point) const = 0;
 
     virtual physicsAabb getAabb(const Real rot) const = 0;
 };
 
-/// Circle shape
+// Circle shape
 class physicsCircleShape : public physicsShape
 {
 public:
@@ -59,11 +57,9 @@ public:
 
 	virtual Real calculateInertia() const override;
  
-    virtual void render(const Vector3& pos, const Real rot) const override;
+    virtual bool containsPoint(const Vector4& point) const override;
 
-    virtual bool containsPoint(const Vector3& point) const override;
-
-    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
+    virtual void getSupportingVertex(const Vector4& direction, Vector4& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
@@ -76,12 +72,12 @@ protected:
     Real m_radius;
 };
 
-/// Box shape
+// Box shape
 class physicsBoxShape : public physicsShape
 {
 public:
 
-	static std::shared_ptr<physicsShape> create( const Vector3& halfExtents );
+	static std::shared_ptr<physicsShape> create( const Vector4& halfExtents );
 
     virtual ~physicsBoxShape() override;
 
@@ -91,29 +87,27 @@ public:
 
 	virtual Real calculateInertia() const override;
 
-	virtual void render( const Vector3& pos, const Real rot ) const override;
+	virtual bool containsPoint( const Vector4& point ) const override;
 
-	virtual bool containsPoint( const Vector3& point ) const override;
-
-	virtual void getSupportingVertex( const Vector3& direction, Vector3& point ) const override;
+	virtual void getSupportingVertex( const Vector4& direction, Vector4& point ) const override;
 
 	virtual physicsAabb getAabb( const Real rot ) const override;
 
-	const Vector3& getHalfExtents() const { return m_halfExtents; }
+	const Vector4& getHalfExtents() const { return m_halfExtents; }
     
 protected:
 
-    physicsBoxShape(const Vector3& halfExtents);
+    physicsBoxShape(const Vector4& halfExtents);
 
-    Vector3 m_halfExtents;
+    Vector4 m_halfExtents;
 };
 
-/// Convex shape
+// Convex shape
 class physicsConvexShape : public physicsShape
 {
 public:
 
-	static std::shared_ptr<physicsShape> create( const std::vector<Vector3>& vertices, const Real radius );
+	static std::shared_ptr<physicsShape> create( const std::vector<Vector4>& vertices, const Real radius );
 
     virtual ~physicsConvexShape() override;
 
@@ -123,15 +117,17 @@ public:
 
 	virtual Real calculateInertia() const override;
 
-    virtual void render(const Vector3& pos, const Real rot) const override;
+    virtual bool containsPoint(const Vector4& point) const override;
 
-    virtual bool containsPoint(const Vector3& point) const override;
-
-    virtual void getSupportingVertex(const Vector3& direction, Vector3& point) const override;
+    virtual void getSupportingVertex(const Vector4& direction, Vector4& point) const override;
 
     virtual physicsAabb getAabb(const Real rot) const override;
 
-	bool getAdjacentVertices( const Vector3& vertex, Vector3& va, Vector3& vb );
+	bool getAdjacentVertices( const Vector4& vertex, Vector4& va, Vector4& vb );
+
+	const std::vector<Vector4>& getVertices() const { return m_vertices; }
+
+	const std::vector<int>& getConnectivity() const { return m_connectivity; }
 
 public:
 
@@ -139,11 +135,11 @@ public:
 
 protected:
 
-	/// Vertices passed can be unsorted
-	/// Vertices have to be w.r.t local-space
-	physicsConvexShape( const std::vector<Vector3>& vertices, const Real radius );
+	// Vertices passed can be unsorted
+	// Vertices have to be w.r.t local-space
+	physicsConvexShape( const std::vector<Vector4>& vertices, const Real radius );
 
-    std::vector<Vector3> m_vertices;
+    std::vector<Vector4> m_vertices;
 
-    std::vector<int> m_connectivity; /// Wraps towards the end
+    std::vector<int> m_connectivity; // Wraps towards the end
 };

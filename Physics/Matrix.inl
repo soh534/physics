@@ -61,7 +61,7 @@ inline void Matrix::setScale(const Real s)
 	(*this)(2, 2) = s;
 }
 
-inline void Matrix::setScale(const Vector3& s)
+inline void Matrix::setScale(const Vector4& s)
 {
 	Assert(getRows() == 3, "Scaling is only supported for 3-row matrices");
 	setIdentity();
@@ -70,7 +70,7 @@ inline void Matrix::setScale(const Vector3& s)
 	(*this)(2, 2) = s(2);
 }
 
-inline void Matrix::setCross(const Vector3& v)
+inline void Matrix::setCross(const Vector4& v)
 {
 	Assert(getRows() == 3, "Cross is only supported for 3 by 3 matrices");
 	Assert(getCols() == 3, "Cross is only supported for 3 by 3 matrices");

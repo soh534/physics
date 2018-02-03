@@ -34,7 +34,7 @@ namespace Scenes
 			cinfo.m_pos.set( 230.0f, 150.0f );
 			cinfo.m_pos.set( -50.f, -50.f );
 			cinfo.m_linearVelocity.set( 50.f, 50.f );
-			/// cinfo.m_angularSpeed = 50.f * g_degToRad;
+			// cinfo.m_angularSpeed = 50.f * g_degToRad;
 			physicsBody* body = new physicsBody( cinfo );
 			world->addBody( body );
 		}
@@ -45,7 +45,7 @@ namespace Scenes
 			cinfo.m_pos.set( -230.0f, -150.0f );
 			cinfo.m_pos.set( 50.f, 50.f );
 			cinfo.m_linearVelocity.set( -10.f, -10.f );
-			/// cinfo.m_angularSpeed = 100.f * g_degToRad;
+			// cinfo.m_angularSpeed = 100.f * g_degToRad;
 			physicsBody* body = new physicsBody( cinfo );
 			world->addBody( body );
 		}
@@ -147,7 +147,7 @@ namespace Scenes
 			vertices.push_back( Vector3( 30.0f, 18.0f ) );
 			cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
 			cinfo.m_pos.set( 462.0f, 434.0f );
-			/// cinfo.m_rot = 45.0f * g_degToRad;
+			// cinfo.m_rot = 45.0f * g_degToRad;
 			cinfo.m_linearVelocity.set( 50.0f, 50.0f );
 			//cinfo.m_angularSpeed = 45.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -168,7 +168,7 @@ namespace Scenes
 			vertices.push_back( Vector3( -30.0f, -40.0f ) );
 			cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 			cinfo.m_pos.set( 115.0f, 70.0f );
-			/// cinfo.m_rot = 77 * g_degToRad;
+			// cinfo.m_rot = 77 * g_degToRad;
 			cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 			cinfo.m_angularSpeed = -50.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -189,7 +189,7 @@ namespace Scenes
 			vertices.push_back( Vector3( -30.0f, -40.0f ) );
 			cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 			cinfo.m_pos.set( 115.0f, 70.0f );
-			/// cinfo.m_rot = 77 * g_degToRad;
+			// cinfo.m_rot = 77 * g_degToRad;
 			cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 			cinfo.m_angularSpeed = -50.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -209,7 +209,7 @@ namespace Scenes
 			vertices.push_back( Vector3( -30.0f, -40.0f ) );
 			cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 			cinfo.m_pos.set( 115.0f, 73.0f );
-			/// cinfo.m_rot = 77 * g_degToRad;
+			// cinfo.m_rot = 77 * g_degToRad;
 			cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 			cinfo.m_angularSpeed = -50.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -229,7 +229,7 @@ namespace Scenes
 			vertices.push_back( Vector3( -30.0f, -40.0f ) );
 			cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 			cinfo.m_pos.set( 115.0f, 74.0f );
-			/// cinfo.m_rot = 77 * g_degToRad;
+			// cinfo.m_rot = 77 * g_degToRad;
 			cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 			cinfo.m_angularSpeed = -50.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -249,7 +249,7 @@ namespace Scenes
 			vertices.push_back( Vector3( -30.0f, -40.0f ) );
 			cinfo.m_shape = new physicsConvexShape( vertices, .1f );
 			cinfo.m_pos.set( 115.0f, 75.0f );
-			/// cinfo.m_rot = 77 * g_degToRad;
+			// cinfo.m_rot = 77 * g_degToRad;
 			cinfo.m_linearVelocity.set( -50.0f, -50.0f );
 			cinfo.m_angularSpeed = -50.0f * g_degToRad;
 			world->createBody( cinfo );
@@ -258,31 +258,63 @@ namespace Scenes
 		return 0;
 	}
 
-	int manyCirclesScene( physicsWorld*& world )
+	std::shared_ptr<physicsWorld> oneConvexScene( const physicsWorldConfig& wcfg )
 	{
-		physicsWorldConfig cinfo;
-		//cinfo.m_gravity.setZero();
-		cinfo.m_gravity.set( 0.f, -981.f );
-		cinfo.m_numIter = 4;
-		world = new physicsWorld( cinfo );
+		std::shared_ptr<physicsWorld> world( new physicsWorld( wcfg ) );
 
-		DemoUtils::createPackedCircles( world, Vector3( 400.f, 400.f ), 50.f, 30 );
+		{
+			physicsBodyCinfo cinfo;
+			std::vector<Vector4> vertices;
+			vertices.push_back( Vector4( 20.0f, -40.0f ) );
+			vertices.push_back( Vector4( 40.0f, -30.0f ) );
+			vertices.push_back( Vector4( 50.0f, -20.0f ) );
+			vertices.push_back( Vector4( 50.0f, 10.0f ) );
+			vertices.push_back( Vector4( 20.0f, 40.0f ) );
+			vertices.push_back( Vector4( -10.0f, 40.0f ) );
+			vertices.push_back( Vector4( -40.0f, 10.0f ) );
+			vertices.push_back( Vector4( -40.0f, -30.0f ) );
+			vertices.push_back( Vector4( -30.0f, -40.0f ) );
+			cinfo.m_shape = physicsConvexShape::create( vertices, .1f );
+			cinfo.m_pos.set( 627.0f, 449.0f );
+			cinfo.m_ori = 77 * g_degToRad;
+			//cinfo.m_angularSpeed = -50.0f * g_degToRad;
+			world->createBody( cinfo );
+		}
 
 		DemoUtils::createWalls( world );
 
-		return 0;
+		return world;
+	}
+
+	std::shared_ptr<physicsWorld> manyCirclesScene( const physicsWorldConfig& wcfg )
+	{
+		std::shared_ptr<physicsWorld> world( new physicsWorld( wcfg ) );
+
+		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 50.f, 20 );
+		DemoUtils::createWalls( world );
+
+		return world;
+	}
+
+	std::shared_ptr<physicsWorld> massParticlesScene( const physicsWorldConfig& wcfg )
+	{
+		std::shared_ptr<physicsWorld> world( new physicsWorld( wcfg ) );
+
+		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 5.f, 500 );
+		DemoUtils::createWalls( world );
+
+		return world;
 	}
 }
 
-int initPhysicsScene( physicsWorld*& world )
+std::shared_ptr<physicsWorld> initPhysicsScene()
 {
-	physicsWorldConfig cinfo;
+	physicsWorldConfig wcfg;
 	//cinfo.m_gravity.setZero();
-	cinfo.m_gravity.set( 0.f, -981.f );
-	cinfo.m_numIter = 4;
-	world = new physicsWorld( cinfo );
+	wcfg.m_gravity.set( 0.f, -981.f );
+	wcfg.m_numIter = 4;
 
-	Scenes::manyCirclesScene( world );
-
-	return 0;
+	//return Scenes::oneConvexScene( wcfg );
+	//return Scenes::manyCirclesScene( wcfg );
+	return Scenes::massParticlesScene( wcfg );
 }

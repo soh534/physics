@@ -26,13 +26,13 @@ public:
 	std::string m_name;
 	std::shared_ptr<physicsShape> m_shape;
 	physicsMotionType m_motionType;
-	Vector3 m_pos;
+	Vector4 m_pos;
     Real m_ori;
-	Vector3 m_linearVelocity;
-    Real m_angularSpeed; /// Radians
+	Vector4 m_linearVelocity;
+    Real m_angularSpeed; // Radians
     Real m_mass;
 	Real m_inertia;
-	Vector3 m_com;
+	Vector4 m_com;
 	Real m_friction;
 	bool m_collidable;
 };
@@ -42,8 +42,8 @@ struct FreeBody
 	int m_nextFreeBodyIdx;
 };
 
-/// Physical body which allows accessing read-only parameters
-/// Changes should be only done internally by the world
+// Physical body which allows accessing read-only parameters
+// Changes should be only done internally by the world
 class physicsBody : public physicsObject
 {
 public:
@@ -52,38 +52,29 @@ public:
 
     ~physicsBody();
 
-	void render() const; /// TODO: move this out of API
+	const std::string& getName() const { return m_name; }
+	void setName( const std::string& name ) { m_name = name; }
 
-	/// Public usage - user-defined name
-	inline const std::string& getName() const;
-	inline void setName( const std::string& name );
+	unsigned int getBodyId() const { return m_bodyId; }
 
-	/// Public usage - bodyId
-	inline unsigned int getBodyId() const;
+	// Return read-only access to shape
+	inline const physicsShape* getShape() const;
 
-	/// Public usage - shape
-	inline std::shared_ptr<physicsShape> getShape() const;
-
-	/// Public usage - motion type
-	inline physicsMotionType getMotionType() const;
+	physicsMotionType getMotionType() const { return m_motionType; }
 	inline bool isStatic() const;
 
-	/// Public usage - positions, rotations, linear velocity, angular speed
-	inline const Vector3& getPosition() const;
-	inline const Real getRotation() const;
-	inline const Vector3& getLinearVelocity() const;
-	inline const Real getAngularSpeed() const;
+	// Read-only access to transforms and motion
+	const Vector4& getPosition() const { return m_pos; }
+	const Real getRotation() const { return  m_ori; }
+	const Vector4& getLinearVelocity() const { return m_linearVelocity; }
+	const Real getAngularSpeed() const { return m_angularSpeed; }
 
-	/// Public usage - mass, inertia, COM
-	inline const Real getMass() const;
-	inline const Real getInertia() const;
-	inline const Vector3& getCenterOfMass() const;
+	const Real getMass() const { return m_mass; }
+	const Real getInvMass() const { return m_invMass; }
+	const Real getInertia() const { return m_inertia; }
+	const Real getInvInertia() const { return m_invInertia; }
 
-	/// Public usage - friction
-	inline const Real getFriction() const;
-
-	/// Public usage - queries
-	bool containsPoint( const Vector3& point ) const;
+	bool containsPoint( const Vector4& point ) const;
 
 private:
 
@@ -91,71 +82,61 @@ private:
 	BodyId m_bodyId;
 	std::shared_ptr<physicsShape> m_shape;
 	physicsMotionType m_motionType;
-	Vector3 m_pos;
+	Vector4 m_pos;
 	Real m_ori;
-	Vector3 m_linearVelocity;
-	Real m_angularSpeed; /// in radians
+	Vector4 m_linearVelocity;
+	Real m_angularSpeed; // in radians
 	Real m_mass;
 	Real m_inertia;
-	Vector3 m_com;
-	Real m_friction;
 
-public: /// TODO: stuff below should be invisible to users, move it
+private:
 
-	/// Internal usage - bodyId
+	// These functions are used internally in physicsWorld
+
 	inline void setBodyId( unsigned int bodyId );
 
-	/// Internal usage - shape
 	physicsShape::Type getShapeType() const;
 
-	/// Internal usage - aabb
+	// Internal usage - aabb
 	inline physicsAabb getAabb() const;
 	void updateAabb();
 
-	/// Internal usage - motion type
+	// Internal usage - motion type
 	inline void setMotionType( physicsMotionType type );
 
-	/// Internal usage - position, rotation, linear velocity, angular speed
-	inline Vector3& getPosition();
-	inline void setPosition( const Vector3& pos );
-	inline Real& getRotation();
+	// Internal usage - position, rotation, linear velocity, angular speed
+	inline void setPosition( const Vector4& pos );
 	inline void setRotation( const Real rotation );
-	inline Vector3& getLinearVelocity();
-	inline void setLinearVelocity( const Vector3& linearVel );
-	inline Real& getAngularSpeed();
+	inline void setLinearVelocity( const Vector4& linearVel );
 	inline void setAngularSpeed( const Real angularVel );
 
-	void getPointVelocity( const Vector3& arm, Vector3& vel ) const; /// arm is local
+	void getPointVelocity( const Vector4& arm, Vector4& vel ) const; // arm is local
 	void setDampedVelocity( const Real& damping );
 
-	/// Internal usage - mass, inertia, COM
+	// Internal usage - mass, inertia, COM
 	inline void setMass(const Real mass);
 	inline void setInertia( const Real inertia );
-	inline const Real getInvMass() const;
-	inline const Real getInvInertia() const;
-	inline void setCenterOfMass(const Vector3& com);
 
-	void getInvInertiaWorld( Transform& invInertiaWorld ) const;
-	void calcEffectiveMassMatrix( const Vector3& ptWorld, Transform& effMassMatrix ) const;
-	void applyPointImpulse( const Vector3& impulse, const Vector3& arm /* arm is in body local*/ );
-
-	/// Internal usage - friction
-	inline void setFriction( const Real friction );
-
-	/// Internal usage - indices
+	// Internal usage - indices
 	inline void setActiveListIdx( unsigned int idx );
 	inline unsigned int getActiveListIdx() const;
 
-	/// Internal usage - collision filter
+	// Internal usage - collision filter
 	inline unsigned int getCollisionFilter() const;
+
+	// Used by world to update body from solver bodies
+	void setFromSolverBody( const struct SolverBody& body );
 
 private:
 
 	physicsAabb m_aabb;
 	Real m_invMass;
 	Real m_invInertia;
-	unsigned int m_activeListIdx; /// Index of this body in physicsWorld::m_activeBodyIds
+	unsigned int m_activeListIdx; // Index of this body in physicsWorld::m_activeBodyIds
 	unsigned int m_collisionFilter;
+
+	friend class physicsWorld;
+	friend class physicsWorldEx;
 };
 
 #include <physicsBody.inl>

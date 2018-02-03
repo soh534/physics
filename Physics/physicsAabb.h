@@ -7,13 +7,13 @@ class physicsAabb
 public:
 
 	physicsAabb();
-	physicsAabb( Vector3 max, Vector3 min );
+	physicsAabb( const Vector4& max, const Vector4& min );
 	void includeAabb( const physicsAabb& aabb );
 	bool overlaps( const physicsAabb& aabb );
 	void expand( const Real factor );
-	void expand( const Vector3& direction );
-	void translate( const Vector3& translation );
+	void expand( const Vector4& direction );
+	void translate( const Vector4& translation );
 
-	Vector3 m_max;
-	Vector3 m_min;
+	Vector4 m_max;
+	Vector4 m_min;
 };

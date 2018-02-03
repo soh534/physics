@@ -57,14 +57,14 @@ void solveConstrainedPairs( const SolverInfo& info,
 		{
 			Constraint& constraint = constraints[ constraintIdx ];
 
-			Vector3 rA_world = constraint.rA.getRotatedDir( bodyA.ori ); /// TODO: replace with transform
-			Vector3 rB_world = constraint.rB.getRotatedDir( bodyB.ori );
+			Vector4 rA_world = constraint.rA.getRotatedDir( bodyA.ori ); // TODO: replace with transform
+			Vector4 rB_world = constraint.rB.getRotatedDir( bodyB.ori );
 
 			const Jacobian& jac = constraint.jac;
 
-			Vector3 vab = bodyA.v + bodyA.w.cross( rA_world ) - bodyB.v - bodyB.w.cross( rB_world );
+			Vector4 vab = bodyA.v + bodyA.w.cross( rA_world ) - bodyB.v - bodyB.w.cross( rB_world );
 
-			Real Jv = vab.dot(jac.vA);
+			Real Jv = vab.dot<2>(jac.vA);
 
 			Real JmJ =
 				jac.vA( 0 ) * bodyA.mInv * jac.vA( 0 ) +
@@ -88,7 +88,7 @@ void solveConstrainedPairs( const SolverInfo& info,
 				pair.accumImp = newImpulse;
 			}
 
-			/// Impulse applied @ contact point
+			// Impulse applied @ contact point
 //			if ( isContact )
 			if ( false )
 			{
@@ -103,7 +103,7 @@ void solveConstrainedPairs( const SolverInfo& info,
 			bodyA.w += jac.wA * impulse * bodyA.iInv;
 			bodyB.w += jac.wB * impulse * bodyB.iInv;
 
-			/// TODO: clean-up these sanity checks
+			// TODO: clean-up these sanity checks
 			Assert( !bodyA.v.isInf(), "bodyA has infinite linear velocity in solver" );
 			Assert( !bodyB.v.isInf(), "bodyB has infinite linear velocity in solver" );
 			Assert( !bodyA.v.isNan(), "bodyA has nan linear velocity in solver" );
@@ -116,25 +116,15 @@ void solveConstrainedPairs( const SolverInfo& info,
 	}
 }
 
-void physicsSolver::solveConstraints( const SolverInfo& info,
-									  bool isContact,
-									  std::vector<ConstrainedPair>& constrainedPairs,
-									  std::vector<SolverBody>& solverBodies,
-									  std::vector<physicsBody>& physicsBodies )
+void physicsSolver::solveConstraints(
+	const SolverInfo& info,
+	bool isContact,
+	std::vector<ConstrainedPair>& constrainedPairs,
+	std::vector<SolverBody>& solverBodies )
 {
-	/// Solve constraints, put satisfying velocities in solver bodies
+	// Solve constraints, put satisfying velocities in solver bodies
 	for ( int i = 0; i < info.m_numIter; i++ )
 	{
 		solveConstrainedPairs( info, isContact, constrainedPairs, solverBodies );
-	}
-
-	/// Update body velocities
-	for ( int activeBodyIdsIdx = 0; activeBodyIdsIdx < (int)solverBodies.size(); activeBodyIdsIdx++ )
-	{
-		const SolverBody& solverBody = solverBodies[activeBodyIdsIdx];
-		physicsBody& body = physicsBodies[activeBodyIdsIdx];
-
-		body.setLinearVelocity( solverBody.v );
-		body.setAngularSpeed( solverBody.w( 2 ) );
 	}
 }

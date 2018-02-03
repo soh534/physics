@@ -38,21 +38,21 @@ inline void Transform::setZero()
 	}
 }
 
-inline void Transform::addTranslation( const Vector3& translation )
+inline void Transform::addTranslation( const Vector4& translation )
 {
 	m_data[0][2] = translation( 0 );
 	m_data[1][2] = translation( 1 );
 }
 
-inline void Transform::setTranslation( const Vector3& translation )
+inline void Transform::setTranslation( const Vector4& translation )
 {
 	setIdentity();
 	addTranslation( translation );
 }
 
-inline Vector3 Transform::getTranslation() const
+inline Vector4 Transform::getTranslation() const
 {
-	return Vector3( m_data[0][2], m_data[1][2] );
+	return Vector4( m_data[0][2], m_data[1][2] );
 }
 
 inline void Transform::addRotation( const Real rotation )
@@ -73,14 +73,14 @@ inline Real Transform::getRotation() const
 	return m_rotation;
 }
 
-inline void Transform::setTransform( const Vector3& translation, const Real rotation )
+inline void Transform::setTransform( const Vector4& translation, const Real rotation )
 {
 	setIdentity();
 	addTranslation( translation );
 	addRotation( rotation );
 }
 
-inline void Transform::setReflection( const Vector3& direction )
+inline void Transform::setReflection( const Vector4& direction )
 {
 	setIdentity();
 	const Real xx = direction( 0 ) * direction( 0 );
@@ -119,7 +119,7 @@ inline void Transform::mul( const Transform& t )
 
 inline void Transform::setInverse( const Transform& t )
 {
-	/// Copy
+	// Copy
 	Transform copy( t );
 
 	setIdentity();

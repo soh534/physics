@@ -1,3 +1,5 @@
 #pragma once
 
-int initPhysicsScene( class physicsWorld*& world );
+#include <memory>
+
+std::shared_ptr<class physicsWorld> initPhysicsScene();

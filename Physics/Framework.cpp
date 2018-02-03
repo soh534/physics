@@ -9,6 +9,8 @@
 #include <Framework.h>
 #include <Scene.h>
 
+#include <physicsViewer.h>
+
 struct RenderConfig
 {
 	unsigned int windowWidth;
@@ -18,17 +20,17 @@ struct RenderConfig
 
 struct MousePickingContext
 {
-	MousePickingContext( physicsWorld* world )
+	MousePickingContext( std::shared_ptr<physicsWorld> world )
 	{
 		arm.setZero();
 		bodyId = invalidId;
 		this->world = world;
 	}
 
-	Vector3 arm; // Body-local grabbed position
+	Vector4 arm; // Body-local grabbed position
 	int bodyId; // Id of body grabbed
 	DemoUtils::ControlInfo controlInfo; // 
-	physicsWorld* world; // Physics world simulating the body
+	std::shared_ptr<physicsWorld> world; // Physics world simulating the body
 };
 
 struct KeyPressContext
@@ -50,7 +52,7 @@ enum State
 	Paused
 };
 
-void transformPointGLFWtoGL( GLFWwindow* window, double xPos, double yPos, Vector3& pointGL )
+void transformPointGLFWtoGL( GLFWwindow* window, double xPos, double yPos, Vector4& pointGL )
 {
 	float left, right, bottom, top;
 	getDimensions( left, right, bottom, top );
@@ -58,24 +60,24 @@ void transformPointGLFWtoGL( GLFWwindow* window, double xPos, double yPos, Vecto
 	int windowWidth, windowHeight;
 	glfwGetWindowSize( window, &windowWidth, &windowHeight );
 
-	/// Reflect monitor-space across x-axis
-	Vector3 axisX( 1.f, 0.f );
+	// Reflect monitor-space across x-axis
+	Vector4 axisX( 1.f, 0.f );
 	Transform axisXReflection; axisXReflection.setReflection( axisX );
 
-	Vector3 pointGLFW( xPos, yPos );
+	Vector4 pointGLFW( xPos, yPos );
 	pointGL.setTransformedPos( axisXReflection, pointGLFW );
 
-	/// Shift origin back to zero
-	Vector3 offsetWindowHeight( 0.f, windowHeight );
+	// Shift origin back to zero
+	Vector4 offsetWindowHeight( 0.f, windowHeight );
 	Transform shiftWindowHeight( offsetWindowHeight, 0.f );
 	pointGL.setTransformedPos( shiftWindowHeight, pointGL );
 
-	/// Scale to dimension-space
-	Vector3 scale( ( right - left ) / windowWidth, ( top - bottom ) / windowHeight );
+	// Scale to dimension-space
+	Vector4 scale( ( right - left ) / windowWidth, ( top - bottom ) / windowHeight );
 	pointGL *= scale;
 
-	/// Shift origin to dimension-space
-	Vector3 bottomLeft( left, bottom );
+	// Shift origin to dimension-space
+	Vector4 bottomLeft( left, bottom );
 	Transform tBottomLeft( bottomLeft, 0.f );
 	pointGL.setTransformedPos( tBottomLeft, pointGL );
 }
@@ -83,7 +85,7 @@ void transformPointGLFWtoGL( GLFWwindow* window, double xPos, double yPos, Vecto
 void handleCursorPosition( GLFWwindow* window, MousePickingContext* context )
 {
 	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
-	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
+	Vector4 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
 
 	if ( context->bodyId != invalidId )
 	{
@@ -96,11 +98,11 @@ void handleMouseButton( GLFWwindow* window, MousePickingContext* context )
 	int leftMouseButtonAction = glfwGetMouseButton( window, GLFW_MOUSE_BUTTON_LEFT );
 
 	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
-	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
+	Vector4 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
 
 	if ( leftMouseButtonAction == GLFW_PRESS && context->bodyId == invalidId )
 	{
-		const physicsWorld* world = context->world;
+		const std::shared_ptr<physicsWorld> world = context->world;
 
 		const std::vector<BodyId>& activeBodyIds = world->getActiveBodyIds();
 		for ( auto i = 0; i < activeBodyIds.size(); i++ )
@@ -132,10 +134,10 @@ void drawAxis()
 	float left, right, bottom, top;
 	getDimensions( left, right, bottom, top );
 
-	Vector3 xleft( left, 0.f );
-	Vector3 xright( right, 0.f );
-	Vector3 ybottom( 0.f, bottom );
-	Vector3 ytop( 0.f, top );
+	Vector4 xleft( left, 0.f );
+	Vector4 xright( right, 0.f );
+	Vector4 ybottom( 0.f, bottom );
+	Vector4 ytop( 0.f, top );
 
 	drawLine( xleft, xright ); // X-axis
 	drawLine( ybottom, ytop ); // Y-axis
@@ -143,8 +145,8 @@ void drawAxis()
 	const int interval = 50;
 
 	float shift = 8.f;
-	Vector3 base, ext;
-	Vector3 offset( shift, shift );
+	Vector4 base, ext;
+	Vector4 offset( shift, shift );
 
 	for ( int i = 0; i < right; i += interval )
 	{
@@ -182,7 +184,7 @@ void drawAxis()
 void drawCursorMarker( GLFWwindow* window )
 {
 	double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
-	Vector3 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
+	Vector4 posGL; transformPointGLFWtoGL( window, xPos, yPos, posGL );
 	drawCross( posGL, 45.f * g_degToRad, 50.f, PURPLE );
 }
 
@@ -196,8 +198,12 @@ void stepFramework( GLFWwindow* window, MousePickingContext* mousePickingContext
 	drawCursorMarker( window );
 
 	// Step physics
-	mousePickingContext->world->render();
+    // TODO: don't depend on mousePickingContext for stepping world
 	mousePickingContext->world->step();
+
+	// Step visualizers
+	physicsViewer::viewShapes( mousePickingContext->world.get() );
+	//physicsViewer::viewBroadphase( mousePickingContext->world.get() );
 
 	// Step framework controls
 	handleCursorPosition( window, mousePickingContext );
@@ -231,9 +237,11 @@ int initWindow( GLFWwindow*& window, const RenderConfig& cinfo )
 int initPhysicsMathSettings()
 {
 	// Raise floating point exceptions
-	unsigned int currentState = 0;
-	_controlfp_s( &currentState, 0, 0 );
-	_controlfp_s( &currentState, _EM_INEXACT | _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
+	// unsigned int currentState = 0;
+	// _controlfp_s( &currentState, 0, 0 );
+	// _controlfp_s( &currentState, _EM_INEXACT | _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID, _MCW_EM );
+
+	_mm_setcsr( _mm_getcsr() | 0x8040 );
 
 	return 0;
 }
@@ -292,8 +300,7 @@ void startSimulationAndRender( int argc, char* argv[] )
 	initPhysicsMathSettings();
 
 	// Setup physics world with bodies
-	physicsWorld* world;
-	initPhysicsScene( world );
+	std::shared_ptr<physicsWorld> world = initPhysicsScene();
 
 	RenderConfig cinfo;
 	{

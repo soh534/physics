@@ -8,7 +8,7 @@ physicsAabb::physicsAabb()
 	m_min.setAll( 0.f );
 }
 
-physicsAabb::physicsAabb( Vector3 max, Vector3 min )
+physicsAabb::physicsAabb( const Vector4& max, const Vector4& min )
 	: m_max( max ), m_min( min )
 {
 }
@@ -27,10 +27,10 @@ void physicsAabb::includeAabb( const physicsAabb& aabb )
 
 bool physicsAabb::overlaps( const physicsAabb& aabb )
 {
-	Vector3 centerA; centerA.setAdd( m_max, m_min );
+	Vector4 centerA; centerA.setAdd( m_max, m_min );
 	centerA.setMul( centerA, 0.5f );
 
-	Vector3 centerB; centerB.setAdd( aabb.m_max, aabb.m_min );
+	Vector4 centerB; centerB.setAdd( aabb.m_max, aabb.m_min );
 	centerB.setMul( centerB, 0.5f );
 
 	Real dx = abs( centerA( 0 ) - centerB( 0 ) );
@@ -48,15 +48,15 @@ void physicsAabb::expand( const Real factor )
 	m_min.setMul( m_min, 1.f + factor );
 }
 
-void physicsAabb::expand( const Vector3 & direction )
+void physicsAabb::expand( const Vector4 & direction )
 {
-	Vector3 newMax = m_max + direction;
-	Vector3 newMin = m_min + direction;
+	Vector4 newMax = m_max + direction;
+	Vector4 newMin = m_min + direction;
 	m_max.setMax( newMax );
 	m_min.setMin( newMin );
 }
 
-void physicsAabb::translate( const Vector3& translation )
+void physicsAabb::translate( const Vector4& translation )
 {
 	m_max.setAdd( m_max, translation );
 	m_min.setAdd( m_min, translation );

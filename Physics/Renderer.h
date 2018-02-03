@@ -8,8 +8,8 @@
 
 #define COLOR_IN_RGB(R, G, B) (R | (G << 8) | (B << 16) | (255 << 24))
 
-/// Color tables obtained from
-/// www.rapidtables.com/web/color/RGB_Color.htm
+// Color tables obtained from
+// www.rapidtables.com/web/color/RGB_Color.htm
 #define BLACK COLOR_IN_RGB(0, 0, 0)
 #define WHITE COLOR_IN_RGB(255, 255, 255)
 #define RED COLOR_IN_RGB(255, 0, 0)
@@ -34,11 +34,11 @@ int closeRenderer();
 int stepRenderer();
 
 void getDimensions( float& left, float& right, float& bottom, float& top );
-void drawLine(const Vector3& p1, const Vector3& p2, unsigned int = BLACK);
-void drawCross(const Vector3& pos, const Real rot, const Real len, unsigned int = BLACK);
-void drawArrow(const Vector3& pos, const Vector3& dir, unsigned int = BLACK);
-void drawBox(const Vector3& max, const Vector3& min, unsigned int = BLACK);
-void drawCircle(const Vector3& pos, const Real radius, unsigned int = BLACK);
+void drawLine(const Vector4& p1, const Vector4& p2, unsigned int = BLACK);
+void drawCross(const Vector4& pos, const Real rot, const Real len, unsigned int = BLACK);
+void drawArrow(const Vector4& pos, const Vector4& dir, unsigned int = BLACK);
+void drawBox(const Vector4& max, const Vector4& min, unsigned int = BLACK);
+void drawCircle(const Vector4& pos, const Real radius, unsigned int = BLACK);
 void drawAxis();
 
-void drawText(const std::string& str, const Vector3& pos, const Real scale = 1.f, unsigned int = BLACK);
+void drawText(const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int = BLACK);

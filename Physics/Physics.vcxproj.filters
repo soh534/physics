@@ -69,14 +69,17 @@
     <ClInclude Include="Renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vector3.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physicsViewer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +122,6 @@
     <ClCompile Include="physicsWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DebugUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -140,15 +140,18 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vector4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physicsViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Matrix.inl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="physicsBody.inl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Vector3.inl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="FragmentShader.shader">
@@ -163,12 +166,12 @@
     <None Include="VertexShader.shader">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="physicsWorld.inl">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Transform.inl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="Vector4.inl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -19,16 +19,16 @@ const Real g_tolerance = 0.01f;
 
 void ContactPointUtils::getContactDifference( const ContactPoint& cpA, const ContactPoint& cpB, Real& res )
 {
-	const Vector3& cpaa = cpA.getContactA();
-	const Vector3& cpab = cpA.getContactB();
-	const Vector3& cpba = cpB.getContactA();
-	const Vector3& cpbb = cpB.getContactB();
+	const Vector4& cpaa = cpA.getContactA();
+	const Vector4& cpab = cpA.getContactB();
+	const Vector4& cpba = cpB.getContactA();
+	const Vector4& cpbb = cpB.getContactB();
 	
-	res = ( cpaa - cpba ).lengthSquared() + ( cpab - cpbb ).lengthSquared();
+	res = ( cpaa - cpba ).lengthSquared<2>() + ( cpab - cpbb ).lengthSquared<2>();
 }
 
 
-/// Base collision agent class functions
+// Base collision agent class functions
 physicsCollider::physicsCollider()
 {
 
@@ -42,104 +42,104 @@ void physicsCollider::collide( const std::shared_ptr<physicsShape>& shapeA,
 
 }
 
-/// Circle-circle collision agent class functions
+// Circle-circle collision agent class functions
 physicsCircleCollider::physicsCircleCollider()
 {
 
 }
 
-void physicsCircleCollider::collide( const std::shared_ptr<physicsShape>& shapeA,
-									 const std::shared_ptr<physicsShape>& shapeB, 
+void physicsCircleCollider::collide( const physicsShape* shapeA,
+									 const physicsShape* shapeB, 
 									 const Transform & transformA, const Transform & transformB, 
 									 std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider" );
 	Assert( shapeB->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle collider" );
 
-	const physicsCircleShape* circleA = static_cast< physicsCircleShape* >( shapeA.get() );
-	const physicsCircleShape* circleB = static_cast< physicsCircleShape* >( shapeB.get() );
+	const physicsCircleShape* circleA = static_cast< const physicsCircleShape* >( shapeA );
+	const physicsCircleShape* circleB = static_cast< const physicsCircleShape* >( shapeB );
 
-	Vector3 posA = transformA.getTranslation();
-	Vector3 posB = transformB.getTranslation();
+	Vector4 posA = transformA.getTranslation();
+	Vector4 posB = transformB.getTranslation();
 	Transform rotA; rotA.setRotation( transformA.getRotation() );
 	Transform rotB; rotB.setRotation( transformB.getRotation() );
 
-	Vector3 ab = posB - posA;
+	Vector4 ab = posB - posA;
 
 	if ( ab.isZero() )
 	{
 		return;
 	}
 
-	Real len = ab.length(); /// TODO: see if we can avoid square rooting
+	Real len = ab.length<2>(); // TODO: see if we can avoid square rooting
 	Real radA = circleA->getRadius();
 	Real radB = circleB->getRadius();
 	Real depth = radA + radB - len;
 
 	if ( depth > 0.f )
 	{
-		Vector3 abHat = ab / len;
-		Vector3 baHat = abHat.getNegated();
+		Vector4 abHat = ab / len;
+		Vector4 baHat = abHat.getNegated();
 
-		Vector3 cpA = posA + abHat * radA;
-		Vector3 cpB = posB + baHat * radB;
-		Vector3 norm = cpA - cpB;
+		Vector4 cpA = posA + abHat * radA;
+		Vector4 cpB = posB + baHat * radB;
+		Vector4 norm = cpA - cpB;
 
 		if ( norm.isZero() )
 		{
-			/// Don't add contact if exactly touching
+			// Don't add contact if exactly touching
 			return;
 		}
 
-		/// TODO: See if we can avoid square rooting
-		norm.normalize();
+		// TODO: See if we can avoid square rooting
+		norm.normalize<2>();
 
-		Vector3 cpAinA; cpAinA.setTransformedInversePos( rotA, cpA - posA );
-		Vector3 cpBinB; cpBinB.setTransformedInversePos( rotB, cpB - posB );
-		ContactPoint contact( depth, cpAinA, cpBinB, norm ); /// AB for separation
+		Vector4 cpAinA; cpAinA.setTransformedInversePos( rotA, cpA - posA );
+		Vector4 cpBinB; cpBinB.setTransformedInversePos( rotB, cpB - posB );
+		ContactPoint contact( depth, cpAinA, cpBinB, norm ); // AB for separation
 
 		contacts.push_back( contact );
 	}
 }
 
-/// Circle-box collision agent class functions
+// Circle-box collision agent class functions
 physicsCircleBoxCollider::physicsCircleBoxCollider()
 {
 
 }
 
-/// A: Circle, B: Box
-void physicsCircleBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
+// A: Circle, B: Box
+void physicsCircleBoxCollider::collide( const physicsShape* shapeA, const physicsShape* shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::CIRCLE, "non-circle shape sent to circle-box collider 1st param" );
 	Assert( shapeB->getType() == physicsShape::BOX, "non-box shape sent to circle-box collider 2nd param" );
 
-	/// TODO: implement this
+	// TODO: implement this
 }
 
-/// Box-box collision agent class functions
+// Box-box collision agent class functions
 physicsBoxCollider::physicsBoxCollider()
 {
 
 }
 
-void physicsBoxCollider::collide( const std::shared_ptr<physicsShape>& shapeA, const std::shared_ptr<physicsShape>& shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
+void physicsBoxCollider::collide( const physicsShape* shapeA, const physicsShape* shapeB, const Transform & transformA, const Transform & transformB, std::vector<ContactPoint>& contacts )
 {
 	Assert( shapeA->getType() == physicsShape::BOX, "non-box shape sent to box collider" );
 	Assert( shapeB->getType() == physicsShape::BOX, "non-box shape sent to box collider" );
 
-	/// TODO: implement this
+	// TODO: implement this
 }
 
-/// Convex-convex collision agent class functions
+// Convex-convex collision agent class functions
 physicsConvexCollider::physicsConvexCollider()
 {
 
 }
 
-void physicsConvexCollider::getSimplexVertex( const Vector3& direction,
-											  const std::shared_ptr<physicsShape>& shapeA,
-											  const std::shared_ptr<physicsShape>& shapeB,
+void physicsConvexCollider::getSimplexVertex( const Vector4& direction,
+											  const physicsShape* shapeA,
+											  const physicsShape* shapeB,
 											  const Transform& transformA,
 											  const Transform& transformB,
 											  SimplexVertex& simplexVertex )
@@ -148,11 +148,11 @@ void physicsConvexCollider::getSimplexVertex( const Vector3& direction,
 	rotationA.setRotation( transformA.getRotation() );
 	rotationB.setRotation( transformB.getRotation() );
 
-	Vector3 dirLocalA, dirLocalB;
+	Vector4 dirLocalA, dirLocalB;
 	dirLocalA.setTransformedInversePos( rotationA, direction );
 	dirLocalB.setTransformedInversePos( rotationB, direction.getNegated() );
 
-	Vector3 supportA, supportB;
+	Vector4 supportA, supportB;
 	shapeA->getSupportingVertex( dirLocalA, supportA );
 	shapeB->getSupportingVertex( dirLocalB, supportB );
 
@@ -213,25 +213,25 @@ void physicsConvexCollider::getSimplexVertex( const Vector3& direction,
 // }
 
 void physicsConvexCollider::collide(
-	const std::shared_ptr<physicsShape>& shapeA,
-	const std::shared_ptr<physicsShape>& shapeB,
+	const physicsShape* shapeA,
+	const physicsShape* shapeB,
 	const Transform& transformA,
 	const Transform& transformB,
 	std::vector<ContactPoint>& contacts )
 {
-    Vector3 posA = transformA.getTranslation();
-    Vector3 posB = transformB.getTranslation();
+    Vector4 posA = transformA.getTranslation();
+    Vector4 posB = transformB.getTranslation();
 
-    Vector3 direction = posB - posA;
+    Vector4 direction = posB - posA;
 
 	if ( direction.isZero() )
 	{
 		return;
 	}
 
-	//direction.setNormalized( direction ); /// TODO: investigate whether normalization really necessary
+	//direction.setNormalized( direction ); // TODO: investigate whether normalization really necessary
 	
-	/// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
+	// [Simplex vertex index][0=simplex, 1=supportA, 2=supportB]
 	Simplex simplex( 3 );
 
 //	drawArrow( transformA.getTranslation(), direction, RED );
@@ -243,28 +243,28 @@ void physicsConvexCollider::collide(
 //	drawCross( simplex[0][1], 45.f * g_degToRad, 30.f, RED );
 	//drawCross( simplex[0][2], 45.f * g_degToRad, 30.f, BLUE );
 
-	const Vector3 origin( 0.f, 0.f );
+	const Vector4 origin( 0.f, 0.f );
 	
 	physicsCd::calcClosestPointOnLine( simplex[0][0], simplex[1][0], origin, direction );
 
-	/// TODO: find out appropriate eps
-	/// float eps = sqrt(std::numeric_limits<float>::epsilon());
+	// TODO: find out appropriate eps
+	// float eps = sqrt(std::numeric_limits<float>::epsilon());
 	Real eps = 0.1f;
     
 	for ( int previousIdx = 0; previousIdx < g_gjkMaxIter; previousIdx++ )
     {
-		/// TODO: Fix bug where direction becomes IND000
+		// TODO: Fix bug where direction becomes IND000
 
 		if ( direction.isZero() )
 		{
-			/// Origin is on the simplex
+			// Origin is on the simplex
 			return;
 		}
 
 		direction.negate();
 		//direction.setNormalized( direction );
 
-		/// Get third simplex triangle vertex
+		// Get third simplex triangle vertex
 		getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, simplex[2] );
 
 #if defined D_GJK_SIMPLEX
@@ -272,17 +272,17 @@ void physicsConvexCollider::collide(
 #endif
 
 		{ 
-			/// Terminate when origin is enclosed by triangle simplex
-			Vector3 edge01; edge01.setSub( simplex[1][0], simplex[0][0] );
-			Vector3 edge12; edge12.setSub( simplex[2][0], simplex[1][0] );
-			Vector3 edge20; edge20.setSub( simplex[0][0], simplex[2][0] );
-			Vector3 vo;
+			// Terminate when origin is enclosed by triangle simplex
+			Vector4 edge01; edge01.setSub( simplex[1][0], simplex[0][0] );
+			Vector4 edge12; edge12.setSub( simplex[2][0], simplex[1][0] );
+			Vector4 edge20; edge20.setSub( simplex[0][0], simplex[2][0] );
+			Vector4 vo;
 
-			vo.setNegated( simplex[0][0] );
+			vo.setNegate( simplex[0][0] );
 			bool l01 = ( edge01( 0 )*vo( 1 ) - edge01( 1 )*vo( 0 ) ) > 0;
-			vo.setNegated( simplex[1][0] );
+			vo.setNegate( simplex[1][0] );
 			bool l12 = ( edge12( 0 )*vo( 1 ) - edge12( 1 )*vo( 0 ) ) > 0;
-			vo.setNegated( simplex[2][0] );
+			vo.setNegate( simplex[2][0] );
 			bool l20 = ( edge20( 0 )*vo( 1 ) - edge20( 1 )*vo( 0 ) ) > 0;
 
 			if ( l01 == l12 && l12 == l20 )
@@ -291,35 +291,35 @@ void physicsConvexCollider::collide(
 			}
 		}
 
-		Real da = direction.dot( simplex[0][0] );
-		Real dc = direction.dot( simplex[2][0] );
+		Real da = direction.dot<2>( simplex[0][0] );
+		Real dc = direction.dot<2>( simplex[2][0] );
 
 		if ( dc - da < eps )
         {
-			/// Converged on closest feature on simplex
-			Vector3 L = simplex[1][0] - simplex[0][0];
+			// Converged on closest feature on simplex
+			Vector4 L = simplex[1][0] - simplex[0][0];
 
-			Vector3 pointA, pointB;
+			Vector4 pointA, pointB;
 
 			if ( L.isZero() )
             {
-				/// Closest simplex feature is a point
+				// Closest simplex feature is a point
 				pointA = simplex[0][1];
 				pointB = simplex[0][2];
             }
             else
             {
-				/// Determine closest point on simplex edge
-				Real l = -1.f * simplex[0][0].dot( L ) / L.dot( L );
+				// Determine closest point on simplex edge
+				Real l = -1.f * simplex[0][0].dot<2>( L ) / L.dot<2>( L );
 
-				/// Interpolation to find contact details if closest is on edge of simplex
+				// Interpolation to find contact details if closest is on edge of simplex
 				pointA.setInterpolate( simplex[0][1], simplex[1][1], l );
 				pointB.setInterpolate( simplex[0][2], simplex[1][2], l );
             }
 
 			if ( direction.isZero() )
 			{
-				/// Exclude touching situations
+				// Exclude touching situations
 				break;
 			}
 
@@ -330,8 +330,8 @@ void physicsConvexCollider::collide(
             return;
         }
 
-		/// Drive simplex edge closer to origin
-		Vector3 closest02, closest21;
+		// Drive simplex edge closer to origin
+		Vector4 closest02, closest21;
 		if ( simplex[0][0] == simplex[2][0] )
 		{
 			closest02 = simplex[0][0];
@@ -350,7 +350,7 @@ void physicsConvexCollider::collide(
 			physicsCd::calcClosestPointOnLine( simplex[2][0], simplex[1][0], origin, closest21 );
 		}
 
-		if ( closest02.dot( closest02 ) < closest21.dot( closest21 ) )
+		if ( closest02.dot<2>( closest02 ) < closest21.dot<2>( closest21 ) )
 		{
 			simplex[1][0] = simplex[2][0];
 			simplex[1][1] = simplex[2][1];
@@ -386,10 +386,10 @@ void physicsConvexCollider::collide(
 	// Determine closest point on simplex edge
 	const size_t szSimplex = simplex.size();
 	int closestIdx = closestEdge.index;
-	int previousIdx = closestIdx == 0 ? szSimplex - 1 : closestIdx - 1;
+	auto previousIdx = closestIdx == 0 ? szSimplex - 1 : closestIdx - 1;
 	
 	// Todo: Find out why two same vertices exist in simplex
-	Vector3 L = simplex[closestIdx][0] - simplex[previousIdx][0];
+	Vector4 L = simplex[closestIdx][0] - simplex[previousIdx][0];
 	//drawArrow( simplex[previousIdx][0], L, PURPLE );
 	//drawCross( simplex[previousIdx][0], 30.f * g_degToRad, 50.f, RED );
 	//drawCross( simplex[closestIdx][0], 30.f * g_degToRad, 50.f, BLUE );
@@ -399,20 +399,20 @@ void physicsConvexCollider::collide(
 		return;
 	}
 	
-	Real l = -1.f * simplex[previousIdx][0].dot( L ) / L.dot( L );
+	Real l = -1.f * simplex[previousIdx][0].dot<2>( L ) / L.dot<2>( L );
 	
-	Vector3 pointA, pointB;
+	Vector4 pointA, pointB;
 	pointA.setInterpolate( simplex[previousIdx][1], simplex[closestIdx][1], l );
 	pointB.setInterpolate( simplex[previousIdx][2], simplex[closestIdx][2], l );
 	//drawCross( pointA, 30.f * g_degToRad, 50.f, RED );
 	// Must be directed from A to B because penetration
-	Vector3 normal = closestEdge.normal;
+	Vector4 normal = closestEdge.normal;
 	normal *= closestEdge.distSq;
 	
 	if ( normal.isZero() )
 	{
 		return;
-		/// Shapes aren't penetrated
+		// Shapes aren't penetrated
 	}
 	
 #if defined D_GJK_CONTACT_LENGTH
@@ -423,19 +423,19 @@ void physicsConvexCollider::collide(
 	rotationA.setRotation( transformA.getRotation() );
 	rotationB.setRotation( transformB.getRotation() );
 	
-	Vector3 cpInA; cpInA.setTransformedInversePos( rotationA, pointA - posA );
-	Vector3 cpInB; cpInB.setTransformedInversePos( rotationB, pointB - posB );
+	Vector4 cpInA; cpInA.setTransformedInversePos( rotationA, pointA - posA );
+	Vector4 cpInB; cpInB.setTransformedInversePos( rotationB, pointB - posB );
 	
-	ContactPoint contact( normal.length(), cpInA, cpInB, normal );
+	ContactPoint contact( normal.length<2>(), cpInA, cpInB, normal );
 	
 	contacts.push_back( contact );
 	
-	/// Detect planar contacts
+	// Detect planar contacts
 	Transform t;
 	const float pt = 15.f * g_degToRad;
 	t.setRotation( pt );
 
-	Vector3 d1, d2;
+	Vector4 d1, d2;
 	d1.setTransformedPos( t, closestEdge.normal );
 	d2.setTransformedInversePos( t, closestEdge.normal );
 	
@@ -451,26 +451,26 @@ void physicsConvexCollider::collide(
 	//drawArrow( newSimplexVertex2[0] - d2 * 50.f, d2 * 50.f, RED );
 	// Determine closest point on simplex edge
 	const size_t szSimplexx = simplex.size();
-	int ii = closestEdge.index == 0 ? szSimplexx - 1 : closestEdge.index - 1;
+	auto ii = closestEdge.index == 0 ? szSimplexx - 1 : closestEdge.index - 1;
 	//drawCross( simplex[ii][0], 45.f * g_degToRad, 50.f, GREEN );
 	//drawCross( simplex[ii][1], 45.f * g_degToRad, 50.f, GREEN );
 	//drawCross( simplex[ii][2], 45.f * g_degToRad, 50.f, GREEN );
 	{
 		// Determine closest point on simplex edge
 		const size_t szSimplex = simplex.size();
-		int i = closestEdge.index == 0 ? szSimplex - 1 : closestEdge.index - 1;
+		auto i = closestEdge.index == 0 ? szSimplex - 1 : closestEdge.index - 1;
 
 		// Todo: Find out why two same vertices exist in simplex
-		Vector3 L = newSimplexVertex1[0] - simplex[i][0];
+		Vector4 L = newSimplexVertex1[0] - simplex[i][0];
 		//drawArrow( simplex[i][0], L, BLUE );
 		if ( L.isZero() )
 		{
 			return;
 		}
 
-		Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
+		Real l = -1.f * simplex[i][0].dot<2>( L ) / L.dot<2>( L );
 
-		Vector3 pointA, pointB;
+		Vector4 pointA, pointB;
 		pointA.setInterpolate( simplex[i][1], newSimplexVertex1[1], l );
 		pointB.setInterpolate( simplex[i][2], newSimplexVertex1[2], l );
 		//drawCross(pointA, 30.f * g_degToRad, 50.f, BLUE);
@@ -483,16 +483,16 @@ void physicsConvexCollider::collide(
 		int i = closestEdge.index == 0 ? szSimplex - 1 : closestEdge.index - 1;
 
 		// Todo: Find out why two same vertices exist in simplex
-		Vector3 L = newSimplexVertex2[0] - simplex[i][0];
+		Vector4 L = newSimplexVertex2[0] - simplex[i][0];
 		//drawArrow( simplex[i][0], L, RED );
 		if ( L.isZero() )
 		{
 			return;
 		}
 
-		Real l = -1.f * simplex[i][0].dot( L ) / L.dot( L );
+		Real l = -1.f * simplex[i][0].dot<2>( L ) / L.dot<2>( L );
 
-		Vector3 pointA, pointB;
+		Vector4 pointA, pointB;
 		pointA.setInterpolate( simplex[i][1], newSimplexVertex2[1], l );
 		pointB.setInterpolate( simplex[i][2], newSimplexVertex2[2], l );
 		//drawCross(pointA, 30.f * g_degToRad, 50.f, RED);
@@ -501,8 +501,8 @@ void physicsConvexCollider::collide(
 }
 
 void physicsConvexCollider::expandingPolytopeAlgorithm(
-	const std::shared_ptr<physicsShape>& shapeA,
-	const std::shared_ptr<physicsShape>& shapeB,
+	const physicsShape* shapeA,
+	const physicsShape* shapeB,
 	const Transform& transformA,
 	const Transform& transformB,
 	Simplex& simplex,
@@ -514,13 +514,13 @@ void physicsConvexCollider::expandingPolytopeAlgorithm(
 
 	while ( true )
 	{
-		// TODO: freezes here in some collisions
+		// TODO: investigate not being able to get out of loop in some collisions
 		getClosestEdgeToOrigin( simplex, closestEdge );
 
 		SimplexVertex newSimplexVertex;
 		getSimplexVertex( closestEdge.normal, shapeA, shapeB, transformA, transformB, newSimplexVertex );
 
-		Real dist = newSimplexVertex[0].dot( closestEdge.normal );
+		Real dist = newSimplexVertex[0].dot<2>( closestEdge.normal );
 		
 		if ( dist - closestEdge.distSq < g_tolerance )
 		{ 
@@ -551,13 +551,13 @@ void physicsConvexCollider::getClosestEdgeToOrigin( const Simplex& simplex, Simp
 	{
 		int j = ( i + 1 ) % szSimplex;
 
-		Vector3 edgeCw = simplex[j][0] - simplex[i][0];
+		Vector4 edgeCw = simplex[j][0] - simplex[i][0];
 
-		/// Get vector from origin to edge, which is direction we want to expand to
-		Vector3 n( edgeCw( 1 ), -1.f * edgeCw( 0 ) );
-		n.normalize();
+		// Get vector from origin to edge, which is direction we want to expand to
+		Vector4 n( edgeCw( 1 ), -1.f * edgeCw( 0 ) );
+		n.normalize<2>();
 
-		Real len = n.dot( simplex[i][0] );
+		Real len = n.dot<2>( simplex[i][0] );
 
 		if ( len < edge.distSq )
 		{

@@ -1,13 +1,13 @@
 #include <physicsCd.h>
 
-/// Finds closest point on line 'p1'---'p2' to 'point'
-void physicsCd::calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, const Vector3& point, Vector3& closest)
+// Finds closest point on line 'p1'---'p2' to 'point'
+void physicsCd::calcClosestPointOnLine(const Vector4& p1, const Vector4& p2, const Vector4& point, Vector4& closest)
 {
 	Assert(p1 != p2, "Edge is a point");
-	Vector3 p1Point; p1Point.setSub(point, p1);
-	Vector3 p1P2; p1P2.setSub(p2, p1);
+	Vector4 p1Point; p1Point.setSub(point, p1);
+	Vector4 p1P2; p1P2.setSub(p2, p1);
 	
-	Real lambda = p1Point.dot(p1P2) / p1P2.dot(p1P2);
+	Real lambda = p1Point.dot<2>(p1P2) / p1P2.dot<2>(p1P2);
 	
 	if (lambda > 1.0f)
 	{
@@ -24,15 +24,15 @@ void physicsCd::calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, con
 	}
 }
 
-void physicsCd::calcLineLineIntersection(const Vector3& l0p0, const Vector3& l0p1, const Vector3& l1p0, const Vector3& l1p1, Vector3& intersection)
+void physicsCd::calcLineLineIntersection(const Vector4& l0p0, const Vector4& l0p1, const Vector4& l1p0, const Vector4& l1p1, Vector4& intersection)
 {
 
 }
 
-void physicsCd::castRay3DTri(const Vector3& ra, const Vector3& rb, const Vector3& ta, const Vector3& tb, const Vector3& tc, Vector3& res)
+void physicsCd::castRay3DTri(const Vector4& ra, const Vector4& rb, const Vector4& ta, const Vector4& tb, const Vector4& tc, Vector4& res)
 {
-	Vector3 norm = (tb - ta).cross(tc - ta);
-	Vector3 m = rb - ra;
-	Real hitFraction = (norm.dot(ta) - norm.dot(ra)) / norm.dot(m);
+	Vector4 norm = (tb - ta).cross(tc - ta);
+	Vector4 m = rb - ra;
+	Real hitFraction = (norm.dot<2>(ta) - norm.dot<2>(ra)) / norm.dot<2>(m);
 	res.setAddMul(ra, m, hitFraction);
 }

@@ -137,6 +137,7 @@
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="physicsViewer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="physicsAabb.h" />
@@ -151,7 +152,7 @@
     <ClInclude Include="physicsTypes.h" />
     <ClInclude Include="physicsWorld.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugUtils.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="physicsViewer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="physicsAabb.cpp" />
@@ -173,7 +175,7 @@
     <ClCompile Include="physicsSolver.cpp" />
     <ClCompile Include="physicsWorld.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Vector3.cpp" />
+    <ClCompile Include="Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.shader" />
@@ -183,10 +185,9 @@
     </None>
     <None Include="Transform.inl" />
     <None Include="physicsBody.inl" />
-    <None Include="physicsWorld.inl" />
     <None Include="TextFragmentShader.shader" />
     <None Include="TextVertexShader.shader" />
-    <None Include="Vector3.inl" />
+    <None Include="Vector4.inl" />
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

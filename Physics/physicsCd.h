@@ -4,12 +4,12 @@
 
 namespace physicsCd
 {
-	/// Finds closest point in line 'p1' to 'p2' from 'point'
-	void calcClosestPointOnLine(const Vector3& p1, const Vector3& p2, const Vector3& point, Vector3& closest);
+	// Finds closest point in line 'p1' to 'p2' from 'point'
+	void calcClosestPointOnLine(const Vector4& p1, const Vector4& p2, const Vector4& point, Vector4& closest);
 
-	/// Finds intersection point 
-	void calcLineLineIntersection(const Vector3& l0p0, const Vector3& l0p1, const Vector3& l1p0, const Vector3& l1p1, Vector3& intersection);
+	// Finds intersection point 
+	void calcLineLineIntersection(const Vector4& l0p0, const Vector4& l0p1, const Vector4& l1p0, const Vector4& l1p1, Vector4& intersection);
 
-	/// Cast ray against triangle
-	void castRay3DTri(const Vector3& ra, const Vector3& rb, const Vector3& ta, const Vector3& tb, const Vector3& tc, Vector3& res);
+	// Cast ray against triangle
+	void castRay3DTri(const Vector4& ra, const Vector4& rb, const Vector4& ta, const Vector4& tb, const Vector4& tc, Vector4& res);
 }

@@ -3,23 +3,23 @@
 #include <vector>
 #include <Base.h>
 
-#include <physicsBody.h> /// For physicsMotionType
-#include <physicsShape.h> /// For physicsShape::NUM_SHAPES
+#include <physicsBody.h> // For physicsMotionType
+#include <physicsShape.h> // For physicsShape::NUM_SHAPES
 #include <physicsCollider.h>
 #include <physicsSolver.h>
 
 struct ContactPoint;
 class physicsSolver;
 
-typedef void( *ColliderFuncPtr )( const std::shared_ptr<physicsShape>& shapeA, 
-								  const std::shared_ptr<physicsShape>& shapeB,
+typedef void( *ColliderFuncPtr )( const physicsShape* shapeA, 
+								  const physicsShape* shapeB,
 								  const Transform& transformA,
 								  const Transform& transformB,
 								  std::vector<ContactPoint>& contacts);
 
 struct physicsWorldConfig
 {
-	Vector3 m_gravity;
+	Vector4 m_gravity;
 	Real m_deltaTime;
 	Real m_cor;
 	int m_numIter;
@@ -35,7 +35,7 @@ struct JointConfig
 {
 	int bodyIdA;
 	int bodyIdB;
-	Vector3 pivot;
+	Vector4 pivot;
 };
 
 struct CachedPair : public BodyIdPair
@@ -45,10 +45,6 @@ struct CachedPair : public BodyIdPair
 	Real accumImp;
 	int numContacts;
 	int idx;
-
-private:
-
-	
 
 public:
 
@@ -66,8 +62,8 @@ public:
 
 	}
 
-	/// TODO: move implementation out
-	void addContact(const ContactPoint cp)
+	// TODO: move implementation out
+	void addContact(const ContactPoint& cp)
 	{
 /*
 		if ( idx == 0 )
@@ -142,6 +138,19 @@ public:
 */
 };
 
+struct BroadphaseBody
+{
+	BodyId bodyId;
+	physicsAabb aabb;
+
+	BroadphaseBody( const BodyId bodyId, const physicsAabb& aabb ) :
+		bodyId( bodyId ),
+		aabb( aabb )
+	{
+
+	}
+};
+
 class physicsWorld : public physicsObject
 {
 public:
@@ -154,9 +163,10 @@ public:
 
 	void removeBody( const BodyId bodyId );
 
-	inline const std::vector<BodyId>& getActiveBodyIds() const;
+	const std::vector<BodyId>& getActiveBodyIds() const { return m_activeBodyIds; }
 
-	const physicsBody& getBody( const BodyId bodyId ) const;
+	// TODO: add O(1) check which checks body is active
+	const physicsBody& getBody( const BodyId bodyId ) const { return m_bodies[bodyId]; }
 
 	int addJoint( const JointConfig& config );
 
@@ -164,32 +174,42 @@ public:
 
 	void step();
 	
-	void render(); /// TODO: move this out of API
-
-	/// Utility funcs
-	void setPosition( BodyId bodyId, const Vector3& point );
+	// Utility funcs
+	void setPosition( BodyId bodyId, const Vector4& point );
 
 	void setMotionType( BodyId bodyId, physicsMotionType type );
 
-	const Real getDeltaTime();
+	const Real getDeltaTime() const { return m_solverInfo.m_deltaTime; }
+
+	const std::vector<BroadphaseBody>& getBroadphaseBodies() const { return m_broadphaseBodies; }
 
 protected:
 
-	Vector3 m_gravity;
+	Vector4 m_gravity;
 	Real m_cor;
-	std::vector<physicsBody> m_bodies; /// Simulated, free bodies
+
+	// Array of bodies, both simulated and freed
+	std::vector<physicsBody> m_bodies;
+
+    // Array of aabb's used for last step's broadphase
 	std::vector<struct BroadphaseBody> m_broadphaseBodies;
 	SolverInfo m_solverInfo;
 	physicsSolver* m_solver;
 	ColliderFuncPtr m_dispatchTable[physicsShape::NUM_SHAPES][physicsShape::NUM_SHAPES];
-	std::vector<BodyIdPair> m_newPairs; /// New broadphase pairs
-	std::vector<BodyIdPair> m_existingPairs; /// Existing broadphase pairs
+
+	// New broadphase pairs
+	std::vector<BodyIdPair> m_newPairs;
+
+	// Existing broadphase pairs from last frame
+	std::vector<BodyIdPair> m_existingPairs;
+
 	std::vector<CachedPair> m_cachedPairs;
 	std::vector<ConstrainedPair> m_jointSolvePairs;
 	std::vector<ConstrainedPair> m_contactSolvePairs;
-	std::vector<BodyId> m_activeBodyIds; /// Simulated body Ids
+
+	// Array of body Ids for which body is simulated
+	std::vector<BodyId> m_activeBodyIds;
+
 	std::vector<SolverBody> m_solverBodies;
 	BodyId m_firstFreeBodyId;
 };
-
-#include <physicsWorld.inl>

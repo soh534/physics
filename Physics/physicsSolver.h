@@ -5,12 +5,12 @@
 
 struct Jacobian
 {
-	Vector3 vA, wA, vB, wB;
+	Vector4 vA, wA, vB, wB;
 };
 
 struct Constraint
 {
-	Vector3 rA, rB; /// Constrained points viewed from local
+	Vector4 rA, rB; // Constrained points viewed from local
 	Real error;
 	Jacobian jac;
 };
@@ -41,10 +41,10 @@ struct SolverInfo
 
 struct SolverBody
 {
-	Vector3 v;
-	Vector3 w;
-	Vector3 pos; /// TODO: remove this
-	Real ori; /// TODO: remove this
+	Vector4 v;
+	Vector4 w;
+	Vector4 pos; // TODO: remove this
+	Real ori; // TODO: remove this
 	Real mInv;
 	Real iInv;
 
@@ -54,10 +54,12 @@ struct SolverBody
 class physicsSolver
 {
 public:
-
-	void solveConstraints( const SolverInfo& info,
-						   bool isContact,
-						   std::vector<ConstrainedPair>& constrainedPairs,
-						   std::vector<SolverBody>& solverBodies,
-						   std::vector<physicsBody>& physicsBodies );
+	// Accept array of constrained pairs and solver bodies,
+    // store constraint-solved velocities in solver bodies
+	void solveConstraints( 
+		const SolverInfo& info,
+		bool isContact,
+		std::vector<ConstrainedPair>& constrainedPairs,
+		std::vector<SolverBody>& solverBodies 
+	);
 };

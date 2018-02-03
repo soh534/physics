@@ -24,23 +24,9 @@
     <ClCompile Include="..\Physics\FileIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Physics\Vector3.cpp">
+    <ClCompile Include="..\Physics\Vector4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Physics\Renderer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Physics\FileIO.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Physics\Base.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Physics\Vector3.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Physics\FragmentShader.shader">
@@ -55,9 +41,9 @@
     <None Include="..\Physics\VertexShader.shader">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\Physics\Vector3.inl">
+    <None Include="packages.config" />
+    <None Include="..\Physics\Vector4.inl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>

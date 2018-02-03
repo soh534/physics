@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>            // std::shared_ptr
 #include <physicsTypes.h>
 
 class physicsBody;
@@ -20,10 +21,16 @@ namespace DemoUtils
 	};
 
 	// Allow mouse-picked control of bodies in world
-	void grab( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId, const Vector3 pos );
-	void release( ControlInfo& controlInfo, physicsWorld* world, BodyId bodyId );
+	void grab( ControlInfo& controlInfo, std::shared_ptr<physicsWorld>& world, BodyId bodyId, const Vector4& pos );
+	void release( ControlInfo& controlInfo, std::shared_ptr<physicsWorld>& world, BodyId bodyId );
 
-	void createPackedCircles( physicsWorld* world, const Vector3& pos, const Real radius, const int numCircles );
-	void createWalls( physicsWorld*& world );
-	void createConstrainedBodies( physicsWorld*& world );
+	// Creates packed circles, useful for testing
+	void createPackedCircles(
+		std::shared_ptr<physicsWorld>& world, const Vector4& pos, const Real radius, const int numCircles );
+
+	// Creates static walls preventing inner bodies from getting out
+	void createWalls( std::shared_ptr<physicsWorld>& world );
+
+	// Adds constrained bodies, useful for testing constraints
+	void createConstrainedBodies( std::shared_ptr<physicsWorld>& world );
 }

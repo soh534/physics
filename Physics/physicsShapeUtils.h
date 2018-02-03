@@ -1,13 +1,13 @@
 #pragma once
 
 class physicsBoxShape;
-class Vector3;
+class Vector4;
 
 namespace physicsShapeUtils
 {
-	/// Determine closest edge of box closest to point
+	// Determine closest edge of box closest to point
 	void getClosestEdgeToPoint( const physicsBoxShape& box, 
-								const Vector3& point,
-								Vector3& base, 
-								Vector3& edge );
+								const Vector4& point,
+								Vector4& base, 
+								Vector4& edge );
 }

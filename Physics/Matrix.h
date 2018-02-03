@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ostream> /// For ostream
+#include <ostream> // For ostream
 
-class Vector3;
+class Vector4;
 
-/// General matrix class, used for constraint solver calculations
+// General matrix class, used for constraint solver calculations
 class Matrix
 {
     Real* m_data;
@@ -31,29 +31,29 @@ public:
 
 	inline Real& operator()(unsigned int row, unsigned int col) const;
 
-	/// Set to identity
+	// Set to identity
 	inline void setIdentity();
 
-	/// Set all elements to f
+	// Set all elements to f
 	inline void set(const Real f);
 
-	/// Set into a scaling matrix from a single scalar (Square matrices only obviously)
+	// Set into a scaling matrix from a single scalar (Square matrices only obviously)
 	inline void setScale(const Real s);
 
-	/// Set into a scaling matrix from Vector3f (3x3 matrices only)
-	inline void setScale(const Vector3& s);
+	// Set into a scaling matrix from Vector3f (3x3 matrices only)
+	inline void setScale(const Vector4& s);
 
-	/// Set into cross product in matrix form from Vector3f (3x3 matrices only)
-	inline void setCross(const Vector3& v);
+	// Set into cross product in matrix form from Vector3f (3x3 matrices only)
+	inline void setCross(const Vector4& v);
 
-	/// Set this matrix into product of m1 and m2
+	// Set this matrix into product of m1 and m2
 	inline void setMul(const Matrix& m1, const Matrix& m2);
 
-	/// Set this matrix into transpose of m
+	// Set this matrix into transpose of m
 	inline void setTranspose(const Matrix& m);
 
-	///
-	/// Utility functions
+	//
+	// Utility functions
 	friend std::ostream& operator << (std::ostream& os, const Matrix& m);
 };
 

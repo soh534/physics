@@ -12,22 +12,22 @@ struct ContactPoint
 private:
 
 	Real m_depth;
-	Vector3 m_posA; /// Contact on A seen by A
-	Vector3 m_posB; /// Contact on B seen by B
-	Vector3 m_norm; /// Point from bodyA to bodyB
+	Vector4 m_posA; // Contact on A seen by A
+	Vector4 m_posB; // Contact on B seen by B
+	Vector4 m_norm; // Point from bodyA to bodyB
 
 public:
 
 	ContactPoint()
 		: m_depth( 0.f ), m_posA(), m_posB(), m_norm() {}
 
-	ContactPoint( Real depth, const Vector3& posA, const Vector3& posB, Vector3 norm )
+	ContactPoint( Real depth, const Vector4& posA, const Vector4& posB, const Vector4& norm )
 		: m_depth( depth ), m_posA( posA ), m_posB( posB ), m_norm( norm ) {}
 
 	inline const Real getDepth() const { return m_depth; }
-	inline const Vector3& getContactA() const { return m_posA; }
-	inline const Vector3& getContactB() const { return m_posB; }
-	inline const Vector3& getNormal() const { return m_norm; }
+	inline const Vector4& getContactA() const { return m_posA; }
+	inline const Vector4& getContactB() const { return m_posB; }
+	inline const Vector4& getNormal() const { return m_norm; }
 
 };
 
@@ -68,8 +68,8 @@ private:
 
 public:
 
-	static void collide( const std::shared_ptr<physicsShape>& shapeA,
-						 const std::shared_ptr<physicsShape>& shapeB,
+	static void collide( const physicsShape* shapeA,
+						 const physicsShape* shapeB,
 						 const Transform& transformA,
 						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
@@ -83,8 +83,8 @@ private:
 
 public:
 
-	static void collide( const std::shared_ptr<physicsShape>& shapeA,
-						 const std::shared_ptr<physicsShape>& shapeB,
+	static void collide( const physicsShape* shapeA,
+						 const physicsShape* shapeB,
 						 const Transform& transformA,
 						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
@@ -98,8 +98,8 @@ private:
 
 public:
 
-	static void collide( const std::shared_ptr<physicsShape>& shapeA,
-						 const std::shared_ptr<physicsShape>& shapeB,
+	static void collide( const physicsShape* shapeA,
+						 const physicsShape* shapeB,
 						 const Transform& transformA,
 						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );
@@ -111,20 +111,20 @@ class physicsConvexCollider: public physicsCollider
 {
 public:
 	
-	typedef std::array<Vector3, 3> SimplexVertex; /// [0] = vertex, [1] = supportA, [2] = supportB
+	typedef std::array<Vector4, 3> SimplexVertex; // [0] = vertex, [1] = supportA, [2] = supportB
 	typedef std::vector<SimplexVertex> Simplex;
 
 	struct SimplexEdge
 	{
 		int index;
 		Real distSq;
-		Vector3 normal;
+		Vector4 normal;
 	};
 
-	/// Finds simplex vertex and it's support vertices local to A
-	static void getSimplexVertex( const Vector3& direction,
-								  const std::shared_ptr<physicsShape>& shapeA,
-								  const std::shared_ptr<physicsShape>& shapeB,
+	// Finds simplex vertex and it's support vertices local to A
+	static void getSimplexVertex( const Vector4& direction,
+								  const physicsShape* shapeA,
+								  const physicsShape* shapeB,
 								  const Transform& transformA,
 								  const Transform& transformB,
 								  SimplexVertex& simplexVert );
@@ -135,8 +135,8 @@ private:
 	physicsConvexCollider();
 
 
-	static void expandingPolytopeAlgorithm( const std::shared_ptr<physicsShape>& shapeA,
-											const std::shared_ptr<physicsShape>& shapeB,
+	static void expandingPolytopeAlgorithm( const physicsShape* shapeA,
+											const physicsShape* shapeB,
 											const Transform& transformA,
 											const Transform& transformB,
 											Simplex& simplex,
@@ -146,8 +146,8 @@ private:
 
 public:
 
-	static void collide( const std::shared_ptr<physicsShape>& shapeA,
-						 const std::shared_ptr<physicsShape>& shapeB,
+	static void collide( const physicsShape* shapeA,
+						 const physicsShape* shapeB,
 						 const Transform& transformA,
 						 const Transform& transformB,
 						 std::vector<ContactPoint>& contacts );

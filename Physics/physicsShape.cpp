@@ -13,12 +13,12 @@
 
 const Real g_density = 1.f;
 
-///#define D_PRINT_VERTICES
+//#define D_PRINT_VERTICES
 #if defined (D_PRINT_VERTICES)
 #include <sstream>
 #endif
 
-/// Base shape class functions
+// Base shape class functions
 physicsShape::physicsShape()
 	: m_convexRadius( 0.1f )
 {
@@ -30,7 +30,7 @@ physicsShape::~physicsShape()
 
 }
 
-/// Circle shape class functions
+// Circle shape class functions
 std::shared_ptr<physicsShape> physicsCircleShape::create( const Real radius )
 {
 	return std::shared_ptr<physicsShape>( new physicsCircleShape( radius ) );
@@ -56,7 +56,7 @@ Real physicsCircleShape::calculateMass() const
 Real physicsCircleShape::calculateInertia() const
 {
 #if 1
-	/// TODO: For now use aabb shape
+	// TODO: For now use aabb shape
 	Real a = m_radius;
 	Real b = m_radius;
 
@@ -66,15 +66,9 @@ Real physicsCircleShape::calculateInertia() const
 #endif
 }
 
-void physicsCircleShape::render( const Vector3& pos, const Real rot ) const
+bool physicsCircleShape::containsPoint( const Vector4& point ) const
 {
-	/// TODO: move this out of API
-	drawCircle( pos, m_radius );
-}
-
-bool physicsCircleShape::containsPoint( const Vector3& point ) const
-{
-	Real distSq = point.lengthSquared();
+	Real distSq = point.lengthSquared<2>();
 
 	if ( distSq < m_radius*m_radius )
 	{
@@ -84,25 +78,25 @@ bool physicsCircleShape::containsPoint( const Vector3& point ) const
 	return false;
 }
 
-void physicsCircleShape::getSupportingVertex( const Vector3& direction, Vector3& point ) const
+void physicsCircleShape::getSupportingVertex( const Vector4& direction, Vector4& point ) const
 {
-	point.setMul( direction.getNormalized(), m_radius );
+	point.setMul( direction.getNormalized<2>(), m_radius );
 }
 
 physicsAabb physicsCircleShape::getAabb( const Real rot ) const
 {
-	Vector3 halfExtent; halfExtent.setAll( m_radius );
-	Vector3 halfExtentNeg; halfExtentNeg.setNegated( halfExtent );
+	Vector4 halfExtent; halfExtent.setAll( m_radius );
+	Vector4 halfExtentNeg; halfExtentNeg.setNegate( halfExtent );
 	return physicsAabb( halfExtent, halfExtentNeg );
 }
 
-std::shared_ptr<physicsShape> physicsBoxShape::create( const Vector3 & halfExtents )
+std::shared_ptr<physicsShape> physicsBoxShape::create( const Vector4 & halfExtents )
 {
 	return std::shared_ptr<physicsShape>( new physicsBoxShape( halfExtents ) );
 }
 
-/// Box shape class functions
-physicsBoxShape::physicsBoxShape( const Vector3& halfExtents )
+// Box shape class functions
+physicsBoxShape::physicsBoxShape( const Vector4& halfExtents )
 	: m_halfExtents( halfExtents )
 {
 
@@ -120,7 +114,7 @@ Real physicsBoxShape::calculateMass() const
 
 Real physicsBoxShape::calculateInertia() const
 {
-	/// From gray book: I = 4/3 p (aaab + abbb)
+	// From gray book: I = 4/3 p (aaab + abbb)
 #if 1
 	Real a = m_halfExtents( 0 );
 	Real b = m_halfExtents( 1 );
@@ -130,32 +124,7 @@ Real physicsBoxShape::calculateInertia() const
 #endif
 }
 
-void physicsBoxShape::render( const Vector3& pos, const Real rot ) const
-{
-	/// Replace with multiplication by transformation matrix
-	Vector3 posNe, posNw, posSe, posSw;
-	posNe.setRotatedDir( m_halfExtents, rot );
-	posNe.setAdd( posNe, pos );
-
-	posNw.setNegated( m_halfExtents, 0 );
-	posNw.setRotatedDir( posNw, rot );
-	posNw.setAdd( posNw, pos );
-
-	posSe.setNegated( m_halfExtents, 1 );
-	posSe.setRotatedDir( posSe, rot );
-	posSe.setAdd( posSe, pos );
-
-	posSw.setNegated( m_halfExtents );
-	posSw.setRotatedDir( posSw, rot );
-	posSw.setAdd( posSw, pos );
-
-	drawLine( posNe, posNw );
-	drawLine( posNw, posSw );
-	drawLine( posSw, posSe );
-	drawLine( posSe, posNe );
-}
-
-bool physicsBoxShape::containsPoint( const Vector3& point ) const
+bool physicsBoxShape::containsPoint( const Vector4& point ) const
 {
 	if ( -1.0f * m_halfExtents( 0 ) <= point( 0 ) && point( 0 ) <= m_halfExtents( 0 ) &&
 		 -1.0f * m_halfExtents( 0 ) <= point( 1 ) && point( 1 ) <= m_halfExtents( 1 ) )
@@ -166,38 +135,38 @@ bool physicsBoxShape::containsPoint( const Vector3& point ) const
 	return false;
 }
 
-void physicsBoxShape::getSupportingVertex( const Vector3& direction, Vector3& point ) const
+void physicsBoxShape::getSupportingVertex( const Vector4& direction, Vector4& point ) const
 {
-	Vector3 dirNw( -m_halfExtents( 0 ), m_halfExtents( 1 ) );
-	Vector3 dirSw( -m_halfExtents( 0 ), -m_halfExtents( 1 ) );
-	Vector3 dirSe( m_halfExtents( 0 ), -m_halfExtents( 1 ) );
-	Vector3 dirNe( m_halfExtents( 0 ), m_halfExtents( 1 ) );
+	Vector4 dirNw( -m_halfExtents( 0 ), m_halfExtents( 1 ) );
+	Vector4 dirSw( -m_halfExtents( 0 ), -m_halfExtents( 1 ) );
+	Vector4 dirSe( m_halfExtents( 0 ), -m_halfExtents( 1 ) );
+	Vector4 dirNe( m_halfExtents( 0 ), m_halfExtents( 1 ) );
 
 	Real currMax = std::numeric_limits<Real>::lowest();
 	Real potentialMaxDot;
 
-	potentialMaxDot = direction.dot( dirNw );
+	potentialMaxDot = direction.dot<2>( dirNw );
 	if ( potentialMaxDot > currMax )
 	{
 		currMax = potentialMaxDot;
 		point = dirNw;
 	}
 
-	potentialMaxDot = direction.dot( dirSw );
+	potentialMaxDot = direction.dot<2>( dirSw );
 	if ( potentialMaxDot > currMax )
 	{
 		currMax = potentialMaxDot;
 		point = dirSw;
 	}
 
-	potentialMaxDot = direction.dot( dirSe );
+	potentialMaxDot = direction.dot<2>( dirSe );
 	if ( potentialMaxDot > currMax )
 	{
 		currMax = potentialMaxDot;
 		point = dirSe;
 	}
 
-	potentialMaxDot = direction.dot( dirNe );
+	potentialMaxDot = direction.dot<2>( dirNe );
 	if ( potentialMaxDot > currMax )
 	{
 		currMax = potentialMaxDot;
@@ -207,33 +176,33 @@ void physicsBoxShape::getSupportingVertex( const Vector3& direction, Vector3& po
 
 physicsAabb physicsBoxShape::getAabb( const Real rot ) const
 {
-	/// ERROR: this shouldn't have to convert to radians
+	// ERROR: this shouldn't have to convert to radians
 	Real radians = rot * ( Real )M_PI / 180.0f;
 	Real w = 2.0f * m_halfExtents( 0 ) * cos( radians ) + 2.0f * m_halfExtents( 1 ) * sin( radians );
 	Real h = 2.0f * m_halfExtents( 0 ) * sin( radians ) + 2.0f * m_halfExtents( 1 ) * cos( radians );
 
 	return physicsAabb(
-		Vector3( w / 2.0f, h / 2.0f ),
-		Vector3( -w / 2.0f, -h / 2.0f ) );
+		Vector4( w / 2.0f, h / 2.0f ),
+		Vector4( -w / 2.0f, -h / 2.0f ) );
 }
 
-/// Convex shape class functions
-std::shared_ptr<physicsShape> physicsConvexShape::create( const std::vector<Vector3>& vertices, const Real radius )
+// Convex shape class functions
+std::shared_ptr<physicsShape> physicsConvexShape::create( const std::vector<Vector4>& vertices, const Real radius )
 {
 	return std::shared_ptr<physicsShape>( new physicsConvexShape( vertices, radius ) );
 }
 
-physicsConvexShape::physicsConvexShape( const std::vector<Vector3>& vertices, const Real radius )
+physicsConvexShape::physicsConvexShape( const std::vector<Vector4>& vertices, const Real radius )
 { 
-	/// Get unsorted list of vertices, establish connections to treat as convex
+	// Get unsorted list of vertices, establish connections to treat as convex
 
-	/// TODO: Bug where code will fail if two same vertices exist in vertices array
+	// TODO: Bug where code will fail if two same vertices exist in vertices array
 	int numVertices = ( int )vertices.size();
 
-	/// TODO: APPLY CONVEX RADIUS
+	// TODO: APPLY CONVEX RADIUS
 	m_vertices.assign( vertices.begin(), vertices.end() );
 
-	/// Determine connectivity
+	// Determine connectivity
 	unsigned int xMinIdx = 0;
 
 	for ( int i = 1; i < numVertices; i++ )
@@ -249,7 +218,7 @@ physicsConvexShape::physicsConvexShape( const std::vector<Vector3>& vertices, co
 	int nodeCurrent = xMinIdx;
 	int nodeNext = -1;
 
-	Vector3 edgeCurrent;
+	Vector4 edgeCurrent;
 	edgeCurrent.set( 0.0f, 1.0f );
 
 	std::vector<bool> flags;
@@ -266,10 +235,10 @@ physicsConvexShape::physicsConvexShape( const std::vector<Vector3>& vertices, co
 				continue;
 			}
 
-			Vector3 edgePotential;
+			Vector4 edgePotential;
 			edgePotential.setSub( m_vertices[j], m_vertices[nodeCurrent] );
 
-			Real cosPotential = edgeCurrent.dot( edgePotential ) / ( edgeCurrent.length() * edgePotential.length() );
+			Real cosPotential = edgeCurrent.dot<2>( edgePotential ) / ( edgeCurrent.length<2>() * edgePotential.length<2>() );
 
 			if ( cosPotential > cosCurrent )
 			{
@@ -294,7 +263,7 @@ Real physicsConvexShape::calculateMass() const
 {
 	Real area = 0.f;
 
-	const Vector3& v0 = m_vertices[m_connectivity[0]];
+	const Vector4& v0 = m_vertices[m_connectivity[0]];
 
 	for ( int i = 1; i < ( int )m_vertices.size(); i++ )
 	{
@@ -307,7 +276,7 @@ Real physicsConvexShape::calculateMass() const
 Real physicsConvexShape::calculateInertia() const
 {
 #if 1
-	/// TODO: For now use aabb shape
+	// TODO: For now use aabb shape
 	physicsAabb aabb = getAabb( 0.f );
 
 	Real a = aabb.m_max( 0 );
@@ -319,36 +288,9 @@ Real physicsConvexShape::calculateInertia() const
 #endif
 }
 
-void physicsConvexShape::render( const Vector3& pos, const Real rot ) const
+bool physicsConvexShape::containsPoint( const Vector4& point ) const
 {
-	int numConnectivity = ( int )m_connectivity.size();
-
-	for ( int i = 1; i < numConnectivity; i++ )
-	{
-		Vector3 dirV0; dirV0.setRotatedDir( m_vertices[m_connectivity[i - 1]], rot );
-		Vector3 v0; v0.setAdd( pos, dirV0 );
-
-		Vector3 dirV1; dirV1.setRotatedDir( m_vertices[m_connectivity[i]], rot );
-		Vector3 v1; v1.setAdd( pos, dirV1 );
-
-		drawLine( v0, v1 );
-
-#if defined (D_PRINT_VERTICES)
-		std::stringstream ss;
-		ss << v0;
-		drawText( ss.str(), v0 );
-
-		ss.str( "" );
-
-		ss << v1;
-		drawText( ss.str(), v1 );
-#endif
-	}
-}
-
-bool physicsConvexShape::containsPoint( const Vector3& point ) const
-{
-	Vector3 edge, normal, dirMpToPoint;
+	Vector4 edge, normal, dirMpToPoint;
 
 	int numConnectivity = ( int )m_connectivity.size();
 
@@ -357,10 +299,10 @@ bool physicsConvexShape::containsPoint( const Vector3& point ) const
 		edge.setSub( m_vertices[m_connectivity[i + 1]], m_vertices[m_connectivity[i]] );
 		normal.set( edge( 1 ), -edge( 0 ) );
 
-		Vector3 midpoint; midpoint.setAddMul( m_vertices[m_connectivity[i]], edge, 0.5f );
+		Vector4 midpoint; midpoint.setAddMul( m_vertices[m_connectivity[i]], edge, 0.5f );
 		dirMpToPoint.setSub( point, midpoint );
 
-		if ( normal.dot( dirMpToPoint ) < 0.0f )
+		if ( normal.dot<2>( dirMpToPoint ) < 0.0f )
 		{
 			return false;
 		}
@@ -369,18 +311,18 @@ bool physicsConvexShape::containsPoint( const Vector3& point ) const
 	return true;
 }
 
-void physicsConvexShape::getSupportingVertex( const Vector3& direction, Vector3& point ) const
+void physicsConvexShape::getSupportingVertex( const Vector4& direction, Vector4& point ) const
 {
 	Real dotMax = std::numeric_limits<Real>::lowest();
 	Real potentialMaxDot;
 
 	int numVertices = ( int )m_vertices.size();
 
-	Vector3 dirNorm = direction.getNormalized();
+	Vector4 dirNorm = direction.getNormalized<2>();
 
 	for ( int i = 0; i < numVertices; i++ )
 	{
-		potentialMaxDot = dirNorm.dot( m_vertices[i] );
+		potentialMaxDot = dirNorm.dot<2>( m_vertices[i] );
 
 		if ( potentialMaxDot > dotMax )
 		{
@@ -400,25 +342,25 @@ physicsAabb physicsConvexShape::getAabb( const Real rot ) const
 	int numVertices = ( int )m_vertices.size();
 	for ( int i = 0; i < numVertices; i++ )
 	{
-		Vector3 vertW = m_vertices[i].getRotatedDir( rot );
+		Vector4 vertW = m_vertices[i].getRotatedDir( rot );
 		xmin = std::min( vertW( 0 ), xmin );
 		xmax = std::max( vertW( 0 ), xmax );
 		ymin = std::min( vertW( 1 ), ymin );
 		ymax = std::max( vertW( 1 ), ymax );
 	}
 
-	return physicsAabb( Vector3( xmax, ymax ), Vector3( xmin, ymin ) );
+	return physicsAabb( Vector4( xmax, ymax ), Vector4( xmin, ymin ) );
 }
 
-bool physicsConvexShape::getAdjacentVertices( const Vector3& vertex, Vector3& va, Vector3& vb )
+bool physicsConvexShape::getAdjacentVertices( const Vector4& vertex, Vector4& va, Vector4& vb )
 {
 	int numVertices = ( int )m_vertices.size();
 	int idx = -1;
 
 	for ( int i = 0; i < numVertices; i++ )
 	{
-		/// TODO: measure appropriate epsilon and make it const var
-		if ( (vertex - m_vertices[i]).lengthSquared() < 0.01f )
+		// TODO: measure appropriate epsilon and make it const var
+		if ( (vertex - m_vertices[i]).lengthSquared<2>() < 0.01f )
 		{
 			idx = i;
 			break;
@@ -444,7 +386,7 @@ bool physicsConvexShape::getAdjacentVertices( const Vector3& vertex, Vector3& va
 
 	Assert( idxConnection > -1, "Connectivity data in convex shape doesn't match vertices index." );
 
-	/// TODO: so messy, clean up
+	// TODO: so messy, clean up
 	int idxVertA = ( idxConnection == 0 ) ? m_connectivity[numConnectivity - 2] : m_connectivity[idxConnection - 1];
 	int idxVertB = (idxConnection == numConnectivity - 1) ? m_connectivity[1] : m_connectivity[idxConnection + 1];
 

@@ -22,19 +22,16 @@
 #include <physicsBody.h>
 #include <physicsCollider.h>
 
-class Vector3;
+class Vector4;
 
 namespace DebugUtils
 {
-	// Broadphase
-	void drawBpAabb( const physicsBody& body );
-
 	// Narrowphase
-	void drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
-								  const std::shared_ptr<physicsShape>& shapeB,
+	void drawMinkowskiDifference( const physicsShape* shapeA,
+								  const physicsShape* shapeB,
 								  const Transform& transformA,
 								  const Transform& transformB );
-	void drawContactNormal( const Vector3& contactA, const Vector3& normal );
+	void drawContactNormal( const Vector4& contactA, const Vector4& normal );
 	void drawSimplex( const physicsConvexCollider::Simplex& simplex, unsigned int color );
 	void drawExpandedSimplex( const physicsConvexCollider::Simplex& simplex );
 }

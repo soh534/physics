@@ -3,8 +3,8 @@
 
 #include <physicsInternalTypes.h>
 
-/// Classifies contents of a and b into intersection and relative complements
-/// i.e. c = ab', d = ab, e = a'b
+// Classifies contents of a and b into intersection and relative complements
+// i.e. c = ab', d = ab, e = a'b
 template<typename T>
 void classifySets(
 	const std::vector<T>& a,
@@ -117,8 +117,8 @@ void bodyIdPairSortTest()
 
 void transformsTest()
 {
-	Vector3 v( 50.f, 50.f );
-	Vector3 vopp = v.getNegated();
+	Vector4 v( 50.f, 50.f );
+	Vector4 vopp = v.getNegated();
 
 	Real rot( 45.f * g_degToRad );
 	Real rotopp = -1.f * rot;
@@ -134,23 +134,23 @@ void transformsTest()
 
 	Transform lin; lin.setTranslation( v );
 	Transform ang; ang.setRotation( rot );
-	Transform linAng; linAng.setMul( lin, ang ); /// Remember v' = LRv, rotation applied first
+	Transform linAng; linAng.setMul( lin, ang ); // Remember v' = LRv, rotation applied first
 
 	Transform linInv; linInv.setInverse( lin );
 	Transform angInv; angInv.setInverse( ang );
 
 	Transform angInvLinInv( vopp, rotopp );
 
-	/// v3(-10.f, 10.f)  ********* v0(10.f, 10.f)
-	///                  *       *
-	///                  *   0   * -> rotate 45 deg, then translate 50, 50
-	///                  *       *
-	/// v2(-10.f, -10.f) ********* v1(10.f, -10.f)
+	// v3(-10.f, 10.f)  ********* v0(10.f, 10.f)
+	//                  *       *
+	//                  *   0   * -> rotate 45 deg, then translate 50, 50
+	//                  *       *
+	// v2(-10.f, -10.f) ********* v1(10.f, -10.f)
 
-	Vector3 v0( 10.f, 10.f );
-	Vector3 v1( 10.f, -10.f );
-	Vector3 v2( -10.f, -10.f );
-	Vector3 v3( -10.f, 10.f );
+	Vector4 v0( 10.f, 10.f );
+	Vector4 v1( 10.f, -10.f );
+	Vector4 v2( -10.f, -10.f );
+	Vector4 v3( -10.f, 10.f );
 
 	v0.setTransformedPos( ang, v0 );
 	v1.setTransformedPos( ang, v1 );
@@ -176,11 +176,11 @@ void transformsTest()
 	{
 		//float c = cos( angle * g_degToRad );
 		//float ac = acos( c ) / g_degToRad;
-		//Assert( fabs( ac - angle ) < 0.001f, "faults" ); /// Fails from angle = 181.f
+		//Assert( fabs( ac - angle ) < 0.001f, "faults" ); // Fails from angle = 181.f
 
 		//float s = sin( angle * g_degToRad );
 		//float as = asin( s ) / g_degToRad;
-		//Assert( fabs( as - angle ) < 0.001f, "faults" ); /// Fails from angle = 91.f
+		//Assert( fabs( as - angle ) < 0.001f, "faults" ); // Fails from angle = 91.f
 
 		Transform trot; trot.setRotation( angle * g_degToRad );
 		Transform trott; trott.setRotation( trot.getRotation() );

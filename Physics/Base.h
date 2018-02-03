@@ -5,7 +5,7 @@
 #if defined _DEBUG
 #define Assert(cond, text) if (COND(cond)) {} else { printf("Assert: %s", text); __debugbreak(); }
 #else
-#define Assert(cond, text) cond
+#define Assert(cond, text)
 #endif
 
 #define _USE_MATH_DEFINES
@@ -20,7 +20,7 @@ typedef float Real;
 
 const Real g_degToRad = (Real)M_PI / 180.f;
 
-#include <Vector3.h>
+#include <Vector4.h>
 #include <Transform.h>
 #include <Matrix.h>
 

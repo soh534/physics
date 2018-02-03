@@ -3,18 +3,12 @@
 #include <DebugUtils.h>
 #include <physicsCollider.h>
 
-void DebugUtils::drawBpAabb( const physicsBody& body )
-{
-	const physicsAabb& aabb = body.getAabb();
-	drawBox( aabb.m_max, aabb.m_min, RED );
-}
-
-void DebugUtils::drawMinkowskiDifference( const std::shared_ptr<physicsShape>& shapeA,
-										  const std::shared_ptr<physicsShape>& shapeB,
+void DebugUtils::drawMinkowskiDifference( const physicsShape* shapeA,
+										  const physicsShape* shapeB,
 										  const Transform& transformA,
 										  const Transform& transformB )
 {
-	Vector3 direction( 1.0f, 0.0f );
+	Vector4 direction( 1.0f, 0.0f );
 
 	physicsConvexCollider::SimplexVertex vert0, vert1;
 	physicsConvexCollider::getSimplexVertex( direction, shapeA, shapeB, transformA, transformB, vert0 );
@@ -31,10 +25,10 @@ void DebugUtils::drawMinkowskiDifference( const std::shared_ptr<physicsShape>& s
 	}
 }
 
-void DebugUtils::drawContactNormal( const Vector3& contactA, const Vector3& normal )
+void DebugUtils::drawContactNormal( const Vector4& contactA, const Vector4& normal )
 {
 	drawArrow( contactA, normal, OLIVE );
-	drawText( std::to_string( normal.length() ), contactA + normal / 2 );
+	drawText( std::to_string( normal.length<2>() ), contactA + normal / 2 );
 }
 
 void DebugUtils::drawSimplex( const physicsConvexCollider::Simplex& simplex, unsigned int color )

@@ -2,17 +2,17 @@
 #include <physicsShapeUtils.h>
 
 void physicsShapeUtils::getClosestEdgeToPoint( const physicsBoxShape& box,
-											   const Vector3& point,
-											   Vector3& base,
-											   Vector3& edge )
+											   const Vector4& point,
+											   Vector4& base,
+											   Vector4& edge )
 {
-	Vector3 dirNe, dirSe;
-	Vector3 halfExtents = box.getHalfExtents();
+	Vector4 dirNe, dirSe;
+	Vector4 halfExtents = box.getHalfExtents();
 	dirNe = halfExtents;
-	dirSe.setNegated( halfExtents, 1 );
+	dirSe.setNegate( halfExtents, 1 );
 
-	Real dotTopRight = dirNe.dot( point );
-	Real dotBottomRight = dirSe.dot( point );
+	Real dotTopRight = dirNe.dot<2>( point );
+	Real dotBottomRight = dirSe.dot<2>( point );
 
 	if ( dotTopRight > 0.0f && dotBottomRight > 0.0f )
 	{ // Right edge
@@ -26,13 +26,13 @@ void physicsShapeUtils::getClosestEdgeToPoint( const physicsBoxShape& box,
 	}
 	else if ( dotTopRight < 0.0f && dotBottomRight > 0.0f )
 	{ // Bottom edge
-		dirNe.setNegated( dirNe );
+		dirNe.setNegate( dirNe );
 		base = dirNe;
 		edge.set( 2.0f * halfExtents( 0 ), 0.0f );
 	}
 	else if ( dotTopRight < 0.0f && dotBottomRight < 0.0f )
 	{ // Left edge
-		dirSe.setNegated( dirSe );
+		dirSe.setNegate( dirSe );
 		base = dirSe;
 		edge.set( 0.0f, -2.0f * halfExtents( 1 ) );
 	}

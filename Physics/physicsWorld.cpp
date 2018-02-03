@@ -10,34 +10,41 @@
 
 #include <DebugUtils.h>
 
-struct BroadphaseBody
-{
-	BodyId bodyId;
-	physicsAabb aabb;
-
-	BroadphaseBody( const BodyId bodyId, const physicsAabb& aabb ) :
-		bodyId( bodyId ),
-		aabb( aabb )
-	{
-
-	}
-};
-
 class physicsWorldEx : public physicsWorld
 {
 public:
 
-	void registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func );
+	void registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func )
+	{
+		m_dispatchTable[typeA][typeB] = func;
+		m_dispatchTable[typeB][typeA] = func;
+	}
 
-	ColliderFuncPtr getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB );
+	ColliderFuncPtr getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB )
+	{
+		physicsShape::Type typeA = bodyA.getShapeType();
+		physicsShape::Type typeB = bodyB.getShapeType();
+		return m_dispatchTable[typeA][typeB];;
+	}
 
 	void collide();
 
-	/// Accept array of indexed AABB's, return pairs which overlap
-	void collideAabbs( std::vector<BroadphaseBody>& broadphaseBodies, 
-					   std::vector<BodyIdPair>& broadPhasePassedPairsOut );
+	// Accept array of indexed AABB's, return pairs which overlap
+	void collideAabbs( const std::vector<BroadphaseBody>& broadphaseBodies,
+		std::vector<BodyIdPair>& broadPhasePassedPairsOut );
 
-	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB );
+	bool checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
+	{
+		const physicsBody& bodyA = m_bodies[bodyIdA];
+		const physicsBody& bodyB = m_bodies[bodyIdB];
+
+		if ( bodyA.getCollisionFilter() == bodyB.getCollisionFilter() )
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	void mergeCollidableStreams(
 		const std::vector<BodyIdPair>& cachedPairs,
@@ -48,49 +55,32 @@ public:
 	void updateJointConstraints();
 };
 
-void physicsWorldEx::registerColliderFunc( physicsShape::Type typeA, physicsShape::Type typeB, ColliderFuncPtr func )
-{
-	m_dispatchTable[typeA][typeB] = func;
-	m_dispatchTable[typeB][typeA] = func;
-}
-
-ColliderFuncPtr physicsWorldEx::getCollisionFunc( const physicsBody& bodyA, const physicsBody& bodyB )
-{
-	physicsShape::Type typeA = bodyA.getShapeType();
-	physicsShape::Type typeB = bodyB.getShapeType();
-	return m_dispatchTable[typeA][typeB];;
-}
-
 void physicsWorldEx::collide()
 {
-	/// Find new pairs in broadphase, delete caches for lost broadphase pairs
+	// Find new pairs in broadphase, delete caches for lost broadphase pairs
 
-	/// Update broadphase AABB's
-	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )
+	// Update broadphase AABB's
+	m_broadphaseBodies.clear(); // TODO: don't clear this, just overwrite the contents
+	for ( auto i = 0; i < m_activeBodyIds.size(); i++ )
 	{
 		int activeBodyId = m_activeBodyIds[i];
 		physicsBody& body = m_bodies[activeBodyId];
 
-		body.updateAabb();
-
-#if defined D_BROADPHASE
-		DebugUtils::drawBpAabb( body ); /// TODO: move this out
-#endif		
+		body.updateAabb(); // TODO: only update if aabb is dirty, don't update for static bodies
 
 		BroadphaseBody bpBody( body.getBodyId(), body.getAabb() );
-		m_broadphaseBodies.push_back( bpBody ); /// TODO: don't push_back this, just overwrite the contents
+		m_broadphaseBodies.push_back( bpBody ); // TODO: don't push_back this, just overwrite the contents
 	}
 
 	std::vector<BodyIdPair> bpPassedPairs;
 	collideAabbs( m_broadphaseBodies, bpPassedPairs );
-	m_broadphaseBodies.clear(); /// TODO: don't clear this, just overwrite the contents
 
 	std::sort( bpPassedPairs.begin(), bpPassedPairs.end(), bodyIdPairLess );
 	std::sort( m_existingPairs.begin(), m_existingPairs.end(), bodyIdPairLess );
 	std::vector<BodyIdPair> bpLostPairs, bpRemainedPairs;
 	BodyIdPairsUtils::classifyPairSets( m_existingPairs, bpPassedPairs, bpLostPairs, bpRemainedPairs, m_newPairs );
 
-	/// Remove collision caches for which we lose broadphase pair
+	// Remove collision caches for which we lose broadphase pair
 	BodyIdPairsUtils::deletePairsBfromA( m_cachedPairs, bpLostPairs );
 	BodyIdPairsUtils::deletePairsBfromA( m_existingPairs, bpLostPairs );
 
@@ -102,9 +92,9 @@ void physicsWorldEx::collide()
 struct aabbIndex
 {
 	int m_idx;
-	Vector3 m_part;
+	Vector4 m_part;
 
-	aabbIndex( int idx, Vector3 part ) : m_idx( idx ), m_part( part ) {}
+	aabbIndex( int idx, const Vector4& part ) : m_idx( idx ), m_part( part ) {}
 };
 
 static bool xless( const aabbIndex& aabbIdx1, const aabbIndex& aabbIdx2 )
@@ -117,11 +107,11 @@ static bool yless( const aabbIndex& aabbIdx1, const aabbIndex& aabbIdx2 )
 	return aabbIdx1.m_part( 1 ) < aabbIdx2.m_part( 1 );
 }
 
-void physicsWorldEx::collideAabbs( std::vector<BroadphaseBody>& broadphaseBodies,
+void physicsWorldEx::collideAabbs( const std::vector<BroadphaseBody>& broadphaseBodies,
 								   std::vector<BodyIdPair>& broadPhasePassedPairsOut )
 {
 	// Do 1D sweep & prune, add pairs which have overlapping AABB's
-	std::vector<aabbIndex> aabbIndices; /// TODO: don't keep reconstructing this vector, store it and re-use
+	std::vector<aabbIndex> aabbIndices; // TODO: don't keep reconstructing this vector, store it and re-use
 
 	int numBpBodies = ( int )broadphaseBodies.size();
 
@@ -180,28 +170,15 @@ void physicsWorldEx::collideAabbs( std::vector<BroadphaseBody>& broadphaseBodies
 	}
 }
 
-bool physicsWorldEx::checkCollidable( BodyId bodyIdA, BodyId bodyIdB )
-{
-	const physicsBody& bodyA = m_bodies[bodyIdA];
-	const physicsBody& bodyB = m_bodies[bodyIdB];
-
-	if ( bodyA.getCollisionFilter() == bodyB.getCollisionFilter() )
-	{
-		return true;
-	}
-
-	return false;
-}
-
 void setAsContact( Constraint& constraint, const ContactPoint& contact, const Real rotA, const Real rotB )
 {
 	constraint.rA = contact.getContactA();
 	constraint.rB = contact.getContactB();
 	constraint.error = contact.getDepth();
 
-	Vector3 norm = contact.getNormal(); norm.normalize();
-	const Vector3& rA_ws = constraint.rA.getRotatedDir( rotA );
-	const Vector3& rB_ws = constraint.rB.getRotatedDir( rotB );
+	Vector4 norm = contact.getNormal(); norm.normalize<2>();
+	const Vector4& rA_ws = constraint.rA.getRotatedDir( rotA );
+	const Vector4& rB_ws = constraint.rB.getRotatedDir( rotB );
 
 	constraint.jac.vA = norm.getNegated();
 	constraint.jac.vB = norm;
@@ -219,9 +196,9 @@ void setAsFriction( Constraint& constraint, const ContactPoint& contact, const R
 	Transform tA; tA.setRotation( rotA );
 	Transform tB; tB.setRotation( rotB );
 
-	Vector3 norm = contact.getNormal(); norm.normalize();
-	Vector3 rA_ws; rA_ws.setTransformedPos( tA, constraint.rA );
-	Vector3 rB_ws; rB_ws.setTransformedPos( tB, constraint.rB );
+	Vector4 norm = contact.getNormal(); norm.normalize<2>();
+	Vector4 rA_ws; rA_ws.setTransformedPos( tA, constraint.rA );
+	Vector4 rB_ws; rB_ws.setTransformedPos( tB, constraint.rB );
 
 	constraint.jac.vA.setTransformedPos( tangential, norm.getNegated() );
 	constraint.jac.vB = constraint.jac.vA.getNegated();
@@ -294,7 +271,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			{
 				canUseCache = true;
 
-				/// Clean up cache
+				// Clean up cache
 				
 			}
 		}
@@ -305,10 +282,10 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 			{
 				iterCached->addContact( contacts[0] );
 
-				/// Add new contact constraint
+				// Add new contact constraint
 				ConstrainedPair constrainedPair( currentPair );
 
-				constrainedPair.accumImp = iterCached->accumImp;  /// re-use impulse
+				constrainedPair.accumImp = iterCached->accumImp;  // re-use impulse
 				//drawText( std::to_string( constrainedPair.accumImp ), Vector3( 50.f, 50.f ) );
 
 				Constraint contactA;
@@ -341,7 +318,7 @@ void physicsWorldEx::mergeCollidableStreams( const std::vector<BodyIdPair>& exis
 				cachedPair.addContact( contacts[0] );
 				pairsCachedThisFrame.push_back( cachedPair );
 
-				/// Add new contact constraint
+				// Add new contact constraint
 				ConstrainedPair constrainedPair( currentPair );
 
 				Constraint constraint;
@@ -368,25 +345,24 @@ void physicsWorldEx::solve()
 		int activeBodyId = m_activeBodyIds[i];
 		physicsBody& body = m_bodies[activeBodyId];
 
-		/// Apply gravity
+		// Apply gravity
 		if ( !body.isStatic() )
 		{
-			Vector3& v = body.getLinearVelocity();
-			v += m_gravity * m_solverInfo.m_deltaTime;
+			const Vector4& currLinVel = body.getLinearVelocity();
+			body.setLinearVelocity( currLinVel + m_gravity * m_solverInfo.m_deltaTime );
 		}
 
-		/// Prepare solver bodies
+		// Prepare solver bodies
 		m_solverBodies[i].setFromBody( body );
 	}
 
 	updateJointConstraints();
 
-	/// Solve constraints
-	m_solver->solveConstraints( m_solverInfo, true, m_contactSolvePairs, m_solverBodies, m_bodies );
-	m_solver->solveConstraints( m_solverInfo, false, m_jointSolvePairs, m_solverBodies, m_bodies );
+	// Solve constraints
+	m_solver->solveConstraints( m_solverInfo, true, m_contactSolvePairs, m_solverBodies );
+	m_solver->solveConstraints( m_solverInfo, false, m_jointSolvePairs, m_solverBodies );
 
-
-	/// Store contact impulses
+	// Store contact impulses
 	{
 		auto contactIter = m_contactSolvePairs.begin();
 		auto cacheIter = m_cachedPairs.begin();
@@ -405,7 +381,15 @@ void physicsWorldEx::solve()
 
 	m_contactSolvePairs.clear();
 
-	/// Integrate time
+	// Update body velocities
+	for ( int activeBodyIdsIdx = 0; activeBodyIdsIdx < ( int ) m_solverBodies.size(); activeBodyIdsIdx++ )
+	{
+		const SolverBody& solverBody = m_solverBodies[activeBodyIdsIdx];
+		physicsBody& body = m_bodies[activeBodyIdsIdx];
+		body.setFromSolverBody( solverBody );
+	}
+
+	// Integrate time
 	for ( int i = 0; i < ( int )m_activeBodyIds.size(); i++ )
 	{
 		int activeBodyId = m_activeBodyIds[i];
@@ -413,15 +397,13 @@ void physicsWorldEx::solve()
 
 		if ( !body.isStatic() )
 		{
-			const Vector3& v = body.getLinearVelocity();
-			Vector3& p = body.getPosition();
-			p += v * m_solverInfo.m_deltaTime;
+			const Vector4& linVel = body.getLinearVelocity();
+			const Vector4& pos = body.getPosition();
+			body.setPosition( pos + linVel * m_solverInfo.m_deltaTime );
 
 			const Real& w = body.getAngularSpeed();
-			Real& rot = body.getRotation();
-			rot += w * m_solverInfo.m_deltaTime;
-
-			body.updateAabb(); /// TODO: this just for debug display, remove later
+			const Real& rot = body.getRotation();
+			body.setRotation( rot + w * m_solverInfo.m_deltaTime );
 		}
 	}
 }
@@ -435,20 +417,20 @@ void physicsWorldEx::updateJointConstraints()
 
 		const Real rotA = bodyA.getRotation();
 		const Real rotB = bodyB.getRotation();
-		const Vector3& posA = bodyA.getPosition();
-		const Vector3& posB = bodyB.getPosition();
+		const Vector4& posA = bodyA.getPosition();
+		const Vector4& posB = bodyB.getPosition();
 
 		Constraint& constraintX = iterJoint->constraints[0];
-		const Vector3& rAworldx = constraintX.rA.getRotatedDir( rotA );
-		const Vector3& rBworldx = constraintX.rB.getRotatedDir( rotB );
+		const Vector4& rAworldx = constraintX.rA.getRotatedDir( rotA );
+		const Vector4& rBworldx = constraintX.rB.getRotatedDir( rotB );
 
 		constraintX.error = -( posA + rAworldx - posB - rBworldx )( 0 );
 		constraintX.jac.wA = rAworldx.cross( constraintX.jac.vA );
 		constraintX.jac.wB = rBworldx.cross( constraintX.jac.vB );
 
 		Constraint& constraintY = iterJoint->constraints[1];
-		const Vector3& rAworldy = constraintY.rA.getRotatedDir( rotA );
-		const Vector3& rBworldy = constraintY.rB.getRotatedDir( rotB );
+		const Vector4& rAworldy = constraintY.rA.getRotatedDir( rotA );
+		const Vector4& rBworldy = constraintY.rB.getRotatedDir( rotB );
 
 		constraintY.error = -( posA + rAworldy - posB - rBworldy )( 1 );
 		constraintY.jac.wA = rAworldy.cross( constraintY.jac.vA );
@@ -490,7 +472,7 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 {
 	if ( m_firstFreeBodyId < m_bodies.size() )
 	{
-		/// Re-use previously allocated space for removed body
+		// Re-use previously allocated space for removed body
 		unsigned int freeId = m_firstFreeBodyId;
 		physicsBody& body = m_bodies[freeId];
 		FreeBody& freeBody = *reinterpret_cast<FreeBody*>( &body );
@@ -499,20 +481,20 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 
 		body.setBodyId( freeId );
 		m_activeBodyIds.push_back( body.getBodyId() );
-		body.setActiveListIdx( m_activeBodyIds.size() - 1 );
+		body.setActiveListIdx( static_cast< int >( m_activeBodyIds.size() ) - 1 );
 
 		return body.getBodyId();
 	}
 	else
 	{
-		/// Append on back
+		// Append on back
 		m_bodies.push_back( physicsBody( cinfo ) );
 		m_firstFreeBodyId = static_cast< BodyId >( m_bodies.size() );
 		physicsBody& body = m_bodies.back();
 
-		body.setBodyId( m_bodies.size() - 1 );
+		body.setBodyId( static_cast< int >( m_bodies.size() ) - 1 );
 		m_activeBodyIds.push_back( body.getBodyId() );
-		body.setActiveListIdx( m_activeBodyIds.size() - 1 );
+		body.setActiveListIdx( static_cast< int >( m_activeBodyIds.size() ) - 1 );
 
 		return body.getBodyId();
 	}
@@ -520,26 +502,20 @@ BodyId physicsWorld::createBody( const physicsBodyCinfo& cinfo )
 
 void physicsWorld::removeBody( const BodyId bodyId )
 {
-	/// Body removed locations will be re-used for future body additions
+	// Body removed locations will be re-used for future body additions
 	physicsBody& body = m_bodies[bodyId];
 
-	body.getShape().reset();
 
-	/// Remove bodyId from actively simulated set
+
+	// Remove bodyId from actively simulated set
 	int activeListIdx = body.getActiveListIdx();
 	std::swap( m_activeBodyIds[activeListIdx], m_activeBodyIds.back() );
 	m_activeBodyIds.pop_back();
 
-	/// Add removed body's index to free body linked list
+	// Add removed body's index to free body linked list
 	FreeBody& freeBody = *reinterpret_cast<FreeBody*>( &body );
 	freeBody.m_nextFreeBodyIdx = m_firstFreeBodyId;
 	m_firstFreeBodyId = body.getBodyId();
-}
-
-const physicsBody& physicsWorld::getBody( const BodyId bodyId ) const
-{
-	/// TODO: add O(1) check which checks body is active
-	return m_bodies[bodyId];
 }
 
 int physicsWorld::addJoint( const JointConfig& config )
@@ -549,13 +525,13 @@ int physicsWorld::addJoint( const JointConfig& config )
 		const physicsBody& bodyA = m_bodies[joint.bodyIdA];
 		const physicsBody& bodyB = m_bodies[joint.bodyIdB];
 
-		Vector3 rAworld = config.pivot - bodyA.getPosition();
-		Vector3 rBworld = config.pivot - bodyB.getPosition();
+		Vector4 rAworld = config.pivot - bodyA.getPosition();
+		Vector4 rBworld = config.pivot - bodyB.getPosition();
 
-		Vector3 rAlocal = rAworld.getRotatedDir( -bodyA.getRotation() );
-		Vector3 rBlocal = rBworld.getRotatedDir( -bodyB.getRotation() );
+		Vector4 rAlocal = rAworld.getRotatedDir( -bodyA.getRotation() );
+		Vector4 rBlocal = rBworld.getRotatedDir( -bodyB.getRotation() );
 
-		/// Constraint x-axis
+		// Constraint x-axis
 		{
 			Constraint constraintX;
 			constraintX.rA = rAlocal;
@@ -569,7 +545,7 @@ int physicsWorld::addJoint( const JointConfig& config )
 			joint.constraints.push_back( constraintX );
 		}
 
-		/// Constraint y-axis
+		// Constraint y-axis
 		{
 			Constraint constraintY;
 			constraintY.rA = rAlocal;
@@ -585,12 +561,12 @@ int physicsWorld::addJoint( const JointConfig& config )
 	}
 
 	m_jointSolvePairs.push_back( joint );
-	return ( m_jointSolvePairs.size() - 1 );
+	return ( static_cast< int >( m_jointSolvePairs.size() ) - 1 );
 }
 
 void physicsWorld::removeJoint( JointId jointId )
 {
-	/// TODO: think about what to do with this
+	// TODO: think about what to do with this
 	auto jiter = m_jointSolvePairs.begin();
 	m_jointSolvePairs.erase( jiter + jointId );
 }
@@ -602,19 +578,8 @@ void physicsWorld::step()
 	self->solve();
 }
 
-/// TODO: move this function outside of physics
-void physicsWorld::render()
-{
-	for ( size_t i = 0; i < m_activeBodyIds.size(); i++ )
-	{
-		int activeBodyId = m_activeBodyIds[i];
-		const physicsBody& body = m_bodies[activeBodyId];
-		body.render();
-	}
-}
-
-/// TODO: prevent removed bodyId input
-void physicsWorld::setPosition( BodyId bodyId, const Vector3& point )
+// TODO: prevent removed bodyId input
+void physicsWorld::setPosition( BodyId bodyId, const Vector4& point )
 {
 	physicsBody& body = m_bodies[bodyId];
 	body.setPosition( point );
@@ -624,9 +589,4 @@ void physicsWorld::setMotionType( BodyId bodyId, physicsMotionType type )
 {
 	physicsBody& body = m_bodies[bodyId];
 	body.setMotionType( type );
-}
-
-const Real physicsWorld::getDeltaTime()
-{
-	return m_solverInfo.m_deltaTime;
 }

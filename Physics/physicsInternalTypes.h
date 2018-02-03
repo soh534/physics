@@ -21,7 +21,7 @@ bool bodyIdPairLess( const BodyIdPair& pairA, const BodyIdPair& pairB );
 
 namespace BodyIdPairsUtils
 {
-	/// Add contents of vector B to vector A, clear B after
+	// Add contents of vector B to vector A, clear B after
 	template <typename T>
 	inline void movePairsBtoA( std::vector<T>& a, std::vector<T>& b )
 	{
@@ -29,9 +29,9 @@ namespace BodyIdPairsUtils
 		b.clear();
 	}
 
-	/// Classifies contents of a and b into intersection and relative complements
-	/// i.e. c = ab', d = ab, e = a'b
-	/// Contents of a and b must be sorted in ascending order
+	// Classifies contents of a and b into intersection and relative complements
+	// i.e. c = ab', d = ab, e = a'b
+	// Contents of a and b must be sorted in ascending order
 	template <typename T1, typename T2>
 	void classifyPairSets( const std::vector<T1>& a, const std::vector<T2>& b,
 						   std::vector<T2>& c, std::vector<T2>& d, std::vector<T2>& e )
@@ -71,7 +71,7 @@ namespace BodyIdPairsUtils
 		}
 	}
 
-	/// TODO: Find other way to do this as this is costly
+	// TODO: Find other way to do this as this is costly
 	template <typename T1, typename T2>
 	void deletePairsBfromA( std::vector<T1>& a, const std::vector<T2>& b )
 	{

@@ -41,10 +41,10 @@ class Line
 {
 public:
 
-	Line( const Vector3& pointA, const Vector3& pointB, unsigned int color = BLACK);
+	Line( const Vector4& pointA, const Vector4& pointB, unsigned int color = BLACK);
 	void render() const;
 
-	Vector3 m_pointA, m_pointB;
+	Vector4 m_pointA, m_pointB;
 	unsigned int m_color;
 };
 
@@ -52,11 +52,11 @@ class Text
 {
 public:
 
-	Text( const std::string& str, const Vector3& pos, const Real scale = 1.f, unsigned int color = BLACK);
+	Text( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK);
 	void render() const;
 
 	std::string m_str;
-	Vector3 m_pos;
+	Vector4 m_pos;
 	Real m_scale;
 	unsigned int m_color;
 };
@@ -77,7 +77,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 
-	/// Compile vertex shader
+	// Compile vertex shader
 	printf( "Compiling vertex shader: %s\n", vertexShaderPath );
 	const char* vertShaderSrcPtr = vertShaderSrcStr.c_str();
 	GLuint vertShaderId = glCreateShader( GL_VERTEX_SHADER );
@@ -93,7 +93,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 		printf( "%s\n", &VertexShaderErrorMessage[0] );
 	}
 
-	/// Compile fragment shader
+	// Compile fragment shader
 	printf( "Compiling fragment shader: %s\n", fragmentShaderPath );
 	const char* fragShaderSrcPtr = fragShaderSrcStr.c_str();
 	GLuint fragShaderId = glCreateShader( GL_FRAGMENT_SHADER );
@@ -109,7 +109,7 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 		printf( "%s\n", &FragmentShaderErrorMessage[0] );
 	}
 
-	/// Link vertex and fragment shaders
+	// Link vertex and fragment shaders
 	printf( "Linking program\n" );
 	GLuint programId = glCreateProgram();
 	glAttachShader( programId, vertShaderId );
@@ -137,26 +137,26 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 struct Character
 {
 	GLuint m_textureId;
-	Vector3 m_size;
-	Vector3 m_bearing;
+	Vector4 m_size;
+	Vector4 m_bearing;
 	FT_Pos m_advance;
 };
 std::map<GLchar, Character> Characters;
 
 int initializeFreeType()
 {
-	FT_Library library;
+	FT_Library library = nullptr;
 	Assert( !FT_Init_FreeType( &library ), "failed to initialize freetype" );
 
-	FT_Face face;
+	FT_Face face = nullptr;
 	Assert( !FT_New_Face( library, "C:\\Windows\\Fonts\\consola.ttf", 0, &face ),
 			"failed to load font face" );
 
 	Assert( !FT_Set_Pixel_Sizes( face, 0, 16 ), "failed to define font size" );
 
-	/// Pre-load characters
-	/// Rendering technique taken from
-	/// https://learnopengl.com/#!In-Practice/Text-Rendering
+	// Pre-load characters
+	// Rendering technique taken from
+	// https://learnopengl.com/#!In-Practice/Text-Rendering
 
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
@@ -186,8 +186,8 @@ int initializeFreeType()
 		Character character =
 		{
 			texture, 
-			Vector3( (Real)face->glyph->bitmap.width, (Real)face->glyph->bitmap.rows ),
-			Vector3( (Real)face->glyph->bitmap_left, (Real)face->glyph->bitmap_top ),
+			Vector4( (Real)face->glyph->bitmap.width, (Real)face->glyph->bitmap.rows ),
+			Vector4( (Real)face->glyph->bitmap_left, (Real)face->glyph->bitmap_top ),
 			face->glyph->advance.x
 		};
 
@@ -252,7 +252,7 @@ int initRenderer( int width, int height )
 	g_txtProgramID = LoadShaders( "TextVertexShader.shader", "TextFragmentShader.shader" );
 #endif
 
-	initializeFreeType();
+	//initializeFreeType();
 
 	return 0;
 }
@@ -284,7 +284,7 @@ int stepRenderer()
 	return 0;
 }
 
-Line::Line( const Vector3& pointA, const Vector3& pointB, unsigned int color )
+Line::Line( const Vector4& pointA, const Vector4& pointB, unsigned int color )
 	: m_pointA(pointA), m_pointB(pointB), m_color(color)
 {
 
@@ -336,16 +336,16 @@ void getDimensions( float & left, float & right, float & bottom, float & top )
 	top = g_top;
 }
 
-void drawLine( const Vector3& pa, const Vector3& pb, unsigned int color )
+void drawLine( const Vector4& pa, const Vector4& pb, unsigned int color )
 {
 	addDisplay( Line( pa, pb, color ) );
 }
 
-void drawCross( const Vector3& pos, const Real rot, const Real len, unsigned int color )
+void drawCross( const Vector4& pos, const Real rot, const Real len, unsigned int color )
 {
-	Vector3 needle( len / 2.f, 0.f );
+	Vector4 needle( len / 2.f, 0.f );
 
-	Vector3 a, b, c, d;
+	Vector4 a, b, c, d;
 
 	a = pos + needle.getRotatedDir( rot );
 	b = pos + needle.getRotatedDir( rot + 90.f * g_degToRad );
@@ -356,25 +356,25 @@ void drawCross( const Vector3& pos, const Real rot, const Real len, unsigned int
 	drawLine( b, d, color );
 }
 
-void drawArrow( const Vector3& pos, const Vector3& dir, unsigned int color )
+void drawArrow( const Vector4& pos, const Vector4& dir, unsigned int color )
 {
-	Vector3 dst; dst.setAdd( pos, dir );
+	Vector4 dst; dst.setAdd( pos, dir );
 	drawLine( pos, dst, color );
 
-	Vector3 dirFrac = dir * .5f;
-	Vector3 headLeft = dirFrac.getRotatedDir( 135.f * g_degToRad );
-	Vector3 headRight = dirFrac.getRotatedDir( -135.f * g_degToRad );
-	Vector3 dstToHeadLeft = dst + headLeft;
-	Vector3 dstToHeadRight = dst + headRight;
+	Vector4 dirFrac = dir * .5f;
+	Vector4 headLeft = dirFrac.getRotatedDir( 135.f * g_degToRad );
+	Vector4 headRight = dirFrac.getRotatedDir( -135.f * g_degToRad );
+	Vector4 dstToHeadLeft = dst + headLeft;
+	Vector4 dstToHeadRight = dst + headRight;
 
 	drawLine( dst, dstToHeadLeft, color );
 	drawLine( dst, dstToHeadRight, color );
 }
 
-void drawBox( const Vector3& max, const Vector3& min, unsigned int color )
+void drawBox( const Vector4& max, const Vector4& min, unsigned int color )
 {
-	Vector3 upperLeft( min( 0 ), max( 1 ) );
-	Vector3 bottomRight( max( 0 ), min( 1 ) );
+	Vector4 upperLeft( min( 0 ), max( 1 ) );
+	Vector4 bottomRight( max( 0 ), min( 1 ) );
 
 	drawLine( max, upperLeft, color );
 	drawLine( max, bottomRight, color );
@@ -382,21 +382,21 @@ void drawBox( const Vector3& max, const Vector3& min, unsigned int color )
 	drawLine( min, bottomRight, color );
 }
 
-void drawCircle( const Vector3& pos, const Real radius, unsigned int color )
+void drawCircle( const Vector4& pos, const Real radius, unsigned int color )
 {
 	Real step = 2 * (Real)M_PI * STEP_RENDER_CIRCLE;
 	Real full = ( 2.f + STEP_RENDER_CIRCLE ) * M_PI;
 
 	for ( Real i = step; i < full; i += step )
 	{
-		Vector3 na, nb;
+		Vector4 na, nb;
 		na.set( radius * cos( i ), radius * sin( i ) );
 		nb.set( radius * cos( i + step ), radius * sin( i + step ) );
 		drawLine( pos + na, pos + nb );
 	}
 }
 
-Text::Text( const std::string& str, const Vector3& pos, const Real scale, unsigned int color )
+Text::Text( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
 	: m_str( str ), m_pos( pos ), m_scale( scale ), m_color( color )
 {
 
@@ -427,11 +427,11 @@ void Text::render() const
 	{
 		Character ch = Characters[*c];
 
-        GLfloat xpos = x + ch.m_bearing.x * m_scale;
-        GLfloat ypos = y - (ch.m_size.y - ch.m_bearing.y) * m_scale;
+		GLfloat xpos = x + ch.m_bearing( 0 ) * m_scale;
+		GLfloat ypos = y - ( ch.m_size( 1 ) - ch.m_bearing( 1 ) ) * m_scale;
 
-        GLfloat w = ch.m_size.x * m_scale;
-        GLfloat h = ch.m_size.y * m_scale;
+		GLfloat w = ch.m_size( 0 ) * m_scale;
+		GLfloat h = ch.m_size( 1 ) * m_scale;
         // Update VBO for each character
         GLfloat vertices[6][4] = {
             { xpos,     ypos + h,   0.0, 0.0 },
@@ -458,7 +458,7 @@ void Text::render() const
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void drawText( const std::string& str, const Vector3& pos, const Real scale, unsigned int color )
+void drawText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
 {
 	g_renderTexts.push_back( Text( str, pos, scale, color ) );
 }
