@@ -1,11 +1,4 @@
 #define _USE_MATH_DEFINES
-#include <math.h> // For M_PI definition
-#include <cmath> // For sqrt, cos, sin
-#include <cfloat> // For FLT_EPSILON
-#include <algorithm> // For max
-
-#include <Base.h>
-#include "Vector4.h"
 
 #define Vector4_AllSetMask 0x8888
 

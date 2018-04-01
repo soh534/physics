@@ -70,8 +70,8 @@ public:
 	const Real getAngularSpeed() const { return m_angularSpeed; }
 
 	const Real getMass() const { return m_mass; }
-	const Real getInvMass() const { return m_invMass; }
 	const Real getInertia() const { return m_inertia; }
+	const Real getInvMass() const { return m_invMass; }
 	const Real getInvInertia() const { return m_invInertia; }
 
 	bool containsPoint( const Vector4& point ) const;

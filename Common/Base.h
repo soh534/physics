@@ -20,8 +20,6 @@ typedef float Real;
 
 const Real g_degToRad = (Real)M_PI / 180.f;
 
-#include <Vector4.h>
-#include <Transform.h>
-#include <Matrix.h>
-
-#include <physicsObject.h>
+#include <Common/Vector4.h>
+#include <Common/Transform.h>
+#include <Common/Matrix.h>

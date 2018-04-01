@@ -290,7 +290,7 @@ namespace Scenes
 	{
 		std::shared_ptr<physicsWorld> world( new physicsWorld( wcfg ) );
 
-		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 50.f, 20 );
+		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 50.f, 30 );
 		DemoUtils::createWalls( world );
 
 		return world;
@@ -300,7 +300,7 @@ namespace Scenes
 	{
 		std::shared_ptr<physicsWorld> world( new physicsWorld( wcfg ) );
 
-		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 5.f, 500 );
+		DemoUtils::createPackedCircles( world, Vector4( 400.f, 400.f ), 10.f, 100 );
 		DemoUtils::createWalls( world );
 
 		return world;

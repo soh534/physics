@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="Vector4.cpp" />
+    <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="FileIO.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="Vector4.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Base.h" />
+    <ClInclude Include="FileIO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Transform.inl" />
+    <None Include="Vector4.inl" />
+    <None Include="Matrix.inl" />
+  </ItemGroup>
+</Project>

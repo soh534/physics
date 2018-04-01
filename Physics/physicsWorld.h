@@ -11,6 +11,7 @@
 struct ContactPoint;
 class physicsSolver;
 
+// Separate a lot of these typedefs, internally used structs to internal types header
 typedef void( *ColliderFuncPtr )( const physicsShape* shapeA, 
 								  const physicsShape* shapeB,
 								  const Transform& transformA,
@@ -151,6 +152,18 @@ struct BroadphaseBody
 	}
 };
 
+struct HitResult
+{
+	struct HitInfo
+	{
+		BodyId bodyId;  // BodyId of hit body
+		Vector4 hitPos; // Hit position local to body
+	};
+
+	int numHits;
+	std::vector<HitInfo> hitInfos;
+};
+
 class physicsWorld : public physicsObject
 {
 public:
@@ -177,11 +190,16 @@ public:
 	// Utility funcs
 	void setPosition( BodyId bodyId, const Vector4& point );
 
+	physicsMotionType getMotionType( BodyId bodyId ) const;
 	void setMotionType( BodyId bodyId, physicsMotionType type );
 
 	const Real getDeltaTime() const { return m_solverInfo.m_deltaTime; }
 
 	const std::vector<BroadphaseBody>& getBroadphaseBodies() const { return m_broadphaseBodies; }
+
+	// Spatial query
+    // Return first body which occupies point
+	void queryPoint( const Vector4& point, HitResult& hitResult ) const;
 
 protected:
 

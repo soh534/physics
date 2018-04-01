@@ -10,6 +10,7 @@
 
 #include <DebugUtils.h>
 
+// TODO: separate physics as library from the framework
 class physicsWorldEx : public physicsWorld
 {
 public:
@@ -585,8 +586,43 @@ void physicsWorld::setPosition( BodyId bodyId, const Vector4& point )
 	body.setPosition( point );
 }
 
+physicsMotionType physicsWorld::getMotionType( BodyId bodyId ) const
+{
+	return getBody( bodyId ).getMotionType();
+}
+
 void physicsWorld::setMotionType( BodyId bodyId, physicsMotionType type )
 {
 	physicsBody& body = m_bodies[bodyId];
 	body.setMotionType( type );
+}
+
+//
+//Spatial queries
+
+void physicsWorld::queryPoint( const Vector4& point, HitResult& hitResult ) const
+{
+	hitResult.numHits = 0;
+	hitResult.hitInfos.clear();
+
+	for ( auto i = 0; i < m_activeBodyIds.size(); i++ )
+	{
+		const physicsBody& body = getBody( m_activeBodyIds[i] );
+
+		Vector4 pointLocal;
+		pointLocal.setSub( point, body.getPosition() );
+		pointLocal.setRotatedDir( -body.getRotation() );
+		
+		if ( body.getShape()->containsPoint( pointLocal ) )
+		{
+			hitResult.numHits++;
+
+			HitResult::HitInfo hitInfo;
+			{
+				hitInfo.bodyId = m_activeBodyIds[i];
+				hitInfo.hitPos.setSub( pointLocal, body.getPosition() );
+			}
+			hitResult.hitInfos.push_back( hitInfo );
+		}
+	}
 }

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Renderer\shaders\FragmentShader.shader">
+      <Filter>Renderer\shaders</Filter>
+    </None>
+    <None Include="Renderer\shaders\TextFragmentShader.shader">
+      <Filter>Renderer\shaders</Filter>
+    </None>
+    <None Include="Renderer\shaders\TextVertexShader.shader">
+      <Filter>Renderer\shaders</Filter>
+    </None>
+    <None Include="Renderer\shaders\VertexShader.shader">
+      <Filter>Renderer\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{b179a5d5-ac2a-4fd1-83a3-e4e82f5c6272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\shaders">
+      <UniqueIdentifier>{6aa91bc0-1df9-48ca-a664-cb7814ab1923}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Renderer\Renderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Shader.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Renderer\Renderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Shader.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

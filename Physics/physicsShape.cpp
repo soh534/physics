@@ -265,7 +265,7 @@ Real physicsConvexShape::calculateMass() const
 
 	const Vector4& v0 = m_vertices[m_connectivity[0]];
 
-	for ( int i = 1; i < ( int )m_vertices.size(); i++ )
+	for ( auto i = 1; i < m_vertices.size(); i++ )
 	{
 		area += v0.cross( m_vertices[m_connectivity[1]] )( 2 );
 	}
@@ -294,7 +294,7 @@ bool physicsConvexShape::containsPoint( const Vector4& point ) const
 
 	int numConnectivity = ( int )m_connectivity.size();
 
-	for ( int i = 0; i < numConnectivity - 1; i++ )
+	for ( auto i = 0; i < numConnectivity - 1; i++ )
 	{
 		edge.setSub( m_vertices[m_connectivity[i + 1]], m_vertices[m_connectivity[i]] );
 		normal.set( edge( 1 ), -edge( 0 ) );
@@ -316,11 +316,11 @@ void physicsConvexShape::getSupportingVertex( const Vector4& direction, Vector4&
 	Real dotMax = std::numeric_limits<Real>::lowest();
 	Real potentialMaxDot;
 
-	int numVertices = ( int )m_vertices.size();
+	auto numVertices = m_vertices.size();
 
 	Vector4 dirNorm = direction.getNormalized<2>();
 
-	for ( int i = 0; i < numVertices; i++ )
+	for ( auto i = 0; i < numVertices; i++ )
 	{
 		potentialMaxDot = dirNorm.dot<2>( m_vertices[i] );
 
@@ -339,8 +339,8 @@ physicsAabb physicsConvexShape::getAabb( const Real rot ) const
 	xmax = ymax = std::numeric_limits<Real>::lowest();
 	xmin = ymin = std::numeric_limits<Real>::max();
 
-	int numVertices = ( int )m_vertices.size();
-	for ( int i = 0; i < numVertices; i++ )
+	auto numVertices = m_vertices.size();
+	for ( auto i = 0; i < numVertices; i++ )
 	{
 		Vector4 vertW = m_vertices[i].getRotatedDir( rot );
 		xmin = std::min( vertW( 0 ), xmin );
@@ -354,10 +354,10 @@ physicsAabb physicsConvexShape::getAabb( const Real rot ) const
 
 bool physicsConvexShape::getAdjacentVertices( const Vector4& vertex, Vector4& va, Vector4& vb )
 {
-	int numVertices = ( int )m_vertices.size();
+	auto numVertices = m_vertices.size();
 	int idx = -1;
 
-	for ( int i = 0; i < numVertices; i++ )
+	for ( auto i = 0; i < numVertices; i++ )
 	{
 		// TODO: measure appropriate epsilon and make it const var
 		if ( (vertex - m_vertices[i]).lengthSquared<2>() < 0.01f )
@@ -372,10 +372,10 @@ bool physicsConvexShape::getAdjacentVertices( const Vector4& vertex, Vector4& va
 		return false;
 	}
 
-	int numConnectivity = ( int )m_connectivity.size();
+	auto numConnectivity = m_connectivity.size();
 	int idxConnection = -1;
 
-	for ( int i = 0; i < numConnectivity; i++ )
+	for ( auto i = 0; i < numConnectivity; i++ )
 	{
 		if ( idx == m_connectivity[i] )
 		{

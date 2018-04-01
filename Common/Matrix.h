@@ -57,4 +57,4 @@ public:
 	friend std::ostream& operator << (std::ostream& os, const Matrix& m);
 };
 
-#include <Matrix.inl>
+#include <Common/Matrix.inl>

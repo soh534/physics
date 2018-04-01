@@ -2,11 +2,13 @@
 #include <algorithm> // For using std::max
 #include <GLFW/glfw3.h>
 
+#include <Framework/Framework.h>
+
 #include <Base.h>
 #include <physicsWorld.h>
-#include <Renderer.h>
+#include <Renderer/Renderer.h>
 #include <DemoUtils.h>
-#include <Framework.h>
+
 #include <Scene.h>
 
 #include <physicsViewer.h>
@@ -102,21 +104,19 @@ void handleMouseButton( GLFWwindow* window, MousePickingContext* context )
 
 	if ( leftMouseButtonAction == GLFW_PRESS && context->bodyId == invalidId )
 	{
-		const std::shared_ptr<physicsWorld> world = context->world;
+		HitResult hitResult;
+		context->world->queryPoint( posGL, hitResult );
 
-		const std::vector<BodyId>& activeBodyIds = world->getActiveBodyIds();
-		for ( auto i = 0; i < activeBodyIds.size(); i++ )
+		if ( hitResult.numHits > 0 )
 		{
-			const physicsBody& body = world->getBody( activeBodyIds[i] );
+			// Just consider the first hit body
+			const HitResult::HitInfo& firstHit = *hitResult.hitInfos.begin();
 
-			if ( body.isStatic() ) continue;
-
-			if ( body.containsPoint( posGL ) )
+			if ( context->world->getMotionType( firstHit.bodyId ) == physicsMotionType::DYNAMIC )
 			{
-				context->bodyId = body.getBodyId();
-				context->arm.setSub( posGL, body.getPosition() );
+				context->bodyId = firstHit.bodyId;
+				context->arm = firstHit.hitPos;
 				DemoUtils::grab( context->controlInfo, context->world, context->bodyId, posGL );
-				break;
 			}
 		}
 	}
@@ -127,7 +127,6 @@ void handleMouseButton( GLFWwindow* window, MousePickingContext* context )
 		context->arm.setZero();
 	}
 }
-
 
 void drawAxis()
 {

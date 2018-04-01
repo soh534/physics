@@ -1,5 +1,3 @@
-#include "Transform.h"
-
 #include <cmath>
 
 inline const Real& Transform::operator()( int i, int j ) const
