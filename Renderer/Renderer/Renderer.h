@@ -3,9 +3,12 @@
 #include <Common/Base.h>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+
+#include <math.h>
 
 // Accuracy for drawing circle
 #define STEP_RENDER_CIRCLE 0.05f
@@ -32,6 +35,7 @@
 #define NAVY COLOR_IN_RGB(0, 0, 128)
 
 class Shader;
+class Camera;
 
 class Renderer
 {
@@ -40,35 +44,40 @@ public:
 	struct Renderable
 	{
 		Renderable( unsigned int color = BLACK );
-		virtual void render() = 0;
 
 		unsigned int m_color;
 	};
 
-	struct Line : Renderable
+	struct DisplayLine : Renderable
 	{
-		Line( const Vector4& a, const Vector4& b, unsigned int color = BLACK );
+		DisplayLine( const Vector4& a, const Vector4& b, unsigned int color = BLACK );
 
 		Vector4 m_a;
 		Vector4 m_b;
 	};
 
-	struct Triangle : Renderable
+	struct DisplayTriangle : Renderable
 	{
-		Triangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
+		DisplayTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
 
 		Vector4 m_a;
 		Vector4 m_b;
 		Vector4 m_c;
 	};
 
-	struct Text : Renderable
+	struct DisplayText : Renderable
 	{
-		Text( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
+		DisplayText( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
 
 		std::string m_str;
 		Vector4 m_pos;
 		Real m_scale;
+	};
+
+	struct Geometry : Renderable
+	{
+
+
 	};
 
 	Renderer();
@@ -78,6 +87,8 @@ public:
 	int step();
 
 	void getDimensions( float& left, float& right, float& bottom, float& top );
+
+	// TODO: make so Line, Triangle structs are passed
 	void drawLine( const Vector4& p1, const Vector4& p2, unsigned int color = BLACK );
 	void drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
 	void drawText( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
@@ -88,20 +99,26 @@ public:
 	void drawBox( const Vector4& max, const Vector4& min, unsigned int = BLACK );
 	void drawCircle( const Vector4& pos, const Real radius, unsigned int = BLACK );
 
+	Camera* getCamera() { return m_camera; }
+
 private:
 
 	int initializeFreeType();
 
+	void updateView();
+
 	// Make these virtual
-	void renderLine( const Line& line ) const;
-	void renderTriangle( const Triangle& tri ) const;
-	void renderText( const Text& text ) const;
+	void renderLine( const DisplayLine& line ) const;
+	void renderTriangle( const DisplayTriangle& tri ) const;
+	void renderText( const DisplayText& text ) const;
 
 	int m_left;
 	int m_right;
 	int m_bottom;
 	int m_top;
 	glm::mat4 m_projection;
+	glm::mat4 m_view;
+	glm::mat4 m_model;
 
 	// For drawing lines
 	GLuint m_lineVAO;
@@ -113,16 +130,15 @@ private:
 
 	// For drawing text
 	GLuint m_textVAO;
-	GLuint m_textVBO;
+	GLuint m_textVBO[2];
 
 	Shader* m_lineShader;
 	Shader* m_triShader;
 	Shader* m_textShader;
 
-	Shader* m_geometryShader;
+	std::vector<DisplayLine> m_displayLines;
+	std::vector<DisplayTriangle> m_displayTris;
+	std::vector<DisplayText> m_displayTexts;
 
-	std::vector<Line> m_displayLines;
-	std::vector<Triangle> m_displayTris;
-	std::vector<Text> m_displayTexts;
+	Camera* m_camera;
 };
-

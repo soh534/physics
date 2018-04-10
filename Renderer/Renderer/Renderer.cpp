@@ -2,13 +2,13 @@
 
 #include <Renderer/Renderer/Renderer.h>
 #include <Renderer/Renderer/Shader.h>
+#include <Renderer/Renderer/Camera.h>
 #include <Common/FileIO.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <vector>
 #include <sstream>
-#include <map>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -19,9 +19,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-typedef Renderer::Line Line;
-typedef Renderer::Triangle Triangle;
-typedef Renderer::Text Text;
+typedef Renderer::DisplayLine DisplayLine;
+typedef Renderer::DisplayTriangle DisplayTriangle;
+typedef Renderer::DisplayText DisplayText;
+
+struct Character
+{
+	GLuint m_textureId;
+	Vector4 m_size;
+	Vector4 m_bearing;
+	FT_Pos m_advance;
+};
+
+std::map<GLchar, Character> Characters;
 
 Renderer::Renderable::Renderable( unsigned int color )
 	: m_color( color )
@@ -29,13 +39,13 @@ Renderer::Renderable::Renderable( unsigned int color )
 
 }
 
-Line::Line( const Vector4& a, const Vector4& b, unsigned int color ) 
+DisplayLine::DisplayLine( const Vector4& a, const Vector4& b, unsigned int color ) 
 	: m_a( a ), m_b( b ), Renderable( color )
 {
 
 }
 
-void Renderer::renderLine( const Line& line ) const
+void Renderer::renderLine( const DisplayLine& line ) const
 {
 	float vertices[] =
 	{
@@ -70,13 +80,13 @@ void Renderer::renderLine( const Line& line ) const
 	glBindVertexArray( 0 );
 }
 
-Triangle::Triangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
+DisplayTriangle::DisplayTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
 	: m_a( a ), m_b( b ), m_c( c ), Renderable( color )
 {
 
 }
 
-void Renderer::renderTriangle( const Triangle& tri ) const
+void Renderer::renderTriangle( const DisplayTriangle& tri ) const
 {
 	float vertices[] =
 	{
@@ -104,22 +114,34 @@ void Renderer::renderTriangle( const Triangle& tri ) const
 	m_triShader->use();
 
 	m_triShader->setMat4( "projection", m_projection );
+	m_triShader->setMat4( "view", m_view );
+	m_triShader->setMat4( "model", m_model );
 
-	
+	glBindVertexArray( m_triVAO );
+	glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[0] );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
 
+	glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[1] );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( color ), color );
+
+	glDrawArrays( GL_TRIANGLES, 0, 3 );
+
+	glBindVertexArray( 0 );
 }
 
-Text::Text( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
+DisplayText::DisplayText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
 	: m_str( str ), m_pos( pos ), m_scale( scale ), Renderable( color )
 {
 
 }
 
-void Renderer::renderText( const Text& text ) const
+void Renderer::renderText( const DisplayText& text ) const
 {
 	m_textShader->use();
 
 	m_textShader->setMat4( "projection", m_projection );
+	m_textShader->setMat4( "view", m_view );
+	m_textShader->setMat4( "model", m_model );
 
 	m_textShader->setVec3(
 		"textColor",
@@ -132,6 +154,7 @@ void Renderer::renderText( const Text& text ) const
 
 	Real x = text.m_pos( 0 );
 	Real y = text.m_pos( 1 );
+	Real z = text.m_pos( 2 );
 
 	// Iterate through all characters
 	std::string::const_iterator c;
@@ -145,31 +168,40 @@ void Renderer::renderText( const Text& text ) const
 		float w = ch.m_size( 0 ) * text.m_scale;
 		float h = ch.m_size( 1 ) * text.m_scale;
 		// Update VBO for each character
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0, 0.0 },
-		{ xpos,     ypos,       0.0, 1.0 },
-		{ xpos + w, ypos,       1.0, 1.0 },
-
-		{ xpos,     ypos + h,   0.0, 0.0 },
-		{ xpos + w, ypos,       1.0, 1.0 },
-		{ xpos + w, ypos + h,   1.0, 0.0 }
+		float vertices[6][3] = 
+		{
+			{ xpos,     ypos + h,   z },
+		    { xpos,     ypos,       z },
+            { xpos + w, ypos,       z },
+    		{ xpos,     ypos + h,   z },
+	    	{ xpos + w, ypos,       z },
+		    { xpos + w, ypos + h,   z }
 		};
+
+		float uv[6][2] = 
+		{
+			{0.f, 0.f}, {0.f, 1.f}, {1.f, 1.f}, {0.f, 0.f}, {1.f, 1.f}, {1.f, 0.f}
+		};
+
 		// Render glyph texture over quad
 		glBindTexture( GL_TEXTURE_2D, ch.m_textureId );
 
 		// Update content of VBO memory
-		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[0] );
 		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
-		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[1] );
+		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( uv ), uv );
+
 		// Render quad
 		glDrawArrays( GL_TRIANGLES, 0, 6 );
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (ch.m_advance >> 6) * text.m_scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
+
 	glBindVertexArray( 0 );
 	glBindTexture( GL_TEXTURE_2D, 0 );
 }
-
 
 inline unsigned int SetRGBA( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
 {
@@ -244,14 +276,83 @@ GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath
 	return programId;
 }
 
-struct Character
+Renderer::Renderer()
 {
-	GLuint m_textureId;
-	Vector4 m_size;
-	Vector4 m_bearing;
-	FT_Pos m_advance;
-};
-std::map<GLchar, Character> Characters;
+
+}
+
+Renderer::~Renderer()
+{
+	delete m_camera;
+	delete m_lineShader;
+	delete m_textShader;
+}
+
+int Renderer::init( int width, int height )
+{
+	GLenum err = glewInit();
+	Assert( err == GLEW_OK, "failed to initialize GLEW" );
+
+	m_left = -width * 0.5;
+	m_right = width * 0.8;
+	m_bottom = -height * 0.5;
+	m_top = height * 0.8;
+
+	m_camera = new Camera();
+
+	//m_projection = glm::ortho( (float) m_left, (float) m_right, (float) m_bottom, (float) m_top, -1.f, 1.f );
+	m_projection = glm::perspective( glm::radians( 90.f ), (float) (m_right - m_left) / (float) (m_top - m_bottom), 0.1f, 1000.f );
+	//m_view = glm::mat4( 1.f );
+	updateView();
+	//m_view = glm::translate( m_view, glm::vec3( 0.f, 0.f, -500.f ) );
+	m_model = glm::mat4( 1.f );
+	//m_model = glm::rotate( m_model, glm::radians( -55.f ), glm::vec3( 1.f, 0.f, 0.f ) );
+
+	m_lineShader = new Shader( "../Renderer/Renderer/shaders/VertexShader.shader", "../Renderer/Renderer/shaders/FragmentShader.shader" );
+
+	// TODO: re-write so vertices in buffer is static
+	// TODO: re-evaluate diference between 2x glGenVertexArrays() or glGenVertexArrays(2, )
+	glGenVertexArrays( 1, &m_lineVAO );
+	glGenBuffers( 2, m_lineVBO );
+
+	glBindVertexArray( m_lineVAO );
+	{
+		glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[0] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 4, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 0 ); // Position
+		glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, 0, nullptr );
+
+		glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[1] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 8, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 1 ); // Color
+		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+	}
+	glBindVertexArray( 0 );
+
+	m_triShader = new Shader( "../Renderer/Renderer/shaders/TriVertShader.shader", "../Renderer/Renderer/shaders/TriFragShader.shader" );
+
+	glGenVertexArrays( 1, &m_triVAO );
+	glGenBuffers( 2, m_triVBO );
+
+	glBindVertexArray( m_triVAO );
+	{
+		glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[0] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 9, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 0 ); // Position
+		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+
+		glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[1] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 12, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 1 ); // Color
+		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+	}
+	glBindVertexArray( 0 );
+
+	m_textShader = new Shader( "../Renderer/Renderer/shaders/TextVertexShader.shader", "../Renderer/Renderer/shaders/TextFragmentShader.shader" );
+	initializeFreeType();
+
+	return 0;
+}
 
 int Renderer::initializeFreeType()
 {
@@ -312,78 +413,40 @@ int Renderer::initializeFreeType()
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 	glGenVertexArrays( 1, &m_textVAO );
-	glGenBuffers( 1, &m_textVBO );
+	glGenBuffers( 2, m_textVBO );
+
 	glBindVertexArray( m_textVAO );
-	glBindBuffer( GL_ARRAY_BUFFER, m_textVBO );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * 6 * 4, nullptr, GL_DYNAMIC_DRAW );
-	glEnableVertexAttribArray( 0 );
-	glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof( GL_FLOAT ), 0 );
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	{
+		// TODO: think of a way to interleave vertex positions and uv coordinates
+		// TODO: align the vertices to 4x floats
+		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[0] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * 6 * 3, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 0 );
+		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+
+		// TODO: consider GL_STATIC_DRAW for uv coordinates
+		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[1] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * 6 * 2, nullptr, GL_DYNAMIC_DRAW );
+		glEnableVertexAttribArray( 1 );
+		glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 0, nullptr );
+	}
 	glBindVertexArray( 0 );
 
 	return 0;
 }
 
-Renderer::Renderer()
+void Renderer::updateView()
 {
-
-}
-
-Renderer::~Renderer()
-{
-	delete m_lineShader;
-	delete m_textShader;
-}
-
-int Renderer::init( int width, int height )
-{
-	GLenum err = glewInit();
-	Assert( err == GLEW_OK, "failed to initialize GLEW" );
-
-	m_left = -width * 0.5;
-	m_right = width * 0.8;
-	m_bottom = -height * 0.5;
-	m_top = height * 0.8;
-	m_projection = glm::ortho( (float) m_left, (float) m_right, (float) m_bottom, (float) m_top );
-
-	m_lineShader = new Shader( "../Renderer/Renderer/shaders/VertexShader.shader", "../Renderer/Renderer/shaders/FragmentShader.shader" );
-
-	// TODO: re-write so vertices in buffer is static
-	// TODO: re-evaluate diference between 2x glGenVertexArrays() or glGenVertexArrays(2, )
-	glGenVertexArrays( 1, &m_lineVAO );
-	glGenBuffers( 2, m_lineVBO );
-	glBindVertexArray( m_lineVAO );
-
-	// Line vertex attrib pointers
-	glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[0] );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 4, nullptr, GL_DYNAMIC_DRAW );
-	glEnableVertexAttribArray( 0 );
-	glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, 0, nullptr );
-
-	// Color vertex attrib pointers
-	glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[1] );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 8, nullptr, GL_DYNAMIC_DRAW );
-	glEnableVertexAttribArray( 1 );
-	glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
-	
-	glBindVertexArray( 0 );
-
-	glGenVertexArrays( 1, &m_triVAO );
-	glGenBuffers( 2, m_triVBO );
-	glBindVertexArray( m_triVAO );
-
-	glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[0] );
-
-
-	m_textShader = new Shader( "../Renderer/Renderer/shaders/TextVertexShader.shader", "../Renderer/Renderer/shaders/TextFragmentShader.shader" );
-
-	initializeFreeType();
-
-	return 0;
+	const glm::vec3& pos = m_camera->getPos();
+	const glm::vec3& dir = m_camera->getDir();
+	const glm::vec3& up = m_camera->getUp();
+	m_view = glm::lookAt( pos, pos + dir, up );
 }
 
 int Renderer::step()
 {
+	updateView();
+
 	for ( auto i = 0; i < m_displayLines.size(); i++ )
 	{
 		renderLine( m_displayLines[i] );
@@ -415,7 +478,7 @@ void Renderer::getDimensions( float & left, float & right, float & bottom, float
 
 void Renderer::drawLine( const Vector4& pa, const Vector4& pb, unsigned int color )
 {
-	m_displayLines.push_back( Line( pa, pb, color ) );
+	m_displayLines.push_back( DisplayLine( pa, pb, color ) );
 }
 
 void Renderer::drawCross( const Vector4& pos, const Real rot, const Real len, unsigned int color )
@@ -473,12 +536,12 @@ void Renderer::drawCircle( const Vector4& pos, const Real radius, unsigned int c
 	}
 }
 
-void Renderer::drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK )
+void Renderer::drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
 {
-
+	m_displayTris.push_back( DisplayTriangle( a, b, c, color ) );
 }
 
 void Renderer::drawText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
 {
-	m_displayTexts.push_back( Text( str, pos, scale, color ) );
+	m_displayTexts.push_back( DisplayText( str, pos, scale, color ) );
 }

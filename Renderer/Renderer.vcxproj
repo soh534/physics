@@ -23,6 +23,8 @@
     <None Include="Renderer\shaders\FragmentShader.shader" />
     <None Include="Renderer\shaders\TextFragmentShader.shader" />
     <None Include="Renderer\shaders\TextVertexShader.shader" />
+    <None Include="Renderer\shaders\TriFragShader.shader" />
+    <None Include="Renderer\shaders\TriVertShader.shader" />
     <None Include="Renderer\shaders\VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
@@ -31,10 +33,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\Camera.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Renderer\Camera.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Shader.h" />
   </ItemGroup>
