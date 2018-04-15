@@ -19,6 +19,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+typedef Renderer::Renderable Renderable;
 typedef Renderer::DisplayLine DisplayLine;
 typedef Renderer::DisplayTriangle DisplayTriangle;
 typedef Renderer::DisplayText DisplayText;
@@ -33,36 +34,25 @@ struct Character
 
 std::map<GLchar, Character> Characters;
 
-Renderer::Renderable::Renderable( unsigned int color )
-	: m_color( color )
+Renderable::Renderable()
 {
 
 }
 
-DisplayLine::DisplayLine( const Vector4& a, const Vector4& b, unsigned int color ) 
-	: m_a( a ), m_b( b ), Renderable( color )
+DisplayLine::DisplayLine( const Line& line )
+	: Renderable()
 {
+	float vertices[] = { line.m_a( 0 ), line.m_a( 1 ), line.m_b( 0 ), line.m_b( 1 ) };
+	
 
+	glGenBuffers( 1, m_vbo );
+	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
+	glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
 }
 
-void Renderer::renderLine( const DisplayLine& line ) const
+void DisplayLine::render(const Shader* shader, const Color color) const
 {
-	float vertices[] =
-	{
-		line.m_a( 0 ), line.m_a( 1 ), line.m_b( 0 ), line.m_b( 1 )
-	};
 
-	float color[] =
-	{
-		(line.m_color & 0xff) / 255.f,
-		((line.m_color >> 8) & 0xff) / 255.f,
-		((line.m_color >> 16) & 0xff) / 255.f,
-		((line.m_color >> 24) & 0xff) / 255.f,
-		(line.m_color & 0xff) / 255.f,
-		((line.m_color >> 8) & 0xff) / 255.f,
-		((line.m_color >> 16) & 0xff) / 255.f,
-		((line.m_color >> 24) & 0xff) / 255.f
-	};
 
 	m_lineShader->use();
 
@@ -80,8 +70,9 @@ void Renderer::renderLine( const DisplayLine& line ) const
 	glBindVertexArray( 0 );
 }
 
-DisplayTriangle::DisplayTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
-	: m_a( a ), m_b( b ), m_c( c ), Renderable( color )
+
+DisplayTriangle::DisplayTriangle( const Triangle& tri )
+	: Renderable()
 {
 
 }
@@ -539,6 +530,11 @@ void Renderer::drawCircle( const Vector4& pos, const Real radius, unsigned int c
 void Renderer::drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
 {
 	m_displayTris.push_back( DisplayTriangle( a, b, c, color ) );
+}
+
+void Renderer::drawBox( const Box& box, unsigned int color )
+{
+
 }
 
 void Renderer::drawText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )

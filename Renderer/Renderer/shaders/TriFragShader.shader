@@ -1,9 +1,10 @@
 #version 400
 
-in vec4 colorToFragmentShader;
-out vec4 fragmentColor;
+uniform vec4 ourColor;
+
+out vec4 FragColor;
 
 void main()
 {
-    fragmentColor = colorToFragmentShader;
+    FragColor = ourColor;
 }

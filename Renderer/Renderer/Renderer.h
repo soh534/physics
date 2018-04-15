@@ -37,32 +37,40 @@
 class Shader;
 class Camera;
 
+// Objects passed to draw funcs. Vertices are in local-space.
+struct Line { Vector4 m_a, m_b; };
+struct Triangle { Vector4 m_a, m_b, m_c; };
+struct Box { Vector4 m_max, m_min; };
+struct Sphere { Vector4 m_centerAndRadius; };
+
 class Renderer
 {
 public:
 
+	typedef unsigned int Color;
+
 	struct Renderable
 	{
-		Renderable( unsigned int color = BLACK );
+		Renderable();
 
-		unsigned int m_color;
+		virtual void render( const Shader* shader, const Color color ) const = 0;
+
+		GLuint m_vao;
+		GLuint m_vbo;
 	};
 
 	struct DisplayLine : Renderable
 	{
-		DisplayLine( const Vector4& a, const Vector4& b, unsigned int color = BLACK );
+		DisplayLine( const Line& line );
 
-		Vector4 m_a;
-		Vector4 m_b;
+		virtual void render( const Shader* shader, const Color color ) const;
 	};
 
 	struct DisplayTriangle : Renderable
 	{
-		DisplayTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
+		DisplayTriangle( const Triangle& tri );
 
-		Vector4 m_a;
-		Vector4 m_b;
-		Vector4 m_c;
+		virtual void render( const Shader* shader, const Color color ) const;
 	};
 
 	struct DisplayText : Renderable
@@ -74,10 +82,25 @@ public:
 		Real m_scale;
 	};
 
-	struct Geometry : Renderable
+	struct DisplayBox : Renderable
 	{
+		DisplayBox( const Box& box, Color color = BLACK );
 
+		virtual void render() const;
+	};
 
+	struct DisplaySphere : Renderable
+	{
+		DisplaySphere( const Sphere& sphere, Color color = BLACK );
+
+		virtual void render() const;
+	};
+
+	struct DisplayGeometry : Renderable
+	{
+		DisplayGeometry();
+
+		virtual void render() const;
 	};
 
 	Renderer();
@@ -91,6 +114,7 @@ public:
 	// TODO: make so Line, Triangle structs are passed
 	void drawLine( const Vector4& p1, const Vector4& p2, unsigned int color = BLACK );
 	void drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
+	void drawBox( const Box& box, unsigned int color = BLACK );
 	void drawText( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
 
 	// TODO: move these under RenderUtils
@@ -116,21 +140,10 @@ private:
 	int m_right;
 	int m_bottom;
 	int m_top;
+
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
 	glm::mat4 m_model;
-
-	// For drawing lines
-	GLuint m_lineVAO;
-	GLuint m_lineVBO[2];
-
-	// For drawing tris
-	GLuint m_triVAO;
-	GLuint m_triVBO[2];
-
-	// For drawing text
-	GLuint m_textVAO;
-	GLuint m_textVBO[2];
 
 	Shader* m_lineShader;
 	Shader* m_triShader;
