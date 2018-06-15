@@ -125,6 +125,7 @@
     <ClCompile Include="Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayFreeList.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Matrix.h" />

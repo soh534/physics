@@ -10,148 +10,310 @@
 
 #include <math.h>
 
-// Accuracy for drawing circle
-#define STEP_RENDER_CIRCLE 0.05f
-
-#define COLOR_IN_RGB(R, G, B) (R | (G << 8) | (B << 16) | (255 << 24))
-
-// Color tables obtained from
-// www.rapidtables.com/web/color/RGB_Color.htm
-#define BLACK COLOR_IN_RGB(0, 0, 0)
-#define WHITE COLOR_IN_RGB(255, 255, 255)
-#define RED COLOR_IN_RGB(255, 0, 0)
-#define LIME COLOR_IN_RGB(0, 255, 0)
-#define BLUE COLOR_IN_RGB(0, 0, 255)
-#define YELLOW COLOR_IN_RGB(255, 255, 0)
-#define CYAN COLOR_IN_RGB(0, 255, 255)
-#define MAGENTA COLOR_IN_RGB(255, 0, 255)
-#define SILVER COLOR_IN_RGB(192, 192, 192)
-#define GRAY COLOR_IN_RGB(128, 128, 128)
-#define MAROON COLOR_IN_RGB(128, 0, 0)
-#define OLIVE COLOR_IN_RGB(128, 128, 0)
-#define GREEN COLOR_IN_RGB(0, 128, 0)
-#define PURPLE COLOR_IN_RGB(128, 0, 128)
-#define TEAL COLOR_IN_RGB(0, 128, 128)
-#define NAVY COLOR_IN_RGB(0, 0, 128)
-
 class Shader;
 class Camera;
 
-// Objects passed to draw funcs. Vertices are in local-space.
-struct Line { Vector4 m_a, m_b; };
-struct Triangle { Vector4 m_a, m_b, m_c; };
-struct Box { Vector4 m_max, m_min; };
-struct Sphere { Vector4 m_centerAndRadius; };
+// Datatypes passed to draw funcs, and used within renderer
+struct Vertex2
+{
+	Vertex2( const float x = 0.f, const float y = 0.f ); // Defaults ( 0.f, 0.f )
+	float x, y;
+};
+
+struct Vertex3 
+{ 
+    enum { NUM_FLOATS = 3 };
+	Vertex3( const float x = 0.f, const float y = 0.f, const float z = 0.f ); // Defaults ( 0.f, 0.f, 0.f )
+
+    const Vertex3 operator-( const Vertex3& other ) const
+    {
+        Vertex3 res( x - other.x, y - other.y, z - other.z );
+        return res;
+    }
+
+    const Vertex3 cross( const Vertex3& other ) const
+    {
+        Vertex3 res( y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x );
+        return res;
+    }
+
+    float x, y, z; 
+};
+
+struct Line
+{ 
+	Line( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3() );
+	Vertex3 a, b; 
+};
+
+struct Triangle 
+{
+	Triangle( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3(), const Vertex3 c = Vertex3() );
+	Vertex3 a, b, c; 
+};
+
+struct Cuboid
+{
+	Cuboid( const Vertex3 max = Vertex3(), const Vertex3 min = Vertex3() );
+	Vertex3 max, min;
+};
+
+struct Color
+{
+    enum { NUM_FLOATS = 4 };
+	Color( const float r = 0.f, const float g = 0.f, const float b = 0.f, const float a = 1.f ); // Opaque black default
+	float r, g, b, a;
+};
+
+struct RendererCinfo
+{
+    RendererCinfo()
+    {
+        m_cameraPos = glm::vec3( 0.f, 0.f, -3.f );
+        m_cameraDir = glm::vec3( 0.f, 0.f, 1.f );
+        m_cameraUp = glm::vec3( 0.f, 1.f, 0.f );
+
+        m_lightColor = glm::vec3( 1.f, 1.f, 1.f );
+        m_lightPos = glm::vec3( 0.f, 1.f, 0.f );
+
+        m_nearPlane = .01f;
+        m_farPlane = 100.f;
+    }
+
+    glm::vec3 m_cameraPos;
+    glm::vec3 m_cameraDir;
+    glm::vec3 m_cameraUp;
+    glm::vec3 m_lightColor;
+    glm::vec3 m_lightPos;
+    float m_nearPlane;
+    float m_farPlane;
+};
 
 class Renderer
 {
 public:
 
-	typedef unsigned int Color;
-
-	struct Renderable
-	{
-		Renderable();
-
-		virtual void render( const Shader* shader, const Color color ) const = 0;
-
-		GLuint m_vao;
-		GLuint m_vbo;
-	};
-
-	struct DisplayLine : Renderable
-	{
-		DisplayLine( const Line& line );
-
-		virtual void render( const Shader* shader, const Color color ) const;
-	};
-
-	struct DisplayTriangle : Renderable
-	{
-		DisplayTriangle( const Triangle& tri );
-
-		virtual void render( const Shader* shader, const Color color ) const;
-	};
-
-	struct DisplayText : Renderable
-	{
-		DisplayText( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
-
-		std::string m_str;
-		Vector4 m_pos;
-		Real m_scale;
-	};
-
-	struct DisplayBox : Renderable
-	{
-		DisplayBox( const Box& box, Color color = BLACK );
-
-		virtual void render() const;
-	};
-
-	struct DisplaySphere : Renderable
-	{
-		DisplaySphere( const Sphere& sphere, Color color = BLACK );
-
-		virtual void render() const;
-	};
-
-	struct DisplayGeometry : Renderable
-	{
-		DisplayGeometry();
-
-		virtual void render() const;
-	};
-
 	Renderer();
 	~Renderer();
 
-	int init( int width, int height );
-	int step();
+	// Call this before your loop
+	int init( struct GLFWwindow* window, const RendererCinfo& cinfo );
 
-	void getDimensions( float& left, float& right, float& bottom, float& top );
+	// Call this in your loop, before the draw funcs
+	void prestep();
 
-	// TODO: make so Line, Triangle structs are passed
-	void drawLine( const Vector4& p1, const Vector4& p2, unsigned int color = BLACK );
-	void drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color = BLACK );
-	void drawBox( const Box& box, unsigned int color = BLACK );
-	void drawText( const std::string& str, const Vector4& pos, const Real scale = 1.f, unsigned int color = BLACK );
+	// Call this in your loop, after the draw funcs
+	void render();
 
-	// TODO: move these under RenderUtils
-	void drawCross( const Vector4& pos, const Real rot, const Real len, unsigned int = BLACK );
-	void drawArrow( const Vector4& pos, const Vector4& dir, unsigned int = BLACK );
-	void drawBox( const Vector4& max, const Vector4& min, unsigned int = BLACK );
-	void drawCircle( const Vector4& pos, const Real radius, unsigned int = BLACK );
+	// Call this after your loop
+	int terminate();
 
+	// Camera access, for changing view
 	Camera* getCamera() { return m_camera; }
+
+	// Draw funcs, wrap these in your render functions for datatype conversion
+	void addDisplayLine( const Line& line, const Color color = Color() );
+	void drawTriangle( const Triangle& tri, const Color color = Color() );
+
+    int addDisplayCuboid( const Cuboid& cube, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
+    void removeDisplayCuboid( int index );
+
+	// Draw func for text
+	void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
+	//void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
 
 private:
 
-	int initializeFreeType();
+    struct LightSource
+    {
+        glm::vec3 m_color;
+        glm::vec3 m_pos;
+    };
 
-	void updateView();
+	struct DisplayLines
+	{
+		// One buffer shared for all lines,
+		// all lines in world space,
+		// single draw call
 
-	// Make these virtual
-	void renderLine( const DisplayLine& line ) const;
-	void renderTriangle( const DisplayTriangle& tri ) const;
-	void renderText( const DisplayText& text ) const;
+		enum { MAX_NUM_LINES = 1024 };
 
-	int m_left;
-	int m_right;
-	int m_bottom;
-	int m_top;
+		void create();
+		void writeBufferLine( const Vertex3 a, const Vertex3 b, const Color color );
+        void clearBufferLine( int index );
+		void render( const glm::mat4& projection, const glm::mat4& view );
+
+		Shader* m_shader;
+
+		GLuint m_vao;
+		GLuint m_vbo[2];
+
+		Vertex3 m_vertices[MAX_NUM_LINES * 2];
+		Color m_color[MAX_NUM_LINES * 2];
+		int m_numVerts;
+	};
+
+    struct DisplayTris
+    {
+        enum { NUM_MAX_TRIS = 32 };
+
+        struct Triangle
+        {
+            enum
+            {
+                NUM_VERTS = 3,
+                NUM_FLOATS_FOR_VERTICES = NUM_VERTS * Vertex3::NUM_FLOATS,
+                NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS
+            };
+        };
+
+        struct Buffer
+        {
+            float m_vertices[NUM_MAX_TRIS * Triangle::NUM_FLOATS_FOR_VERTICES];
+            float m_colors[NUM_MAX_TRIS * Triangle::NUM_FLOATS_FOR_COLORS];
+        };
+    };
+
+    // Specialized buffer for cuboids
+	struct DisplayCuboids
+	{
+		// Three buffers for vert, normal, color for all cuboids
+		// One draw call per cuboid for model matrix update
+        // TODO: Merge vert, normal, color to one buffer
+
+        enum { NUM_MAX_CUBOIDS = 32 };
+
+        // Per-cuboid data
+        struct Cuboid
+        {
+            enum
+            {
+                NUM_VERTS = 36,
+                NUM_FLOATS_FOR_VERTICES = NUM_VERTS * Vertex3::NUM_FLOATS,
+                NUM_FLOATS_FOR_NORMALS = NUM_VERTS * Vertex3::NUM_FLOATS,
+                NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS
+            };
+            
+            // Model matrix local->world
+            glm::mat4 m_model;
+        };
+
+        struct Buffer
+        {
+            void setAtIndex( int index, const Vertex3* verts, const Vertex3* norms, const Color color )
+            {
+                const int cuboidVertOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
+                const int cuboidNormalOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
+                const int cuboidColorOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
+
+                for ( int i = 0; i < Cuboid::NUM_VERTS; i++ )
+                {
+                    int vertexOffset = i * 3;
+                    m_vertices[cuboidVertOffset + vertexOffset] = verts[i].x;
+                    m_vertices[cuboidVertOffset + vertexOffset + 1] = verts[i].y;
+                    m_vertices[cuboidVertOffset + vertexOffset + 2] = verts[i].z;
+
+                    int normalOffset = i * 3;
+                    m_normals[cuboidNormalOffset + normalOffset] = norms[i].x;
+                    m_normals[cuboidNormalOffset + normalOffset + 1] = norms[i].y;
+                    m_normals[cuboidNormalOffset + normalOffset + 2] = norms[i].z;
+
+                    int colorOffset = i * 4;
+                    m_colors[cuboidColorOffset + colorOffset] = color.r;
+                    m_colors[cuboidColorOffset + colorOffset + 1] = color.g;
+                    m_colors[cuboidColorOffset + colorOffset + 2] = color.b;
+                    m_colors[cuboidColorOffset + colorOffset + 3] = color.a;
+                }
+            }
+
+            void resetAtIndex( int index )
+            {
+                const int cuboidVertOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_VERTICES; fltIdx++ )
+                {
+                    m_vertices[cuboidVertOffset + fltIdx] = 0.f;
+                }
+
+                const int cuboidNormalOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_NORMALS; fltIdx++ )
+                {
+                    m_normals[cuboidNormalOffset + fltIdx] = 0.f;
+                }
+
+                const int cuboidColorOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_COLORS; fltIdx++ )
+                {
+                    m_colors[cuboidColorOffset + fltIdx] = 0.f;
+                }
+            }
+
+            float* getVertsAtIndex( int index )
+            {
+                const int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
+                return &m_vertices[cuboidOffset];
+            }
+
+            float* getNormalsAtIndex( int index )
+            {
+                const int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
+                return &m_normals[cuboidOffset];
+            }
+
+            float* getColorsAtIndex( int index )
+            {
+                int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
+                return &m_colors[cuboidOffset];
+            }
+
+            // Vertices in cube-local space
+            float m_vertices[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_VERTICES];
+
+            // Unnormalized normals from cube-face
+            float m_normals[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_NORMALS];
+
+            // Color per vertex, r, g, b, a
+            float m_colors[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_COLORS];
+        };
+
+		void create();
+		int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
+        void clearBufferCuboid( int index );
+        void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
+
+		Shader* m_shader;
+
+        GLuint m_vao;
+        GLuint m_vbo[3];
+
+        ArrayFreeList<Cuboid>* m_cuboids;
+
+        // Buffer containing vertex, color data
+        // Not needed but useful for keeping track
+        Buffer m_buffer;
+
+		int m_numCuboids;
+
+        int m_nextFreeCuboid;
+	};
+
+    // Buffer generalized for convex /w variable # of vertices
+
+    // Buffer generalized for meshes
+    // Use a best-fit allocation for freelist
+    struct DisplayGeometries
+    {
+
+    };
+
+	GLFWwindow* m_window;
 
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
-	glm::mat4 m_model;
 
-	Shader* m_lineShader;
-	Shader* m_triShader;
-	Shader* m_textShader;
+	DisplayLines m_displayLines;
+	DisplayCuboids m_displayCuboids;
 
-	std::vector<DisplayLine> m_displayLines;
-	std::vector<DisplayTriangle> m_displayTris;
-	std::vector<DisplayText> m_displayTexts;
+    LightSource m_lightSource;
 
 	Camera* m_camera;
 };

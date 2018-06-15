@@ -119,11 +119,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Renderer\Renderer.vcxproj">
-      <Project>{0a5563a4-879a-40cd-afbc-780dc7a47b87}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

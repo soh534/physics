@@ -1,10 +1,10 @@
-#include <Renderer/Renderer/Camera.h>
+#include "Camera.h"
 
-Camera::Camera()
+Camera::Camera( const glm::vec3 pos, const glm::vec3 dir, const glm::vec3 up )
 {
-	m_cameraPos = glm::vec3( 0.f, 0.f, -200.f );
-	m_cameraDir = glm::vec3( 0.f, 0.f, 1.f );
-	m_cameraUp = glm::vec3( 0.f, 1.f, 0.f );
+    m_cameraPos = pos;
+    m_cameraDir = dir;
+    m_cameraUp = up;
 
 	m_yaw = 90.f; // Start with facing z axis
 	m_pitch = 0.f;

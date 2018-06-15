@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Renderer\Camera.cpp" />
+    <ClCompile Include="Renderer\Renderer.cpp" />
+    <ClCompile Include="Renderer\Shader.cpp" />
+    <ClCompile Include="Renderer\Thirdparty\Imgui\imgui.cpp">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_demo.cpp">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_draw.cpp">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_impl_glfw_gl3.cpp">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Renderer\Camera.h" />
+    <ClInclude Include="Renderer\Renderer.h" />
+    <ClInclude Include="Renderer\Shader.h" />
+    <ClInclude Include="Renderer\Thirdparty\Imgui\imconfig.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\imgui.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\imgui_impl_glfw_gl3.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\imgui_internal.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\stb_rect_pack.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\stb_textedit.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Thirdparty\Imgui\stb_truetype.h">
+      <Filter>Thirdparty\Imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Renderer\shaders\Geometry\GeomFrag.shader">
+      <Filter>shaders\Geometry</Filter>
+    </None>
+    <None Include="Renderer\shaders\Geometry\GeomVert.shader">
+      <Filter>shaders\Geometry</Filter>
+    </None>
+    <None Include="Renderer\shaders\LightSource\LightSourceFrag.shader">
+      <Filter>shaders\LightSource</Filter>
+    </None>
+    <None Include="Renderer\shaders\LightSource\LightSourceVert.shader">
+      <Filter>shaders\LightSource</Filter>
+    </None>
+    <None Include="Renderer\shaders\Line\LineFrag.shader">
+      <Filter>shaders\Line</Filter>
+    </None>
+    <None Include="Renderer\shaders\Line\LineVert.shader">
+      <Filter>shaders\Line</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{ba5a3e45-c9a6-4601-8a56-4eee946b10bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\Geometry">
+      <UniqueIdentifier>{d81959b1-a7e8-4686-98c0-50ca1d82f26f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\LightSource">
+      <UniqueIdentifier>{a534c7d4-3116-4702-a879-531af4fea067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\Line">
+      <UniqueIdentifier>{85936543-86c9-4e76-abdd-ebfe9d520d13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty">
+      <UniqueIdentifier>{b6fc09f0-e089-405d-8103-15b38313168e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thirdparty\Imgui">
+      <UniqueIdentifier>{04389d1c-9bcf-45b5-94ae-27ee9b34d215}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

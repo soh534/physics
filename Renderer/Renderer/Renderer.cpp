@@ -1,270 +1,203 @@
 #include <Common/Base.h>
-
-#include <Renderer/Renderer/Renderer.h>
-#include <Renderer/Renderer/Shader.h>
-#include <Renderer/Renderer/Camera.h>
 #include <Common/FileIO.h>
+
+#include "Renderer.h"
+#include "Shader.h"
+#include "Camera.h"
+
+#include "Thirdparty/Imgui/imgui.h"
+#include "Thirdparty/Imgui/imgui_impl_glfw_gl3.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <vector>
 #include <sstream>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-typedef Renderer::Renderable Renderable;
-typedef Renderer::DisplayLine DisplayLine;
-typedef Renderer::DisplayTriangle DisplayTriangle;
-typedef Renderer::DisplayText DisplayText;
-
-struct Character
+Vertex2::Vertex2( const float x, const float y)
+	: x( x ), y( y )
 {
-	GLuint m_textureId;
-	Vector4 m_size;
-	Vector4 m_bearing;
-	FT_Pos m_advance;
-};
-
-std::map<GLchar, Character> Characters;
-
-Renderable::Renderable()
-{
-
 }
 
-DisplayLine::DisplayLine( const Line& line )
-	: Renderable()
+Vertex3::Vertex3( const float x, const float y, const float z )
+	: x( x ), y( y ), z( z )
 {
-	float vertices[] = { line.m_a( 0 ), line.m_a( 1 ), line.m_b( 0 ), line.m_b( 1 ) };
-	
-
-	glGenBuffers( 1, m_vbo );
-	glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
 }
 
-void DisplayLine::render(const Shader* shader, const Color color) const
+Line::Line( const Vertex3 a, const Vertex3 b )
+	: a( a ), b( b )
 {
+}
 
+Triangle::Triangle( const Vertex3 a, const Vertex3 b, const Vertex3 c )
+	: a( a ), b( b ), c( c )
+{
+}
 
-	m_lineShader->use();
+Cuboid::Cuboid(const Vertex3 max, const Vertex3 min)
+	: max( max ), min( min )
+{
+}
 
-	m_lineShader->setMat4( "projection", m_projection );
+Color::Color( float r, float g, float b, float a )
+	: r( r ), g( g ), b( b ), a( a )
+{
+}
 
-	glBindVertexArray( m_lineVAO );
-	glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[0] );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
+void Renderer::DisplayLines::create()
+{
+	m_shader = new Shader(
+		"../Renderer_vaopg_vboref/Renderer/shaders/Line/LineVert.shader",
+		"../Renderer_vaopg_vboref/Renderer/shaders/Line/LineFrag.shader"
+	);
 
-	glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[1] );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( color ), color );
+	glGenVertexArrays( 1, &m_vao );
+	glGenBuffers( 2, m_vbo );
 
-	glDrawArrays( GL_LINE_STRIP, 0, 2 );
+	glBindVertexArray( m_vao );
+	{
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( m_vertices ), m_vertices, GL_DYNAMIC_DRAW );
+		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+		glEnableVertexAttribArray( 0 ); // Position
 
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( m_color ), m_color, GL_DYNAMIC_DRAW );
+		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+		glEnableVertexAttribArray( 1 ); // Color
+	}
 	glBindVertexArray( 0 );
+
+	m_numVerts = 0;
 }
 
-
-DisplayTriangle::DisplayTriangle( const Triangle& tri )
-	: Renderable()
+void Renderer::DisplayLines::writeBufferLine( const Vertex3 a, const Vertex3 b, const Color color )
 {
+	Assert( m_numVerts < MAX_NUM_LINES * 2, "Max # of lines exceeded." );
+	m_vertices[m_numVerts] = a;
+	m_color[m_numVerts] = color;
+	m_vertices[m_numVerts + 1] = b;
+	m_color[m_numVerts + 1] = color;
 
+	m_numVerts += 2;
 }
 
-void Renderer::renderTriangle( const DisplayTriangle& tri ) const
+void Renderer::DisplayLines::render( const glm::mat4& projection, const glm::mat4& view )
 {
-	float vertices[] =
+	// Single draw call for all lines.
+	m_shader->use();
+	m_shader->setMat4( "projection", projection );
+	m_shader->setMat4( "view", view );
+
+	glBindVertexArray( m_vao );
 	{
-		tri.m_a( 0 ), tri.m_a( 1 ), tri.m_a( 2 ),
-		tri.m_b( 0 ), tri.m_b( 1 ), tri.m_b( 2 ),
-		tri.m_c( 0 ), tri.m_c( 1 ), tri.m_c( 2 ),
-	};
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
+		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( Vertex3 ) * m_numVerts, m_vertices );
 
-	float color[] =
-	{
-		(tri.m_color & 0xff) / 255.f,
-		((tri.m_color >> 8) & 0xff) / 255.f,
-		((tri.m_color >> 16) & 0xff) / 255.f,
-		((tri.m_color >> 24) & 0xff) / 255.f,
-		(tri.m_color & 0xff) / 255.f,
-		((tri.m_color >> 8) & 0xff) / 255.f,
-		((tri.m_color >> 16) & 0xff) / 255.f,
-		((tri.m_color >> 24) & 0xff) / 255.f,
-		(tri.m_color & 0xff) / 255.f,
-		((tri.m_color >> 8) & 0xff) / 255.f,
-		((tri.m_color >> 16) & 0xff) / 255.f,
-		((tri.m_color >> 24) & 0xff) / 255.f
-	};
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
+		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( Color ) * m_numVerts, m_color );
 
-	m_triShader->use();
-
-	m_triShader->setMat4( "projection", m_projection );
-	m_triShader->setMat4( "view", m_view );
-	m_triShader->setMat4( "model", m_model );
-
-	glBindVertexArray( m_triVAO );
-	glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[0] );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
-
-	glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[1] );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( color ), color );
-
-	glDrawArrays( GL_TRIANGLES, 0, 3 );
-
+		glDrawArrays( GL_LINES, 0, m_numVerts );
+	}
 	glBindVertexArray( 0 );
+
+	m_numVerts = 0;
 }
 
-DisplayText::DisplayText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
-	: m_str( str ), m_pos( pos ), m_scale( scale ), Renderable( color )
+void Renderer::DisplayCuboids::create()
 {
+	m_shader = new Shader(
+		"../Renderer_vaofag_vbos/Renderer/shaders/Geometry/GeomVert.shader",
+		"../Renderer_vaofag_vbos/Renderer/shaders/Geometry/GeomFrag.shader"
+	);
 
+    glGenVertexArrays( 1, &m_vao );
+    glBindVertexArray( m_vao );
+
+    glGenBuffers( 3, m_vbo );
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_vertices ), m_buffer.m_vertices, GL_DYNAMIC_DRAW );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glEnableVertexAttribArray( 0 ); // Position
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_normals ), m_buffer.m_normals, GL_DYNAMIC_DRAW );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glEnableVertexAttribArray( 1 ); // Normal
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[2] );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_colors ), m_buffer.m_colors, GL_DYNAMIC_DRAW );
+    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glEnableVertexAttribArray( 2 ); // Color
+
+    glBindVertexArray( 0 );
+
+    m_cuboids = new ArrayFreeList<Cuboid>();
 }
 
-void Renderer::renderText( const DisplayText& text ) const
+int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color )
 {
-	m_textShader->use();
+	Assert( m_numCuboids < NUM_MAX_CUBOIDS, "Max # geometry exceeded." );
 
-	m_textShader->setMat4( "projection", m_projection );
-	m_textShader->setMat4( "view", m_view );
-	m_textShader->setMat4( "model", m_model );
+    Cuboid cuboid;
+    cuboid.m_model = model;
+        
+    const int index = m_cuboids->add( cuboid );
+    m_buffer.setAtIndex( index, trisAsVerts, normalsPerVert, color );
 
-	m_textShader->setVec3(
-		"textColor",
-		(float) (text.m_color & 0xff) / 255.f,
-		(float) (text.m_color >> 8 & 0xff) / 255.f,
-		(float) (text.m_color >> 16 & 0xff) / 255.f );
+    // Write vert positions to buffer
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), m_buffer.getVertsAtIndex( index ) );
 
-	glActiveTexture( GL_TEXTURE0 );
-	glBindVertexArray( m_textVAO );
+    // Write normals
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), m_buffer.getNormalsAtIndex( index ) );
 
-	Real x = text.m_pos( 0 );
-	Real y = text.m_pos( 1 );
-	Real z = text.m_pos( 2 );
+    // Write colors
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[2] );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Color ), Cuboid::NUM_VERTS * sizeof( Color ), m_buffer.getColorsAtIndex( index ) );
 
-	// Iterate through all characters
-	std::string::const_iterator c;
-	for ( c = text.m_str.begin(); c != text.m_str.end(); c++ )
-	{
-		Character ch = Characters[*c];
-
-		float xpos = x + ch.m_bearing( 0 ) * text.m_scale;
-		float ypos = y - (ch.m_size( 1 ) - ch.m_bearing( 1 )) * text.m_scale;
-
-		float w = ch.m_size( 0 ) * text.m_scale;
-		float h = ch.m_size( 1 ) * text.m_scale;
-		// Update VBO for each character
-		float vertices[6][3] = 
-		{
-			{ xpos,     ypos + h,   z },
-		    { xpos,     ypos,       z },
-            { xpos + w, ypos,       z },
-    		{ xpos,     ypos + h,   z },
-	    	{ xpos + w, ypos,       z },
-		    { xpos + w, ypos + h,   z }
-		};
-
-		float uv[6][2] = 
-		{
-			{0.f, 0.f}, {0.f, 1.f}, {1.f, 1.f}, {0.f, 0.f}, {1.f, 1.f}, {1.f, 0.f}
-		};
-
-		// Render glyph texture over quad
-		glBindTexture( GL_TEXTURE_2D, ch.m_textureId );
-
-		// Update content of VBO memory
-		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[0] );
-		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
-
-		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[1] );
-		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( uv ), uv );
-
-		// Render quad
-		glDrawArrays( GL_TRIANGLES, 0, 6 );
-		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.m_advance >> 6) * text.m_scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
-	}
-
-	glBindVertexArray( 0 );
-	glBindTexture( GL_TEXTURE_2D, 0 );
+    return index;
 }
 
-inline unsigned int SetRGBA( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
+void Renderer::DisplayCuboids::clearBufferCuboid( int index )
 {
-	return (r) | (g << 8) | (b << 16) | (a << 24);
+    m_cuboids->remove( index );
+    m_buffer.resetAtIndex( index );
 }
 
-GLuint LoadShaders( const char* vertexShaderPath, const char* fragmentShaderPath )
+void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos )
 {
-	std::string vertShaderSrcStr;
-	Assert( FileIO::loadFileStream( vertexShaderPath, vertShaderSrcStr ) == 0, "Failed to read shader" );
+	m_shader->use();
+	m_shader->setMat4( "projection", projection );
+	m_shader->setMat4( "view", view );
 
-	std::string fragShaderSrcStr;
-	Assert( FileIO::loadFileStream( fragmentShaderPath, fragShaderSrcStr ) == 0, "Failed to read shader" );
+    m_shader->setVec3( "lightColor", lightSource.m_color );
+    m_shader->setVec3( "lightPos", cameraPos );
+    m_shader->setVec3( "viewPos", cameraPos );
 
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
+    glBindVertexArray( m_vao );
 
-	// Compile vertex shader
-	printf( "Compiling vertex shader: %s\n", vertexShaderPath );
-	const char* vertShaderSrcPtr = vertShaderSrcStr.c_str();
-	GLuint vertShaderId = glCreateShader( GL_VERTEX_SHADER );
-	glShaderSource( vertShaderId, 1, &vertShaderSrcPtr, nullptr );
-	glCompileShader( vertShaderId );
-
-	glGetShaderiv( vertShaderId, GL_COMPILE_STATUS, &Result );
-	glGetShaderiv( vertShaderId, GL_INFO_LOG_LENGTH, &InfoLogLength );
-	if ( InfoLogLength > 0 )
+	for ( int cuboidIndex = 0; cuboidIndex < m_cuboids->getSize(); cuboidIndex++ )
 	{
-		std::vector<char> VertexShaderErrorMessage( InfoLogLength + 1 );
-		glGetShaderInfoLog( vertShaderId, InfoLogLength, nullptr, &VertexShaderErrorMessage[0] );
-		printf( "%s\n", &VertexShaderErrorMessage[0] );
+        if ( !m_cuboids->isValid( cuboidIndex ) )
+        {
+            continue;
+        }
+
+        Cuboid& cuboid = ( *m_cuboids )( cuboidIndex );
+		m_shader->setMat4( "model", cuboid.m_model );
+        glDrawArrays( GL_TRIANGLES, cuboidIndex * Cuboid::NUM_VERTS, Cuboid::NUM_VERTS );
 	}
 
-	// Compile fragment shader
-	printf( "Compiling fragment shader: %s\n", fragmentShaderPath );
-	const char* fragShaderSrcPtr = fragShaderSrcStr.c_str();
-	GLuint fragShaderId = glCreateShader( GL_FRAGMENT_SHADER );
-	glShaderSource( fragShaderId, 1, &fragShaderSrcPtr, nullptr );
-	glCompileShader( fragShaderId );
-
-	glGetShaderiv( fragShaderId, GL_COMPILE_STATUS, &Result );
-	glGetShaderiv( fragShaderId, GL_INFO_LOG_LENGTH, &InfoLogLength );
-	if ( InfoLogLength > 0 )
-	{
-		std::vector<char> FragmentShaderErrorMessage( InfoLogLength + 1 );
-		glGetShaderInfoLog( fragShaderId, InfoLogLength, nullptr, &FragmentShaderErrorMessage[0] );
-		printf( "%s\n", &FragmentShaderErrorMessage[0] );
-	}
-
-	// Link vertex and fragment shaders
-	printf( "Linking program\n" );
-	GLuint programId = glCreateProgram();
-	glAttachShader( programId, vertShaderId );
-	glAttachShader( programId, fragShaderId );
-	glLinkProgram( programId );
-
-	glGetProgramiv( programId, GL_LINK_STATUS, &Result );
-	glGetProgramiv( programId, GL_INFO_LOG_LENGTH, &InfoLogLength );
-	if ( InfoLogLength > 0 )
-	{
-		std::vector<char> ProgramErrorMessage( InfoLogLength + 1 );
-		glGetProgramInfoLog( programId, InfoLogLength, nullptr, &ProgramErrorMessage[0] );
-		printf( "%s\n", &ProgramErrorMessage[0] );
-	}
-
-	glDetachShader( programId, vertShaderId );
-	glDetachShader( programId, fragShaderId );
-
-	glDeleteShader( vertShaderId );
-	glDeleteShader( fragShaderId );
-
-	return programId;
+    glBindVertexArray( 0 );
 }
 
 Renderer::Renderer()
@@ -274,270 +207,168 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	delete m_camera;
-	delete m_lineShader;
-	delete m_textShader;
+    delete m_camera;
 }
 
-int Renderer::init( int width, int height )
+int Renderer::init( GLFWwindow* window, const RendererCinfo& cinfo )
 {
-	GLenum err = glewInit();
-	Assert( err == GLEW_OK, "failed to initialize GLEW" );
+	m_window = window;
 
-	m_left = -width * 0.5;
-	m_right = width * 0.8;
-	m_bottom = -height * 0.5;
-	m_top = height * 0.8;
+	int width, height;
+	glfwGetFramebufferSize( window, &width, &height );
 
-	m_camera = new Camera();
+    m_camera = new Camera( cinfo.m_cameraPos, cinfo.m_cameraDir, cinfo.m_cameraUp );
 
-	//m_projection = glm::ortho( (float) m_left, (float) m_right, (float) m_bottom, (float) m_top, -1.f, 1.f );
-	m_projection = glm::perspective( glm::radians( 90.f ), (float) (m_right - m_left) / (float) (m_top - m_bottom), 0.1f, 1000.f );
-	//m_view = glm::mat4( 1.f );
-	updateView();
-	//m_view = glm::translate( m_view, glm::vec3( 0.f, 0.f, -500.f ) );
-	m_model = glm::mat4( 1.f );
-	//m_model = glm::rotate( m_model, glm::radians( -55.f ), glm::vec3( 1.f, 0.f, 0.f ) );
+    m_projection = glm::perspective( glm::radians( 90.f ), (float)width / (float)height, cinfo.m_nearPlane, cinfo.m_farPlane );
+	m_view = glm::lookAt( m_camera->getPos(), m_camera->getPos() + m_camera->getDir(), m_camera->getUp() );
 
-	m_lineShader = new Shader( "../Renderer/Renderer/shaders/VertexShader.shader", "../Renderer/Renderer/shaders/FragmentShader.shader" );
+    m_lightSource.m_color = cinfo.m_lightColor;
+    m_lightSource.m_pos = cinfo.m_lightPos;
 
-	// TODO: re-write so vertices in buffer is static
-	// TODO: re-evaluate diference between 2x glGenVertexArrays() or glGenVertexArrays(2, )
-	glGenVertexArrays( 1, &m_lineVAO );
-	glGenBuffers( 2, m_lineVBO );
+	m_displayLines.create();
+	m_displayCuboids.create();
 
-	glBindVertexArray( m_lineVAO );
-	{
-		glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[0] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 4, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 0 ); // Position
-		glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glEnable( GL_DEPTH_TEST );
 
-		glBindBuffer( GL_ARRAY_BUFFER, m_lineVBO[1] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 8, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 1 ); // Color
-		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
-	}
-	glBindVertexArray( 0 );
-
-	m_triShader = new Shader( "../Renderer/Renderer/shaders/TriVertShader.shader", "../Renderer/Renderer/shaders/TriFragShader.shader" );
-
-	glGenVertexArrays( 1, &m_triVAO );
-	glGenBuffers( 2, m_triVBO );
-
-	glBindVertexArray( m_triVAO );
-	{
-		glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[0] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 9, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 0 ); // Position
-		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
-
-		glBindBuffer( GL_ARRAY_BUFFER, m_triVBO[1] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( GL_FLOAT ) * 12, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 1 ); // Color
-		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
-	}
-	glBindVertexArray( 0 );
-
-	m_textShader = new Shader( "../Renderer/Renderer/shaders/TextVertexShader.shader", "../Renderer/Renderer/shaders/TextFragmentShader.shader" );
-	initializeFreeType();
+	ImGui::CreateContext();
+	ImGui_ImplGlfwGL3_Init( window, true );
 
 	return 0;
 }
 
-int Renderer::initializeFreeType()
+void Renderer::prestep()
 {
-	FT_Library library = nullptr;
-	Assert( !FT_Init_FreeType( &library ), "failed to initialize FreeType" );
+	ImGui_ImplGlfwGL3_NewFrame();
 
-	FT_Face face = nullptr;
-	Assert( !FT_New_Face( library, "C:\\Windows\\Fonts\\consola.ttf", 0, &face ),
-		"failed to load font face" );
+	// Not frame-persistent, must be called every frame
+	ImGui::SetNextWindowPos( ImVec2( 0, 0 ) );
 
-	Assert( !FT_Set_Pixel_Sizes( face, 0, 16 ), "failed to define font size" );
+	int width, height;
+	glfwGetFramebufferSize( m_window, &width, &height );
 
-	// Pre-load characters
-	// Rendering technique taken from
-	// https://learnopengl.com/#!In-Practice/Text-Rendering
+	ImGui::SetNextWindowSize( ImVec2( (float)width, (float)height ) );
+	ImGui::SetNextWindowBgAlpha( 0.f );
+}
 
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+void Renderer::render()
+{
+	// Update view matrix, flush display lines & geoms, step Imgui
+	m_view = glm::lookAt( m_camera->getPos(), m_camera->getPos() + m_camera->getDir(), m_camera->getUp() );
 
-	for ( GLubyte c = 0; c < 128; c++ )
-	{
-		Assert( !FT_Load_Char( face, c, FT_LOAD_RENDER ), "failed to load character from font face" );
+	m_displayLines.render( m_projection, m_view );
+    m_displayCuboids.render( m_projection, m_view, m_lightSource, m_camera->getPos() );
 
-		// glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels );
+	ImGui::Render();
+	ImGui_ImplGlfwGL3_RenderDrawData( ImGui::GetDrawData() );
+}
 
-		GLuint texture;
-		glGenTextures( 1, &texture );
-		glBindTexture( GL_TEXTURE_2D, texture );
-		glTexImage2D( GL_TEXTURE_2D,                 // GLenum target
-			0,                             // GLint level
-			GL_RED,                        // GLint internalformat
-			face->glyph->bitmap.width,     // GLsizei width
-			face->glyph->bitmap.rows,      // GLsizei height
-			0,                             // GLint border
-			GL_RED,                        // GLenum format
-			GL_UNSIGNED_BYTE,              // GLenum type
-			face->glyph->bitmap.buffer );   // const void *pixels
-
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-		Character character =
-		{
-			texture,
-			Vector4( (Real) face->glyph->bitmap.width, (Real) face->glyph->bitmap.rows ),
-			Vector4( (Real) face->glyph->bitmap_left, (Real) face->glyph->bitmap_top ),
-			face->glyph->advance.x
-		};
-
-		Characters.insert( std::pair<GLchar, Character>( c, character ) );
-	}
-
-	FT_Done_Face( face );
-	FT_Done_FreeType( library );
-
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-	glGenVertexArrays( 1, &m_textVAO );
-	glGenBuffers( 2, m_textVBO );
-
-	glBindVertexArray( m_textVAO );
-	{
-		// TODO: think of a way to interleave vertex positions and uv coordinates
-		// TODO: align the vertices to 4x floats
-		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[0] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * 6 * 3, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 0 );
-		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
-
-		// TODO: consider GL_STATIC_DRAW for uv coordinates
-		glBindBuffer( GL_ARRAY_BUFFER, m_textVBO[1] );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * 6 * 2, nullptr, GL_DYNAMIC_DRAW );
-		glEnableVertexAttribArray( 1 );
-		glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 0, nullptr );
-	}
-	glBindVertexArray( 0 );
+int Renderer::terminate()
+{
+	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui::DestroyContext();
 
 	return 0;
 }
 
-void Renderer::updateView()
+void Renderer::addDisplayLine( const Line& line, const Color color )
 {
-	const glm::vec3& pos = m_camera->getPos();
-	const glm::vec3& dir = m_camera->getDir();
-	const glm::vec3& up = m_camera->getUp();
-	m_view = glm::lookAt( pos, pos + dir, up );
+	m_displayLines.writeBufferLine( line.a, line.b, color );
 }
 
-int Renderer::step()
+/*
+void Renderer::drawTriangle( const Triangle& tri, const Color color )
 {
-	updateView();
+	m_displayCuboids.addDisplayCuboid( &tri, 1, glm::mat4( 1.f ), color );
+}
+*/
 
-	for ( auto i = 0; i < m_displayLines.size(); i++ )
-	{
-		renderLine( m_displayLines[i] );
-	}
-	m_displayLines.clear();
+int Renderer::addDisplayCuboid( const Cuboid& cube, const glm::mat4& model, const Color color )
+{
+    // Prepare 8 verts from cube's min-max extents
+    Vertex3 verts[8] =
+    {
+        { cube.min.x, cube.min.y, cube.min.z }, // A 0 ---
+        { cube.max.x, cube.min.y, cube.min.z }, // B 1 +--
+        { cube.max.x, cube.max.y, cube.min.z }, // C 2 ++-
+        { cube.min.x, cube.max.y, cube.min.z }, // D 3 -+-
+        { cube.min.x, cube.min.y, cube.max.z }, // E 4 --+
+        { cube.max.x, cube.min.y, cube.max.z }, // F 5 +-+
+        { cube.max.x, cube.max.y, cube.max.z }, // G 6 +++
+        { cube.min.x, cube.max.y, cube.max.z }  // H 7 -++
+    };
 
-	for ( auto i = 0; i < m_displayTris.size(); i++ )
-	{
-		renderTriangle( m_displayTris[i] );
-	}
-	m_displayTris.clear();
+    // Prepare 12 tris as verts from the 8 verts
+    Vertex3 trisAsVerts[36] =
+    {
+        verts[0], verts[3], verts[2], // ADC 032
+        verts[2], verts[1], verts[0], // CBA 210
 
-	for ( auto i = 0; i < m_displayTexts.size(); i++ )
-	{
-		renderText( m_displayTexts[i] );
-	}
-	m_displayTexts.clear();
+        verts[4], verts[5], verts[6], // EFG 456
+        verts[6], verts[7], verts[4], // GHE 674
 
-	return 0;
+        verts[7], verts[3], verts[0], // HDA 730
+        verts[0], verts[4], verts[7], // AEH 047
+
+        verts[6], verts[5], verts[1], // GFB 651
+        verts[1], verts[2], verts[6], // BCG 126
+
+        verts[0], verts[1], verts[5], // ABF 015
+        verts[5], verts[4], verts[0], // FEA 540
+
+        verts[6], verts[2], verts[3], // GCD 623
+        verts[3], verts[7], verts[6]  // DHG 376
+    };
+
+    // Prepare 36 normal vectors by AC x AB
+    Vertex3 normsPerVert[36];
+
+    for ( int i = 0; i < 36; i += 3 )
+    {
+        Vertex3 ab = trisAsVerts[i + 1] - trisAsVerts[i];
+        Vertex3 ac = trisAsVerts[i + 2] - trisAsVerts[i];
+        normsPerVert[i] = ac.cross( ab );
+        normsPerVert[i + 1] = ac.cross( ab );
+        normsPerVert[i + 2] = ac.cross( ab );
+    }
+
+    const int index = m_displayCuboids.writeBufferCuboid( trisAsVerts, normsPerVert, model, color );
+    return index;
 }
 
-void Renderer::getDimensions( float & left, float & right, float & bottom, float & top )
+void Renderer::removeDisplayCuboid( int index )
 {
-	left = m_left;
-	right = m_right;
-	bottom = m_bottom;
-	top = m_top;
+    m_displayCuboids.clearBufferCuboid( index );
 }
 
-void Renderer::drawLine( const Vector4& pa, const Vector4& pb, unsigned int color )
+void Renderer::drawText2d( const Vertex2 pos, const Color color, const char* string, ... )
 {
-	m_displayLines.push_back( DisplayLine( pa, pb, color ) );
+	va_list arg;
+	va_start( arg, string );
+	ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
+
+	ImVec2 posImvec;
+	ImGui::SetCursorPos( posImvec ); // Window-coordinate system (pixel-based, top-left origin)
+
+	ImColor colorIm( color.r, color.g, color.b, color.a );
+	ImGui::TextColoredV( colorIm, string, arg );
+	ImGui::End();
+	va_end( arg );
 }
 
-void Renderer::drawCross( const Vector4& pos, const Real rot, const Real len, unsigned int color )
+/*
+void Renderer::drawText3d( const Vertex3 pos, const Color color, const char* string, ... )
 {
-	Vector4 needle( len / 2.f, 0.f );
+	va_list arg;
+	va_start( arg, string );
+	ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
 
-	Vector4 a, b, c, d;
+	ImVec2 posIm;
+	// TODO: project pos to screen to posIm
+	ImGui::SetCursorPos( posIm ); // Window-coordinate system (pixel-based, top-left origin)
 
-	a = pos + needle.getRotatedDir( rot );
-	b = pos + needle.getRotatedDir( rot + 90.f * g_degToRad );
-	c = pos + needle.getRotatedDir( rot + 180.f * g_degToRad );
-	d = pos + needle.getRotatedDir( rot + 270.f * g_degToRad );
-
-	drawLine( a, c, color );
-	drawLine( b, d, color );
+	ImColor colorIm( color.r, color.g, color.b, color.a );
+	ImGui::TextColoredV( colorIm, string, arg );
+	ImGui::End();
+	va_end( arg );
 }
-
-void Renderer::drawArrow( const Vector4& pos, const Vector4& dir, unsigned int color )
-{
-	Vector4 dst; dst.setAdd( pos, dir );
-	drawLine( pos, dst, color );
-
-	Vector4 dirFrac = dir * .5f;
-	Vector4 headLeft = dirFrac.getRotatedDir( 135.f * g_degToRad );
-	Vector4 headRight = dirFrac.getRotatedDir( -135.f * g_degToRad );
-	Vector4 dstToHeadLeft = dst + headLeft;
-	Vector4 dstToHeadRight = dst + headRight;
-
-	drawLine( dst, dstToHeadLeft, color );
-	drawLine( dst, dstToHeadRight, color );
-}
-
-void Renderer::drawBox( const Vector4& max, const Vector4& min, unsigned int color )
-{
-	Vector4 upperLeft( min( 0 ), max( 1 ) );
-	Vector4 bottomRight( max( 0 ), min( 1 ) );
-
-	drawLine( max, upperLeft, color );
-	drawLine( max, bottomRight, color );
-	drawLine( min, upperLeft, color );
-	drawLine( min, bottomRight, color );
-}
-
-void Renderer::drawCircle( const Vector4& pos, const Real radius, unsigned int color )
-{
-	Real step = 2 * (Real) M_PI * STEP_RENDER_CIRCLE;
-	Real full = (2.f + STEP_RENDER_CIRCLE) * M_PI;
-
-	for ( Real i = step; i < full; i += step )
-	{
-		Vector4 na, nb;
-		na.set( radius * cos( i ), radius * sin( i ) );
-		nb.set( radius * cos( i + step ), radius * sin( i + step ) );
-		drawLine( pos + na, pos + nb );
-	}
-}
-
-void Renderer::drawTriangle( const Vector4& a, const Vector4& b, const Vector4& c, unsigned int color )
-{
-	m_displayTris.push_back( DisplayTriangle( a, b, c, color ) );
-}
-
-void Renderer::drawBox( const Box& box, unsigned int color )
-{
-
-}
-
-void Renderer::drawText( const std::string& str, const Vector4& pos, const Real scale, unsigned int color )
-{
-	m_displayTexts.push_back( DisplayText( str, pos, scale, color ) );
-}
+*/

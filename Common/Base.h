@@ -18,8 +18,10 @@
 
 typedef float Real;
 
-const Real g_degToRad = (Real)M_PI / 180.f;
+const Real g_degToRad = (Real)M_PI / 180.f; // TODO: get rid of this awfulness
 
 #include <Common/Vector4.h>
 #include <Common/Transform.h>
 #include <Common/Matrix.h>
+
+#include <Common/ArrayFreeList.h>

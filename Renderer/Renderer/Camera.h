@@ -6,7 +6,7 @@ class Camera
 {
 public:
 
-	Camera();
+	Camera( const glm::vec3 pos, const glm::vec3 dir, const glm::vec3 up );
 
 	void panAndTilt( const float yaw, const float pitch );
 	void dolly( const float x );

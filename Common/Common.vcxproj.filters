@@ -12,6 +12,7 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="FileIO.h" />
+    <ClInclude Include="ArrayFreeList.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Transform.inl" />

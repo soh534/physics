@@ -18,15 +18,24 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Physics\physicsInternalTypes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Physics\physicsTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Physics\physicsInternalTypes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformsTest.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassifySetsTest.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BodyIdPairSortTest.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayFreeListTest.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

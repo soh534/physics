@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <algorithm>
 
@@ -10,11 +11,11 @@ namespace
 {
 	static float cameraSpeed;
 	double xLast, yLast;
-	bool firstMouse;
+	bool firstClick;
 
-	void scrollCallback( class GLFWwindow* window, double x, double y )
+	void scrollCallback( GLFWwindow* window, double x, double y )
 	{
-		cameraSpeed *= std::pow( 1.2, y );
+        cameraSpeed *= (float)std::pow( 1.2, y );
 	}
 }
 
@@ -42,11 +43,11 @@ void processMouse( GLFWwindow* window, Camera* camera )
 	{
 		double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
 
-		if ( firstMouse )
+		if ( firstClick )
 		{
 			xLast = xPos;
 			yLast = yPos;
-			firstMouse = false;
+			firstClick = false;
 		}
 
 		double xoffset = xPos - xLast;
@@ -59,58 +60,68 @@ void processMouse( GLFWwindow* window, Camera* camera )
 		xoffset *= sensitivity;
 		yoffset *= sensitivity;
 
-		camera->panAndTilt( xoffset, yoffset );
+        camera->panAndTilt( (float)xoffset, (float)yoffset );
 	}
 
 	if ( leftMouseButtonAction == GLFW_RELEASE )
 	{
-		firstMouse = true;
+		firstClick = true;
 	}
 }
 
 int main( int argc, char* argv[] )
 {
-	GLFWwindow* window;
-
-	if ( !glfwInit() )
-	{
-		return -1;
-	}
+	Assert( glfwInit() == GLFW_TRUE, "failed to initialize GLFW" );
 
 	int width = 1024;
 	int height = 768;
 
-	window = glfwCreateWindow( width, height, "Renderer test", nullptr, nullptr );
-
+	GLFWwindow* window = glfwCreateWindow( width, height, "Renderer test", nullptr, nullptr );
 	Assert( window, "glfwCreateWindow failed" );
-
 	glfwMakeContextCurrent( window );
 
-	Renderer renderer;
-	renderer.init( width, height );
+	Assert( glewInit() == GLEW_OK, "failed to initialize GLEW" );
 
-	cameraSpeed = 10.f;
+    RendererCinfo cinfo;
+	Renderer renderer;
+	renderer.init( window, cinfo );
+
+	cameraSpeed = 0.01f;
 
 	glfwSetScrollCallback( window, &scrollCallback );
+
+    {
+        Cuboid cuboid( Vertex3( -0.25f, -0.25f, -0.25f ), Vertex3( 0.25f, 0.25f, 0.25f ) );
+        glm::mat4 model = glm::mat4( 1.f );
+        model = glm::translate( model, glm::vec3( 0.25f, 0.25f, 0.25f ) );
+        renderer.addDisplayCuboid( cuboid, model, Color( 1.f, 0.5f, 0.3f ) );
+    }
+
+    {
+        Cuboid cuboid( Vertex3( -0.5f, -0.5f, -0.5f ), Vertex3( 0.5f, 0.5f, 0.5f ) );
+        glm::mat4 model = glm::mat4( 1.f );
+        model = glm::translate( model, glm::vec3( -0.5f, -0.5f, -0.5f ) );
+        renderer.addDisplayCuboid( cuboid, model, Color( 1.f, 0.5f, 0.3f ) );
+    }
 
 	while ( !glfwWindowShouldClose( window ) )
 	{
 		glfwPollEvents();
 
-		glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+		renderer.prestep();
+
+		glClearColor( 0.f, 0.f, 0.f, 1.f ); // Black, full opacity
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-		renderer.drawBox( Vector4( 100.f, 100.f ), Vector4( 300.f, 300.f ), BLUE );
-		renderer.drawText( "bbbbbbb", Vector4( 150.f, 150.f ), 1.f, BLUE );
-		renderer.drawTriangle( Vector4( -100.f, -100.f ), Vector4( 100.f, 100.f ), Vector4( -100.f, 100.f ), RED );
-		//renderer.drawTriangle( Vector4( -100.f, -100.f ), Vector4( 100.f, -100.f ), Vector4( 100.f, 100.f ), RED );
-		
 		processKey( window, renderer.getCamera() );
 		processMouse( window, renderer.getCamera() );
-		renderer.step();
+
+		renderer.render();
 
 		glfwSwapBuffers( window );
 	}
+
+	renderer.terminate();
 
 	glfwDestroyWindow( window );
 
