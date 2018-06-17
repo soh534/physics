@@ -113,7 +113,6 @@ public:
 
 	// Draw funcs, wrap these in your render functions for datatype conversion
 	void addDisplayLine( const Line& line, const Color color = Color() );
-	void drawTriangle( const Triangle& tri, const Color color = Color() );
 
     int addDisplayCuboid( const Cuboid& cube, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
     void removeDisplayCuboid( int index );
@@ -121,6 +120,8 @@ public:
 	// Draw func for text
 	void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
 	//void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
+
+    void setModel( int index, const glm::mat4& model );
 
 private:
 
@@ -279,6 +280,7 @@ private:
 		int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
         void clearBufferCuboid( int index );
         void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
+        void setModel( int index, const glm::mat4& model );
 
 		Shader* m_shader;
 

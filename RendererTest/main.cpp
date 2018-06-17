@@ -86,22 +86,26 @@ int main( int argc, char* argv[] )
 	Renderer renderer;
 	renderer.init( window, cinfo );
 
-	cameraSpeed = 0.01f;
+	cameraSpeed = 0.05f;
 
 	glfwSetScrollCallback( window, &scrollCallback );
 
+    int cuboidA;
+    glm::mat4 modelA;
     {
         Cuboid cuboid( Vertex3( -0.25f, -0.25f, -0.25f ), Vertex3( 0.25f, 0.25f, 0.25f ) );
-        glm::mat4 model = glm::mat4( 1.f );
-        model = glm::translate( model, glm::vec3( 0.25f, 0.25f, 0.25f ) );
-        renderer.addDisplayCuboid( cuboid, model, Color( 1.f, 0.5f, 0.3f ) );
+        modelA = glm::mat4( 1.f );
+        modelA = glm::translate( modelA, glm::vec3( 0.25f, 0.25f, 0.25f ) );
+        cuboidA = renderer.addDisplayCuboid( cuboid, modelA, Color( 1.f, 0.5f, 0.3f ) );
     }
 
+    int cuboidB;
+    glm::mat4 modelB;
     {
         Cuboid cuboid( Vertex3( -0.5f, -0.5f, -0.5f ), Vertex3( 0.5f, 0.5f, 0.5f ) );
-        glm::mat4 model = glm::mat4( 1.f );
-        model = glm::translate( model, glm::vec3( -0.5f, -0.5f, -0.5f ) );
-        renderer.addDisplayCuboid( cuboid, model, Color( 1.f, 0.5f, 0.3f ) );
+        modelB = glm::mat4( 1.f );
+        modelB = glm::translate( modelB, glm::vec3( -0.5f, -0.5f, -0.5f ) );
+        cuboidB = renderer.addDisplayCuboid( cuboid, modelB, Color( 1.f, 0.5f, 0.3f ) );
     }
 
 	while ( !glfwWindowShouldClose( window ) )
@@ -115,6 +119,12 @@ int main( int argc, char* argv[] )
 
 		processKey( window, renderer.getCamera() );
 		processMouse( window, renderer.getCamera() );
+
+        modelA = glm::rotate( modelA, glm::pi<float>() / 120, glm::vec3( 1.f, 1.f, 1.f ) );
+        renderer.setModel( cuboidA, modelA );
+
+        modelB = glm::rotate( modelB, glm::pi<float>() / 240.f, glm::vec3( -1.f, -1.f, -1.f ) );
+        renderer.setModel( cuboidB, modelB );
 
 		renderer.render();
 

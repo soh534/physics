@@ -53,8 +53,8 @@ Color::Color( float r, float g, float b, float a )
 void Renderer::DisplayLines::create()
 {
 	m_shader = new Shader(
-		"../Renderer_vaopg_vboref/Renderer/shaders/Line/LineVert.shader",
-		"../Renderer_vaopg_vboref/Renderer/shaders/Line/LineFrag.shader"
+		"../Renderer/Renderer/shaders/Line/LineVert.shader",
+		"../Renderer/Renderer/shaders/Line/LineFrag.shader"
 	);
 
 	glGenVertexArrays( 1, &m_vao );
@@ -113,8 +113,8 @@ void Renderer::DisplayLines::render( const glm::mat4& projection, const glm::mat
 void Renderer::DisplayCuboids::create()
 {
 	m_shader = new Shader(
-		"../Renderer_vaofag_vbos/Renderer/shaders/Geometry/GeomVert.shader",
-		"../Renderer_vaofag_vbos/Renderer/shaders/Geometry/GeomFrag.shader"
+		"../Renderer/Renderer/shaders/Geometry/GeomVert.shader",
+		"../Renderer/Renderer/shaders/Geometry/GeomFrag.shader"
 	);
 
     glGenVertexArrays( 1, &m_vao );
@@ -198,6 +198,13 @@ void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::m
 	}
 
     glBindVertexArray( 0 );
+}
+
+void Renderer::DisplayCuboids::setModel( int index, const glm::mat4& model )
+{
+    // TODO: Check isValid()
+    Cuboid& cuboid = (*m_cuboids)(index);
+    cuboid.m_model = model;
 }
 
 Renderer::Renderer()
@@ -372,3 +379,9 @@ void Renderer::drawText3d( const Vertex3 pos, const Color color, const char* str
 	va_end( arg );
 }
 */
+
+void Renderer::setModel( int index, const glm::mat4& model )
+{
+    // TODO: Separate indices between different shape buffers, choose multiple buffers from here.
+    m_displayCuboids.setModel( index, model );
+}
