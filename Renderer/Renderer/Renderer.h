@@ -16,14 +16,14 @@ class Camera;
 // Datatypes passed to draw funcs, and used within renderer
 struct Vertex2
 {
-	Vertex2( const float x = 0.f, const float y = 0.f ); // Defaults ( 0.f, 0.f )
-	float x, y;
+    Vertex2( const float x = 0.f, const float y = 0.f ); // Defaults ( 0.f, 0.f )
+    float x, y;
 };
 
-struct Vertex3 
-{ 
+struct Vertex3
+{
     enum { NUM_FLOATS = 3 };
-	Vertex3( const float x = 0.f, const float y = 0.f, const float z = 0.f ); // Defaults ( 0.f, 0.f, 0.f )
+    Vertex3( const float x = 0.f, const float y = 0.f, const float z = 0.f ); // Defaults ( 0.f, 0.f, 0.f )
 
     const Vertex3 operator-( const Vertex3& other ) const
     {
@@ -37,32 +37,32 @@ struct Vertex3
         return res;
     }
 
-    float x, y, z; 
+    float x, y, z;
 };
 
 struct Line
-{ 
-	Line( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3() );
-	Vertex3 a, b; 
+{
+    Line( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3() );
+    Vertex3 a, b;
 };
 
-struct Triangle 
+struct Triangle
 {
-	Triangle( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3(), const Vertex3 c = Vertex3() );
-	Vertex3 a, b, c; 
+    Triangle( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3(), const Vertex3 c = Vertex3() );
+    Vertex3 a, b, c;
 };
 
 struct Cuboid
 {
-	Cuboid( const Vertex3 max = Vertex3(), const Vertex3 min = Vertex3() );
-	Vertex3 max, min;
+    Cuboid( const Vertex3 max = Vertex3(), const Vertex3 min = Vertex3() );
+    Vertex3 max, min;
 };
 
 struct Color
 {
     enum { NUM_FLOATS = 4 };
-	Color( const float r = 0.f, const float g = 0.f, const float b = 0.f, const float a = 1.f ); // Opaque black default
-	float r, g, b, a;
+    Color( const float r = 0.f, const float g = 0.f, const float b = 0.f, const float a = 1.f ); // Opaque black default
+    float r, g, b, a;
 };
 
 struct RendererCinfo
@@ -95,33 +95,33 @@ class Renderer
 {
 public:
 
-	Renderer();
-	~Renderer();
+    Renderer();
+    ~Renderer();
 
-	// Call this before your loop
-	int init( struct GLFWwindow* window, const RendererCinfo& cinfo );
+    // Call this before your loop
+    int init( struct GLFWwindow* window, const RendererCinfo& cinfo );
 
-	// Call this in your loop, before the draw funcs
-	void prestep();
+    // Call this in your loop, before the draw funcs
+    void prestep();
 
-	// Call this in your loop, after the draw funcs
-	void render();
+    // Call this in your loop, after the draw funcs
+    void render();
 
-	// Call this after your loop
-	int terminate();
+    // Call this after your loop
+    int terminate();
 
-	// Camera access, for changing view
-	Camera* getCamera() { return m_camera; }
+    // Camera access, for changing view
+    Camera* getCamera() { return m_camera; }
 
-	// Draw funcs, wrap these in your render functions for datatype conversion
-	void addDisplayLine( const Line& line, const Color color = Color() );
+    // Draw funcs, wrap these in your render functions for datatype conversion
+    void addDisplayLine( const Line& line, const Color color = Color() );
 
     int addDisplayCuboid( const Cuboid& cube, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
     void removeDisplayCuboid( int index );
 
-	// Draw func for text
-	void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
-	//void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
+    // Draw func for text
+    void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
+    //void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
 
     void setModel( int index, const glm::mat4& model );
 
@@ -133,28 +133,28 @@ private:
         glm::vec3 m_pos;
     };
 
-	struct DisplayLines
-	{
-		// One buffer shared for all lines,
-		// all lines in world space,
-		// single draw call
+    struct DisplayLines
+    {
+        // One buffer shared for all lines,
+        // all lines in world space,
+        // single draw call
 
-		enum { MAX_NUM_LINES = 1024 };
+        enum { MAX_NUM_LINES = 1024 };
 
-		void create();
-		void writeBufferLine( const Vertex3 a, const Vertex3 b, const Color color );
+        void create();
+        void writeBufferLine( const Vertex3 a, const Vertex3 b, const Color color );
         void clearBufferLine( int index );
-		void render( const glm::mat4& projection, const glm::mat4& view );
+        void render( const glm::mat4& projection, const glm::mat4& view );
 
-		Shader* m_shader;
+        Shader* m_shader;
 
-		GLuint m_vao;
-		GLuint m_vbo[2];
+        GLuint m_vao;
+        GLuint m_vbo[2];
 
-		Vertex3 m_vertices[MAX_NUM_LINES * 2];
-		Color m_color[MAX_NUM_LINES * 2];
-		int m_numVerts;
-	};
+        Vertex3 m_vertices[MAX_NUM_LINES * 2];
+        Color m_color[MAX_NUM_LINES * 2];
+        int m_numVerts;
+    };
 
     struct DisplayTris
     {
@@ -178,10 +178,10 @@ private:
     };
 
     // Specialized buffer for cuboids
-	struct DisplayCuboids
-	{
-		// Three buffers for vert, normal, color for all cuboids
-		// One draw call per cuboid for model matrix update
+    struct DisplayCuboids
+    {
+        // Three buffers for vert, normal, color for all cuboids
+        // One draw call per cuboid for model matrix update
         // TODO: Merge vert, normal, color to one buffer
 
         enum { NUM_MAX_CUBOIDS = 32 };
@@ -196,7 +196,7 @@ private:
                 NUM_FLOATS_FOR_NORMALS = NUM_VERTS * Vertex3::NUM_FLOATS,
                 NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS
             };
-            
+
             // Model matrix local->world
             glm::mat4 m_model;
         };
@@ -278,13 +278,13 @@ private:
             float m_colors[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_COLORS];
         };
 
-		void create();
-		int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
+        void create();
+        int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
         void clearBufferCuboid( int index );
         void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
         void setModel( int index, const glm::mat4& model );
 
-		Shader* m_shader;
+        Shader* m_shader;
 
         GLuint m_vao;
         GLuint m_vbo[3];
@@ -295,10 +295,10 @@ private:
         // Not needed but useful for keeping track
         Buffer m_buffer;
 
-		int m_numCuboids;
+        int m_numCuboids;
 
         int m_nextFreeCuboid;
-	};
+    };
 
     // Buffer generalized for convex /w variable # of vertices
 
@@ -310,15 +310,15 @@ private:
     };
 
     // TODO: Order these members by data size?
-	GLFWwindow* m_window;
+    GLFWwindow* m_window;
     glm::vec3 m_backColor;
 
     Camera* m_camera;
-	glm::mat4 m_projection;
-	glm::mat4 m_view;
+    glm::mat4 m_projection;
+    glm::mat4 m_view;
 
-	DisplayLines m_displayLines;
-	DisplayCuboids m_displayCuboids;
+    DisplayLines m_displayLines;
+    DisplayCuboids m_displayCuboids;
 
     LightSource m_lightSource;
 };
