@@ -185,16 +185,14 @@ void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::m
 
     glBindVertexArray( m_vao );
 
-	for ( int cuboidIndex = 0; cuboidIndex < m_cuboids->getSize(); cuboidIndex++ )
+	for ( int cuboidIdx = 0; cuboidIdx < m_cuboids->getSize(); cuboidIdx++ )
 	{
-        if ( !m_cuboids->isValid( cuboidIndex ) )
+        if ( m_cuboids->isUsed( cuboidIdx ) )
         {
-            continue;
+            Cuboid& cuboid = (*m_cuboids)(cuboidIdx);
+            m_shader->setMat4( "model", cuboid.m_model );
+            glDrawArrays( GL_TRIANGLES, cuboidIdx * Cuboid::NUM_VERTS, Cuboid::NUM_VERTS );
         }
-
-        Cuboid& cuboid = ( *m_cuboids )( cuboidIndex );
-		m_shader->setMat4( "model", cuboid.m_model );
-        glDrawArrays( GL_TRIANGLES, cuboidIndex * Cuboid::NUM_VERTS, Cuboid::NUM_VERTS );
 	}
 
     glBindVertexArray( 0 );
@@ -224,16 +222,18 @@ int Renderer::init( GLFWwindow* window, const RendererCinfo& cinfo )
 	int width, height;
 	glfwGetFramebufferSize( window, &width, &height );
 
+    m_backColor = cinfo.m_backColor;
+
     m_camera = new Camera( cinfo.m_cameraPos, cinfo.m_cameraDir, cinfo.m_cameraUp );
 
     m_projection = glm::perspective( glm::radians( 90.f ), (float)width / (float)height, cinfo.m_nearPlane, cinfo.m_farPlane );
 	m_view = glm::lookAt( m_camera->getPos(), m_camera->getPos() + m_camera->getDir(), m_camera->getUp() );
 
-    m_lightSource.m_color = cinfo.m_lightColor;
-    m_lightSource.m_pos = cinfo.m_lightPos;
-
 	m_displayLines.create();
 	m_displayCuboids.create();
+
+    m_lightSource.m_color = cinfo.m_lightColor;
+    m_lightSource.m_pos = cinfo.m_lightPos;
 
     glEnable( GL_DEPTH_TEST );
 
@@ -245,6 +245,9 @@ int Renderer::init( GLFWwindow* window, const RendererCinfo& cinfo )
 
 void Renderer::prestep()
 {
+    glClearColor( m_backColor.x, m_backColor.y, m_backColor.z, 1.f ); // Black, full opacity
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
 	ImGui_ImplGlfwGL3_NewFrame();
 
 	// Not frame-persistent, must be called every frame

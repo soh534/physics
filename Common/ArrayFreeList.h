@@ -25,11 +25,12 @@ struct ArrayFreeList
     }
 
     int getSize() { return m_numElements; }
-    bool isValid( int index ) { return (m_nextFreeIds[index] == -1); }
+    bool isUsed( int index ) { return (m_nextFreeIds[index] == -1); }
     T& operator()( int index ) { return m_elements[index]; }
 
     int add( const T& t )
     {
+        // TODO: Check for overflow
         int thisId = m_firstFreeId;
 
         T& element = m_elements[thisId];

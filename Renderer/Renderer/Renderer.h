@@ -75,6 +75,7 @@ struct RendererCinfo
 
         m_lightColor = glm::vec3( 1.f, 1.f, 1.f );
         m_lightPos = glm::vec3( 0.f, 1.f, 0.f );
+        m_backColor = glm::vec3( 0.f, 0.f, 0.f );
 
         m_nearPlane = .01f;
         m_farPlane = 100.f;
@@ -85,6 +86,7 @@ struct RendererCinfo
     glm::vec3 m_cameraUp;
     glm::vec3 m_lightColor;
     glm::vec3 m_lightPos;
+    glm::vec3 m_backColor;
     float m_nearPlane;
     float m_farPlane;
 };
@@ -307,8 +309,11 @@ private:
 
     };
 
+    // TODO: Order these members by data size?
 	GLFWwindow* m_window;
+    glm::vec3 m_backColor;
 
+    Camera* m_camera;
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
 
@@ -316,6 +321,4 @@ private:
 	DisplayCuboids m_displayCuboids;
 
     LightSource m_lightSource;
-
-	Camera* m_camera;
 };

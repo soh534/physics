@@ -21,6 +21,7 @@ namespace
 
 void processKey( GLFWwindow* window, Camera* camera )
 {
+    // TODO: strange to be passing speed for amount
 	if ( glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS )
 		camera->dolly( cameraSpeed );
 	if ( glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS )
@@ -113,9 +114,6 @@ int main( int argc, char* argv[] )
 		glfwPollEvents();
 
 		renderer.prestep();
-
-		glClearColor( 0.f, 0.f, 0.f, 1.f ); // Black, full opacity
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		processKey( window, renderer.getCamera() );
 		processMouse( window, renderer.getCamera() );
