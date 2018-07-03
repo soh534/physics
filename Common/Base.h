@@ -11,17 +11,17 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // fabs
 #include <cmath>
-#include <cfloat> // For FLT_EPSILON
 
-#include <cassert>
 #include <string> // For std::ostream
 
 typedef float Real;
 
 const Real g_degToRad = (Real)M_PI / 180.f; // TODO: get rid of this awfulness
 
+// Math
 #include <Common/Vector4.h>
 #include <Common/Transform.h>
 #include <Common/Matrix.h>
 
+// Container
 #include <Common/ArrayFreeList.h>

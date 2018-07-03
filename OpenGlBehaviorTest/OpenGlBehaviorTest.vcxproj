@@ -143,6 +143,8 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="TestExpandVbo.h" />
+    <ClInclude Include="TestMergeVbo.h" />
     <ClInclude Include="TestReuseVertexAttribIndex.h" />
     <ClInclude Include="TestShareVbo.h" />
     <ClInclude Include="TestShareVboDynUpdate.h" />

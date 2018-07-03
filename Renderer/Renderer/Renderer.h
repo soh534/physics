@@ -40,24 +40,6 @@ struct Vertex3
     float x, y, z;
 };
 
-struct Line
-{
-    Line( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3() );
-    Vertex3 a, b;
-};
-
-struct Triangle
-{
-    Triangle( const Vertex3 a = Vertex3(), const Vertex3 b = Vertex3(), const Vertex3 c = Vertex3() );
-    Vertex3 a, b, c;
-};
-
-struct Cuboid
-{
-    Cuboid( const Vertex3 max = Vertex3(), const Vertex3 min = Vertex3() );
-    Vertex3 max, min;
-};
-
 struct Color
 {
     enum { NUM_FLOATS = 4 };
@@ -77,6 +59,7 @@ struct RendererCinfo
         m_lightPos = glm::vec3( 0.f, 1.f, 0.f );
         m_backColor = glm::vec3( 0.f, 0.f, 0.f );
 
+        m_fov = 45.f;
         m_nearPlane = .01f;
         m_farPlane = 100.f;
     }
@@ -87,7 +70,14 @@ struct RendererCinfo
     glm::vec3 m_lightColor;
     glm::vec3 m_lightPos;
     glm::vec3 m_backColor;
+
+    // Defaults 45.f
+    float m_fov;
+
+    // Defaults 0.01f
     float m_nearPlane;
+
+    // Defaults 100.f
     float m_farPlane;
 };
 
@@ -113,10 +103,8 @@ public:
     // Camera access, for changing view
     Camera* getCamera() { return m_camera; }
 
-    // Draw funcs, wrap these in your render functions for datatype conversion
-    void addDisplayLine( const Line& line, const Color color = Color() );
-
-    int addDisplayCuboid( const Cuboid& cube, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
+    void addDisplayLine( const Vertex3 a, const Vertex3 b, const Color color = Color() );
+    int addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
     void removeDisplayCuboid( int index );
 
     // Draw func for text
@@ -184,7 +172,7 @@ private:
         // One draw call per cuboid for model matrix update
         // TODO: Merge vert, normal, color to one buffer
 
-        enum { NUM_MAX_CUBOIDS = 32 };
+        enum { NUM_MAX_CUBOIDS = 500 };
 
         // Per-cuboid data
         struct Cuboid
@@ -197,8 +185,72 @@ private:
                 NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS
             };
 
+            void set( const Vertex3* verts, const Vertex3* norms, const Color color )
+            {
+                for ( int vIdx = 0; vIdx < Cuboid::NUM_VERTS; vIdx++ )
+                {
+                    int vertexOffset = vIdx * 3;
+                    m_vertices[vertexOffset] = verts[vIdx].x;
+                    m_vertices[vertexOffset + 1] = verts[vIdx].y;
+                    m_vertices[vertexOffset + 2] = verts[vIdx].z;
+
+                    int normalOffset = vIdx * 3;
+                    m_normals[normalOffset] = norms[vIdx].x;
+                    m_normals[normalOffset + 1] = norms[vIdx].y;
+                    m_normals[normalOffset + 2] = norms[vIdx].z;
+
+                    int colorOffset = vIdx * 4;
+                    m_colors[colorOffset] = color.r;
+                    m_colors[colorOffset + 1] = color.g;
+                    m_colors[colorOffset + 2] = color.b;
+                    m_colors[colorOffset + 3] = color.a;
+                }
+            }
+
+            void reset()
+            {
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_VERTICES; fltIdx++ )
+                {
+                    m_vertices[fltIdx] = 0.f;
+                }
+
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_NORMALS; fltIdx++ )
+                {
+                    m_normals[fltIdx] = 0.f;
+                }
+
+                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_COLORS; fltIdx++ )
+                {
+                    m_colors[fltIdx] = 0.f;
+                }
+            }
+
+            float* getVerts()
+            {
+                return m_vertices;
+            }
+
+            float* getNormals()
+            {
+                return m_normals;
+            }
+
+            float* getColors()
+            {
+                return m_colors;
+            }
+
             // Model matrix local->world
             glm::mat4 m_model;
+
+            // Vertices in cube-local space
+            float m_vertices[Cuboid::NUM_FLOATS_FOR_VERTICES];
+
+            // Unnormalized normals from cube-face
+            float m_normals[Cuboid::NUM_FLOATS_FOR_NORMALS];
+
+            // Color per vertex, r, g, b, a
+            float m_colors[Cuboid::NUM_FLOATS_FOR_COLORS];
         };
 
         struct Buffer
@@ -281,6 +333,7 @@ private:
         void create();
         int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
         void clearBufferCuboid( int index );
+        void expandBuffer();
         void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
         void setModel( int index, const glm::mat4& model );
 

@@ -5,16 +5,16 @@
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Shader.cpp" />
     <ClCompile Include="Renderer\Thirdparty\Imgui\imgui.cpp">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_demo.cpp">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_draw.cpp">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Thirdparty\Imgui\imgui_impl_glfw_gl3.cpp">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -22,25 +22,25 @@
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Shader.h" />
     <ClInclude Include="Renderer\Thirdparty\Imgui\imconfig.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\imgui.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\imgui_impl_glfw_gl3.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\imgui_internal.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\stb_rect_pack.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\stb_textedit.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Thirdparty\Imgui\stb_truetype.h">
-      <Filter>Thirdparty\Imgui</Filter>
+      <Filter>Thirdparty</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -51,37 +51,34 @@
     <None Include="Renderer\shaders\Geometry\GeomVert.shader">
       <Filter>shaders\Geometry</Filter>
     </None>
-    <None Include="Renderer\shaders\LightSource\LightSourceFrag.shader">
-      <Filter>shaders\LightSource</Filter>
-    </None>
-    <None Include="Renderer\shaders\LightSource\LightSourceVert.shader">
-      <Filter>shaders\LightSource</Filter>
-    </None>
     <None Include="Renderer\shaders\Line\LineFrag.shader">
       <Filter>shaders\Line</Filter>
     </None>
     <None Include="Renderer\shaders\Line\LineVert.shader">
       <Filter>shaders\Line</Filter>
     </None>
+    <None Include="Renderer\shaders\LightSource\LightSourceFrag.shader">
+      <Filter>shaders\LightSource</Filter>
+    </None>
+    <None Include="Renderer\shaders\LightSource\LightSourceVert.shader">
+      <Filter>shaders\LightSource</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shaders">
-      <UniqueIdentifier>{ba5a3e45-c9a6-4601-8a56-4eee946b10bf}</UniqueIdentifier>
+      <UniqueIdentifier>{9ca0932e-1aac-4eeb-9fb1-527df3cd3ee9}</UniqueIdentifier>
     </Filter>
     <Filter Include="shaders\Geometry">
-      <UniqueIdentifier>{d81959b1-a7e8-4686-98c0-50ca1d82f26f}</UniqueIdentifier>
+      <UniqueIdentifier>{0d606b74-eff8-42fd-8564-1fa1161ba05e}</UniqueIdentifier>
     </Filter>
     <Filter Include="shaders\LightSource">
-      <UniqueIdentifier>{a534c7d4-3116-4702-a879-531af4fea067}</UniqueIdentifier>
+      <UniqueIdentifier>{f44673b8-530d-49f5-b975-28a6a7fda7be}</UniqueIdentifier>
     </Filter>
     <Filter Include="shaders\Line">
-      <UniqueIdentifier>{85936543-86c9-4e76-abdd-ebfe9d520d13}</UniqueIdentifier>
+      <UniqueIdentifier>{130a2fd1-65f4-4f6e-9e10-7d9b88f59d90}</UniqueIdentifier>
     </Filter>
     <Filter Include="Thirdparty">
-      <UniqueIdentifier>{b6fc09f0-e089-405d-8103-15b38313168e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Thirdparty\Imgui">
-      <UniqueIdentifier>{04389d1c-9bcf-45b5-94ae-27ee9b34d215}</UniqueIdentifier>
+      <UniqueIdentifier>{5db81030-e8f0-4fc4-81fa-42277e19091b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

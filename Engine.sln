@@ -23,7 +23,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGlBehaviorTest", "OpenG
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BehaviorTest", "BehaviorTest\BehaviorTest.vcxproj", "{08CC211E-E0E7-4D07-8A42-0FFA15105B82}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Renderer", "Renderer\Renderer_vaofag_vbos.vcxproj", "{4538A313-90FF-49F3-9B45-0B5D99D5A0BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Renderer", "Renderer\Renderer.vcxproj", "{4538A313-90FF-49F3-9B45-0B5D99D5A0BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

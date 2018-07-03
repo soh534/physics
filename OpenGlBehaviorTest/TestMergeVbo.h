@@ -1,9 +1,11 @@
 #pragma once
 
+#pragma once
+
 #include "Common.h"
 #include "Shader.h"
 
-int testShareVboDynUpdate()
+int testMergeVbo()
 {
     Assert( glfwInit() == GLFW_TRUE, "failed to initialize GLFW" );
 
@@ -29,8 +31,8 @@ int testShareVboDynUpdate()
     Color colorsA[3] =
     {
         { 1.f, 0.f, 0.f, 1.f },
-    { 1.f, 0.f, 0.f, 1.f },
-    { 0.f, 0.f, 1.f, 1.f }
+        { 1.f, 0.f, 0.f, 1.f },
+        { 0.f, 0.f, 1.f, 1.f }
     };
 
     Vertex3 verticesB[3] =
@@ -52,33 +54,36 @@ int testShareVboDynUpdate()
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
 
-    GLuint vbo[2];
+    GLuint vbo;
     {
-        // Storage for 6 vertices and 6 colors, update later
-        const int initialSize = 6;
+        // Put vertex positions and color into same VBO
+        // Not interleaved but in adjacent blocks (VVNNCC)
+        const int numVerts = 6;
 
-        glGenBuffers( 2, vbo );
-        
-        glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( Vertex3 ) * initialSize, nullptr, GL_DYNAMIC_DRAW );
-        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+        glGenBuffers( 1, &vbo );
+
+        glBindBuffer( GL_ARRAY_BUFFER, vbo );
+        glBufferData( GL_ARRAY_BUFFER, (sizeof( Vertex3 ) + sizeof( Color )) * numVerts, nullptr, GL_DYNAMIC_DRAW );
+        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0 );
         glEnableVertexAttribArray( 0 );
-        
-        glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( Color ) * initialSize, nullptr, GL_DYNAMIC_DRAW );
-        glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+
+        glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof( Vertex3 ) * numVerts) );
         glEnableVertexAttribArray( 1 );
     }
     glBindVertexArray( 0 );
 
-    // Update buffer per-triangle basis, use 6 vertices and 6 colors
-    glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( Vertex3 ) * 3, verticesA );
-    glBufferSubData( GL_ARRAY_BUFFER, sizeof( Vertex3 ) * 3, sizeof( Vertex3 ) * 3, verticesB );
+    {
+        // Update buffer per-triangle basis, use 6 vertices and 6 colors
+        glBindBuffer( GL_ARRAY_BUFFER, vbo );
 
-    glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( Color ) * 3, colorsA );
-    glBufferSubData( GL_ARRAY_BUFFER, sizeof( Color ) * 3, sizeof( Color ) * 3, colorsB );
+        // Vertex positions
+        glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( verticesA ), verticesA );
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof( verticesA ), sizeof( verticesB ), verticesB );
+
+        // Colors
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof( verticesA ) + sizeof( verticesB ), sizeof( colorsA ), colorsA );
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof( verticesA ) + sizeof( verticesB ) + sizeof( colorsA ), sizeof( colorsB ), colorsB );
+    }
 
     while ( !glfwWindowShouldClose( window ) )
     {

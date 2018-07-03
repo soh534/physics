@@ -1,18 +1,20 @@
 #pragma once
 
+#include <cstring>
+#include <cassert>
+
 template <typename T>
 struct ArrayFreeList
 {
-    ArrayFreeList( int size = 128 )
+    ArrayFreeList( int capacity = 128 )
     {
-        // Must assert sizeof(T) > sizeof(int)
-
-        m_elements = new T[size];
-        m_nextFreeIds = new int[size];
+        m_elements = new T[capacity];
+        m_nextFreeIds = new int[capacity];
         m_firstFreeId = 0;
-        m_numElements = size;
+        m_numElements = 0;
+        m_capacity = capacity;
 
-        for ( int i = 0; i < m_numElements; i++ )
+        for ( int i = 0; i < m_capacity; i++ )
         {
             m_nextFreeIds[i] = i + 1;
         }
@@ -25,11 +27,22 @@ struct ArrayFreeList
     }
 
     int getSize() { return m_numElements; }
+    int getCapacity() { return m_capacity; }
     bool isUsed( int index ) { return (m_nextFreeIds[index] == -1); }
-    T& operator()( int index ) { return m_elements[index]; }
+
+    T& operator()( int index )
+    { 
+        assert( isUsed( index ) );
+        return m_elements[index];
+    }
 
     int add( const T& t )
     {
+        if ( m_firstFreeId == m_capacity )
+        {
+            expand();
+        }
+
         int thisId = m_firstFreeId;
 
         T& element = m_elements[thisId];
@@ -38,6 +51,8 @@ struct ArrayFreeList
         m_firstFreeId = m_nextFreeIds[thisId];
         m_nextFreeIds[thisId] = -1;
 
+        m_numElements++;
+
         return thisId;
     }
 
@@ -45,114 +60,54 @@ struct ArrayFreeList
     {
         m_nextFreeIds[index] = m_firstFreeId;
         m_firstFreeId = index;
+
+        m_numElements--;
     }
 
 private:
 
+    void expand()
+    {
+        // Make new storage /w double capacity, copy from old
+        T* newElements = new T[m_capacity * 2];
+        memcpy( newElements, m_elements, m_capacity * sizeof( T ) );
+        delete[] m_elements;
+        m_elements = newElements;
+
+        int* newNextFreeIds = new int[m_capacity * 2];
+        memcpy( newNextFreeIds, m_nextFreeIds, m_capacity * sizeof( int ) );
+        delete[] m_nextFreeIds;
+        m_nextFreeIds = newNextFreeIds;
+
+        // Append expanded free Ids
+        m_firstFreeId = m_capacity;
+        for ( int i = m_firstFreeId; i < m_capacity * 2; i++ )
+        {
+            m_nextFreeIds[i] = i + 1;
+        }
+
+        m_capacity *= 2;
+    }
+
     T * m_elements;
     int* m_nextFreeIds;
     int m_firstFreeId;
+
     int m_numElements;
-};
-
-
-struct Strukt
-{
-    enum
-    {
-        INVALID = -1
-    };
-
-    int content;
-    int nextFreeStruktId;
-};
-
-struct StruktManager
-{
-    enum 
-    {
-        SZ_STRUKTS = 100
-    };
-
-    Strukt m_strukts[SZ_STRUKTS];
-
-    StruktManager()
-    {
-        m_nextFreeStruktId = 0;
-
-        for ( int i = 0; i < SZ_STRUKTS; i++ )
-        {
-            Strukt& strukt = getStrukt( i );
-
-            strukt.content = Strukt::INVALID;
-
-            if ( i == SZ_STRUKTS - 1 )
-            {
-                strukt.nextFreeStruktId = Strukt::INVALID;
-            }
-            else
-            {
-                strukt.nextFreeStruktId = i + 1;
-            }
-        }
-    }
-
-    Strukt& getStrukt( int index )
-    {
-        return m_strukts[index];
-    }
-
-    int add( int i )
-    {
-        Strukt& strukt = getStrukt( m_nextFreeStruktId );
-
-        // Update next free strukt, update memory stuff
-        int disIndex = m_nextFreeStruktId;
-        m_nextFreeStruktId = strukt.nextFreeStruktId;
-        strukt.nextFreeStruktId = Strukt::INVALID;
-
-        // Fill content
-        strukt.content = i;
-
-        return disIndex;
-    }
-
-    void remove( int index )
-    {
-        Strukt& strukt = getStrukt( index );
-
-        // Add this strukt in front of free list
-        strukt.content = Strukt::INVALID;
-        strukt.nextFreeStruktId = m_nextFreeStruktId;
-        m_nextFreeStruktId = index;
-    }
-
-    int m_nextFreeStruktId;
+    int m_capacity;
 };
 
 int arrayFreeListTest()
 {
-    StruktManager sm;
-
-    for ( int i = 0; i < 100; i++ )
-    {
-        sm.add( i );
-    }
-
-    sm.remove( 49 );
-    sm.remove( 64 );
-    int idForThirtyTwo = sm.add( 32 );
-
     ArrayFreeList<int> arrayFreeList;
-
-    for ( int i = 0; i < arrayFreeList.getSize(); i++ )
+    for ( int i = 0; i < 300; i++ )
     {
         arrayFreeList.add( i );
     }
 
-    arrayFreeList.remove( 49 );
-    arrayFreeList.remove( 64 );
-    idForThirtyTwo = arrayFreeList.add( 32 );
+    arrayFreeList.remove( 50 );
+
+    __debugbreak();
 
     return 0;
 }

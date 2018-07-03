@@ -7,11 +7,13 @@
 
 #include <algorithm>
 
+#include "SampleSceneTest.h"
+
 namespace
 {
 	static float cameraSpeed;
 	double xLast, yLast;
-	bool firstClick;
+	bool firstClickFlag;
 
 	void scrollCallback( GLFWwindow* window, double x, double y )
 	{
@@ -22,18 +24,12 @@ namespace
 void processKey( GLFWwindow* window, Camera* camera )
 {
     // TODO: strange to be passing speed for amount
-	if ( glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS )
-		camera->dolly( cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS )
-		camera->truck( -cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS )
-		camera->dolly( -cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS )
-		camera->truck( cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS )
-		camera->pedestal( cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS )
-		camera->pedestal( -cameraSpeed );
+    if ( glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS )       camera->dolly( cameraSpeed );
+    if ( glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS )		camera->truck( -cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS )		camera->dolly( -cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS )		camera->truck( cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS )		camera->pedestal( cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS )		camera->pedestal( -cameraSpeed );
 }
 
 void processMouse( GLFWwindow* window, Camera* camera )
@@ -44,11 +40,11 @@ void processMouse( GLFWwindow* window, Camera* camera )
 	{
 		double xPos, yPos; glfwGetCursorPos( window, &xPos, &yPos );
 
-		if ( firstClick )
+		if ( firstClickFlag )
 		{
 			xLast = xPos;
 			yLast = yPos;
-			firstClick = false;
+			firstClickFlag = false;
 		}
 
 		double xoffset = xPos - xLast;
@@ -66,7 +62,7 @@ void processMouse( GLFWwindow* window, Camera* camera )
 
 	if ( leftMouseButtonAction == GLFW_RELEASE )
 	{
-		firstClick = true;
+		firstClickFlag = true;
 	}
 }
 
@@ -91,23 +87,8 @@ int main( int argc, char* argv[] )
 
 	glfwSetScrollCallback( window, &scrollCallback );
 
-    int cuboidA;
-    glm::mat4 modelA;
-    {
-        Cuboid cuboid( Vertex3( -0.25f, -0.25f, -0.25f ), Vertex3( 0.25f, 0.25f, 0.25f ) );
-        modelA = glm::mat4( 1.f );
-        modelA = glm::translate( modelA, glm::vec3( 0.25f, 0.25f, 0.25f ) );
-        cuboidA = renderer.addDisplayCuboid( cuboid, modelA, Color( 1.f, 0.5f, 0.3f ) );
-    }
-
-    int cuboidB;
-    glm::mat4 modelB;
-    {
-        Cuboid cuboid( Vertex3( -0.5f, -0.5f, -0.5f ), Vertex3( 0.5f, 0.5f, 0.5f ) );
-        modelB = glm::mat4( 1.f );
-        modelB = glm::translate( modelB, glm::vec3( -0.5f, -0.5f, -0.5f ) );
-        cuboidB = renderer.addDisplayCuboid( cuboid, modelB, Color( 1.f, 0.5f, 0.3f ) );
-    }
+    RendererObjects objs;
+    addObjects( renderer, objs );
 
 	while ( !glfwWindowShouldClose( window ) )
 	{
@@ -118,11 +99,7 @@ int main( int argc, char* argv[] )
 		processKey( window, renderer.getCamera() );
 		processMouse( window, renderer.getCamera() );
 
-        modelA = glm::rotate( modelA, glm::pi<float>() / 120, glm::vec3( 1.f, 1.f, 1.f ) );
-        renderer.setModel( cuboidA, modelA );
-
-        modelB = glm::rotate( modelB, glm::pi<float>() / 240.f, glm::vec3( -1.f, -1.f, -1.f ) );
-        renderer.setModel( cuboidB, modelB );
+        updateObjects(renderer, objs );
 
 		renderer.render();
 

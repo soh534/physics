@@ -30,21 +30,6 @@ Vertex3::Vertex3( const float x, const float y, const float z )
 {
 }
 
-Line::Line( const Vertex3 a, const Vertex3 b )
-    : a( a ), b( b )
-{
-}
-
-Triangle::Triangle( const Vertex3 a, const Vertex3 b, const Vertex3 c )
-    : a( a ), b( b ), c( c )
-{
-}
-
-Cuboid::Cuboid( const Vertex3 max, const Vertex3 min )
-    : max( max ), min( min )
-{
-}
-
 Color::Color( float r, float g, float b, float a )
     : r( r ), g( g ), b( b ), a( a )
 {
@@ -144,25 +129,27 @@ void Renderer::DisplayCuboids::create()
 
 int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color )
 {
-    Assert( m_numCuboids < NUM_MAX_CUBOIDS, "Max # geometry exceeded." );
+    //Assert( m_numCuboids < NUM_MAX_CUBOIDS, "Max # geometry exceeded." );
 
     Cuboid cuboid;
     cuboid.m_model = model;
+    cuboid.set( trisAsVerts, normalsPerVert, color );
 
     const int index = m_cuboids->add( cuboid );
-    m_buffer.setAtIndex( index, trisAsVerts, normalsPerVert, color );
+    
+    //m_buffer.setAtIndex( index, trisAsVerts, normalsPerVert, color );
 
     // Write vert positions to buffer
     glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), m_buffer.getVertsAtIndex( index ) );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), cuboid.getVerts() );
 
     // Write normals
     glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), m_buffer.getNormalsAtIndex( index ) );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), cuboid.getNormals() );
 
     // Write colors
     glBindBuffer( GL_ARRAY_BUFFER, m_vbo[2] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Color ), Cuboid::NUM_VERTS * sizeof( Color ), m_buffer.getColorsAtIndex( index ) );
+    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Color ), Cuboid::NUM_VERTS * sizeof( Color ), cuboid.getColors() );
 
     return index;
 }
@@ -173,6 +160,11 @@ void Renderer::DisplayCuboids::clearBufferCuboid( int index )
     m_buffer.resetAtIndex( index );
 }
 
+void Renderer::DisplayCuboids::expandBuffer()
+{
+
+}
+
 void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos )
 {
     m_shader->use();
@@ -180,7 +172,7 @@ void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::m
     m_shader->setMat4( "view", view );
 
     m_shader->setVec3( "lightColor", lightSource.m_color );
-    m_shader->setVec3( "lightPos", cameraPos );
+    m_shader->setVec3( "lightPos", lightSource.m_pos );
     m_shader->setVec3( "viewPos", cameraPos );
 
     glBindVertexArray( m_vao );
@@ -226,7 +218,7 @@ int Renderer::init( GLFWwindow* window, const RendererCinfo& cinfo )
 
     m_camera = new Camera( cinfo.m_cameraPos, cinfo.m_cameraDir, cinfo.m_cameraUp );
 
-    m_projection = glm::perspective( glm::radians( 90.f ), (float)width / (float)height, cinfo.m_nearPlane, cinfo.m_farPlane );
+    m_projection = glm::perspective( glm::radians( cinfo.m_fov ), (float)width / (float)height, cinfo.m_nearPlane, cinfo.m_farPlane );
     m_view = glm::lookAt( m_camera->getPos(), m_camera->getPos() + m_camera->getDir(), m_camera->getUp() );
 
     m_displayLines.create();
@@ -280,9 +272,9 @@ int Renderer::terminate()
     return 0;
 }
 
-void Renderer::addDisplayLine( const Line& line, const Color color )
+void Renderer::addDisplayLine( const Vertex3 a, const Vertex3 b, const Color color )
 {
-    m_displayLines.writeBufferLine( line.a, line.b, color );
+    m_displayLines.writeBufferLine( a, b, color );
 }
 
 /*
@@ -292,19 +284,19 @@ m_displayCuboids.addDisplayCuboid( &tri, 1, glm::mat4( 1.f ), color );
 }
 */
 
-int Renderer::addDisplayCuboid( const Cuboid& cube, const glm::mat4& model, const Color color )
+int Renderer::addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model, const Color color )
 {
     // Prepare 8 verts from cube's min-max extents
     Vertex3 verts[8] =
     {
-        { cube.min.x, cube.min.y, cube.min.z }, // A 0 ---
-        { cube.max.x, cube.min.y, cube.min.z }, // B 1 +--
-        { cube.max.x, cube.max.y, cube.min.z }, // C 2 ++-
-        { cube.min.x, cube.max.y, cube.min.z }, // D 3 -+-
-        { cube.min.x, cube.min.y, cube.max.z }, // E 4 --+
-        { cube.max.x, cube.min.y, cube.max.z }, // F 5 +-+
-        { cube.max.x, cube.max.y, cube.max.z }, // G 6 +++
-        { cube.min.x, cube.max.y, cube.max.z }  // H 7 -++
+        { min.x, min.y, min.z }, // A 0 ---
+        { max.x, min.y, min.z }, // B 1 +--
+        { max.x, max.y, min.z }, // C 2 ++-
+        { min.x, max.y, min.z }, // D 3 -+-
+        { min.x, min.y, max.z }, // E 4 --+
+        { max.x, min.y, max.z }, // F 5 +-+
+        { max.x, max.y, max.z }, // G 6 +++
+        { min.x, max.y, max.z }  // H 7 -++
     };
 
     // Prepare 12 tris as verts from the 8 verts
@@ -329,16 +321,16 @@ int Renderer::addDisplayCuboid( const Cuboid& cube, const glm::mat4& model, cons
         verts[3], verts[7], verts[6]  // DHG 376
     };
 
-    // Prepare 36 normal vectors by AC x AB
+    // Prepare 36 normal vectors by AB x AC
     Vertex3 normsPerVert[36];
 
     for ( int i = 0; i < 36; i += 3 )
     {
         Vertex3 ab = trisAsVerts[i + 1] - trisAsVerts[i];
         Vertex3 ac = trisAsVerts[i + 2] - trisAsVerts[i];
-        normsPerVert[i] = ac.cross( ab );
-        normsPerVert[i + 1] = ac.cross( ab );
-        normsPerVert[i + 2] = ac.cross( ab );
+        normsPerVert[i] = ab.cross( ac );
+        normsPerVert[i + 1] = ab.cross( ac );
+        normsPerVert[i + 2] = ab.cross( ac );
     }
 
     const int index = m_displayCuboids.writeBufferCuboid( trisAsVerts, normsPerVert, model, color );

@@ -135,9 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RenderBridge.h" />
+    <ClInclude Include="SampleSceneTest.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Renderer\Renderer_vaofag_vbos.vcxproj">
+    <ProjectReference Include="..\Renderer\Renderer.vcxproj">
       <Project>{4538a313-90ff-49f3-9b45-0b5d99d5a0be}</Project>
     </ProjectReference>
   </ItemGroup>

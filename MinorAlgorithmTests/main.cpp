@@ -10,7 +10,5 @@ int main( int argc, char* argv[] )
 	//transformsTest();
     arrayFreeListTest();
 
-	__debugbreak();
-
 	return 0;
 }

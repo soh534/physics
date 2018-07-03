@@ -39,5 +39,11 @@
     <ClInclude Include="TestShareVboDynUpdate.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestExpandVbo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestMergeVbo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

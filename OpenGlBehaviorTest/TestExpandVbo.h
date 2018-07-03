@@ -3,7 +3,7 @@
 #include "Common.h"
 #include "Shader.h"
 
-int testShareVboDynUpdate()
+int testExpandVbo()
 {
     Assert( glfwInit() == GLFW_TRUE, "failed to initialize GLFW" );
 
@@ -25,14 +25,6 @@ int testShareVboDynUpdate()
         { 0.4f, 0.2f, 0.0f }
     };
 
-
-    Color colorsA[3] =
-    {
-        { 1.f, 0.f, 0.f, 1.f },
-    { 1.f, 0.f, 0.f, 1.f },
-    { 0.f, 0.f, 1.f, 1.f }
-    };
-
     Vertex3 verticesB[3] =
     {
         { -0.6f, -0.2f, 0.0f },
@@ -40,6 +32,12 @@ int testShareVboDynUpdate()
         { -0.4f, 0.2f, 0.0f }
     };
 
+    Color colorsA[3] =
+    {
+        { 1.f, 0.f, 0.f, 1.f },
+        { 1.f, 0.f, 0.f, 1.f },
+        { 0.f, 0.f, 1.f, 1.f }
+    };
 
     Color colorsB[3] =
     {
@@ -54,18 +52,17 @@ int testShareVboDynUpdate()
 
     GLuint vbo[2];
     {
-        // Storage for 6 vertices and 6 colors, update later
-        const int initialSize = 6;
+        // Storage for 12 vertices and 12 colors, update later
 
         glGenBuffers( 2, vbo );
-        
+
         glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( Vertex3 ) * initialSize, nullptr, GL_DYNAMIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( Vertex3 ) * 12, nullptr, GL_DYNAMIC_DRAW );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
         glEnableVertexAttribArray( 0 );
-        
+
         glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( Color ) * initialSize, nullptr, GL_DYNAMIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( Color ) * 12, nullptr, GL_DYNAMIC_DRAW );
         glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
         glEnableVertexAttribArray( 1 );
     }
@@ -79,6 +76,8 @@ int testShareVboDynUpdate()
     glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
     glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( Color ) * 3, colorsA );
     glBufferSubData( GL_ARRAY_BUFFER, sizeof( Color ) * 3, sizeof( Color ) * 3, colorsB );
+
+    bool expand = false;
 
     while ( !glfwWindowShouldClose( window ) )
     {
@@ -105,6 +104,22 @@ int testShareVboDynUpdate()
         shader->setMat4( "model", modelB );
         glDrawArrays( GL_TRIANGLES, 3, 3 );
         glBindVertexArray( 0 );
+
+        if ( expand)
+        {
+            // Storage for 12 vertices and 12 colors, update later
+            glGenBuffers( 2, vbo );
+
+            glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
+            glBufferData( GL_ARRAY_BUFFER, sizeof( Vertex3 ) * 12, nullptr, GL_DYNAMIC_DRAW );
+            glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+            glEnableVertexAttribArray( 0 );
+
+            glBindBuffer( GL_ARRAY_BUFFER, vbo[1] );
+            glBufferData( GL_ARRAY_BUFFER, sizeof( Color ) * 12, nullptr, GL_DYNAMIC_DRAW );
+            glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+            glEnableVertexAttribArray( 1 );
+        }
 
         glfwSwapBuffers( window );
     }

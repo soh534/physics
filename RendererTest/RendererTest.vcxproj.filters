@@ -9,5 +9,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RenderBridge.h" />
+    <ClInclude Include="SampleSceneTest.h" />
   </ItemGroup>
 </Project>

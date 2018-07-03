@@ -143,6 +143,8 @@
     <None Include="packages.config" />
     <None Include="Renderer\shaders\Geometry\GeomFrag.shader" />
     <None Include="Renderer\shaders\Geometry\GeomVert.shader" />
+    <None Include="Renderer\shaders\LightSource\LightSourceFrag.shader" />
+    <None Include="Renderer\shaders\LightSource\LightSourceVert.shader" />
     <None Include="Renderer\shaders\Line\LineFrag.shader" />
     <None Include="Renderer\shaders\Line\LineVert.shader" />
   </ItemGroup>
