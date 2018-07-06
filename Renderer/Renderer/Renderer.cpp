@@ -102,29 +102,26 @@ void Renderer::DisplayCuboids::create()
         "../Renderer/Renderer/shaders/Geometry/GeomFrag.shader"
     );
 
+    m_cuboids = new ArrayFreeList<Cuboid>( NUM_INITIAL_MAX_CUBOIDS );
+
     glGenVertexArrays( 1, &m_vao );
     glBindVertexArray( m_vao );
 
-    glGenBuffers( 3, m_vbo );
+    glGenBuffers( 1, &m_vbo );
 
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
-    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_vertices ), m_buffer.m_vertices, GL_DYNAMIC_DRAW );
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
+    int szBuf = m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ) + sizeof( Cuboid::m_colors ));
+    glBufferData( GL_ARRAY_BUFFER, szBuf, nullptr, GL_DYNAMIC_DRAW );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0 );
     glEnableVertexAttribArray( 0 ); // Position
 
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
-    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_normals ), m_buffer.m_normals, GL_DYNAMIC_DRAW );
-    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0,  );
     glEnableVertexAttribArray( 1 ); // Normal
 
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[2] );
-    glBufferData( GL_ARRAY_BUFFER, sizeof( m_buffer.m_colors ), m_buffer.m_colors, GL_DYNAMIC_DRAW );
     glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
     glEnableVertexAttribArray( 2 ); // Color
 
     glBindVertexArray( 0 );
-
-    m_cuboids = new ArrayFreeList<Cuboid>();
 }
 
 int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color )
@@ -137,19 +134,17 @@ int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, con
 
     const int index = m_cuboids->add( cuboid );
     
-    //m_buffer.setAtIndex( index, trisAsVerts, normalsPerVert, color );
-
     // Write vert positions to buffer
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[0] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), cuboid.getVerts() );
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
+    glBufferSubData( GL_ARRAY_BUFFER, index * sizeof( Cuboid::m_vertices ), sizeof( Cuboid::m_vertices ), cuboid.getVerts() );
 
     // Write normals
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[1] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Vertex3 ), Cuboid::NUM_VERTS * sizeof( Vertex3 ), cuboid.getNormals() );
+    int normalOffset = m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices );
+    glBufferSubData( GL_ARRAY_BUFFER, normalOffset + index * sizeof( Cuboid::m_normals ), sizeof( Cuboid::m_normals ), cuboid.getNormals() );
 
     // Write colors
-    glBindBuffer( GL_ARRAY_BUFFER, m_vbo[2] );
-    glBufferSubData( GL_ARRAY_BUFFER, index * Cuboid::NUM_VERTS * sizeof( Color ), Cuboid::NUM_VERTS * sizeof( Color ), cuboid.getColors() );
+    int colorOffset = m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ));
+    glBufferSubData( GL_ARRAY_BUFFER, colorOffset + index * sizeof( Cuboid::m_colors ), sizeof( Cuboid::m_colors ), cuboid.getColors() );
 
     return index;
 }
@@ -157,7 +152,6 @@ int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, con
 void Renderer::DisplayCuboids::clearBufferCuboid( int index )
 {
     m_cuboids->remove( index );
-    m_buffer.resetAtIndex( index );
 }
 
 void Renderer::DisplayCuboids::expandBuffer()

@@ -172,7 +172,7 @@ private:
         // One draw call per cuboid for model matrix update
         // TODO: Merge vert, normal, color to one buffer
 
-        enum { NUM_MAX_CUBOIDS = 500 };
+        enum { NUM_INITIAL_MAX_CUBOIDS = 256 };
 
         // Per-cuboid data
         struct Cuboid
@@ -182,7 +182,7 @@ private:
                 NUM_VERTS = 36,
                 NUM_FLOATS_FOR_VERTICES = NUM_VERTS * Vertex3::NUM_FLOATS,
                 NUM_FLOATS_FOR_NORMALS = NUM_VERTS * Vertex3::NUM_FLOATS,
-                NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS
+                NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS,
             };
 
             void set( const Vertex3* verts, const Vertex3* norms, const Color color )
@@ -252,84 +252,7 @@ private:
             // Color per vertex, r, g, b, a
             float m_colors[Cuboid::NUM_FLOATS_FOR_COLORS];
         };
-
-        struct Buffer
-        {
-            void setAtIndex( int index, const Vertex3* verts, const Vertex3* norms, const Color color )
-            {
-                const int cuboidVertOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
-                const int cuboidNormalOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
-                const int cuboidColorOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
-
-                for ( int i = 0; i < Cuboid::NUM_VERTS; i++ )
-                {
-                    int vertexOffset = i * 3;
-                    m_vertices[cuboidVertOffset + vertexOffset] = verts[i].x;
-                    m_vertices[cuboidVertOffset + vertexOffset + 1] = verts[i].y;
-                    m_vertices[cuboidVertOffset + vertexOffset + 2] = verts[i].z;
-
-                    int normalOffset = i * 3;
-                    m_normals[cuboidNormalOffset + normalOffset] = norms[i].x;
-                    m_normals[cuboidNormalOffset + normalOffset + 1] = norms[i].y;
-                    m_normals[cuboidNormalOffset + normalOffset + 2] = norms[i].z;
-
-                    int colorOffset = i * 4;
-                    m_colors[cuboidColorOffset + colorOffset] = color.r;
-                    m_colors[cuboidColorOffset + colorOffset + 1] = color.g;
-                    m_colors[cuboidColorOffset + colorOffset + 2] = color.b;
-                    m_colors[cuboidColorOffset + colorOffset + 3] = color.a;
-                }
-            }
-
-            void resetAtIndex( int index )
-            {
-                const int cuboidVertOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_VERTICES; fltIdx++ )
-                {
-                    m_vertices[cuboidVertOffset + fltIdx] = 0.f;
-                }
-
-                const int cuboidNormalOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_NORMALS; fltIdx++ )
-                {
-                    m_normals[cuboidNormalOffset + fltIdx] = 0.f;
-                }
-
-                const int cuboidColorOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_COLORS; fltIdx++ )
-                {
-                    m_colors[cuboidColorOffset + fltIdx] = 0.f;
-                }
-            }
-
-            float* getVertsAtIndex( int index )
-            {
-                const int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_VERTICES;
-                return &m_vertices[cuboidOffset];
-            }
-
-            float* getNormalsAtIndex( int index )
-            {
-                const int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_NORMALS;
-                return &m_normals[cuboidOffset];
-            }
-
-            float* getColorsAtIndex( int index )
-            {
-                int cuboidOffset = index * Cuboid::NUM_FLOATS_FOR_COLORS;
-                return &m_colors[cuboidOffset];
-            }
-
-            // Vertices in cube-local space
-            float m_vertices[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_VERTICES];
-
-            // Unnormalized normals from cube-face
-            float m_normals[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_NORMALS];
-
-            // Color per vertex, r, g, b, a
-            float m_colors[NUM_MAX_CUBOIDS * Cuboid::NUM_FLOATS_FOR_COLORS];
-        };
-
+ 
         void create();
         int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
         void clearBufferCuboid( int index );
@@ -340,13 +263,9 @@ private:
         Shader* m_shader;
 
         GLuint m_vao;
-        GLuint m_vbo[3];
+        GLuint m_vbo;
 
         ArrayFreeList<Cuboid>* m_cuboids;
-
-        // Buffer containing vertex, color data
-        // Not needed but useful for keeping track
-        Buffer m_buffer;
 
         int m_numCuboids;
 

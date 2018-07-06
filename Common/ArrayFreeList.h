@@ -26,8 +26,12 @@ struct ArrayFreeList
         delete[] m_nextFreeIds;
     }
 
+    // Get number of used spaces among allocated spaces for elements
     int getSize() { return m_numElements; }
+
+    // Get number of allocated spaces for elements
     int getCapacity() { return m_capacity; }
+
     bool isUsed( int index ) { return (m_nextFreeIds[index] == -1); }
 
     T& operator()( int index )
