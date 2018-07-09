@@ -7,7 +7,8 @@
 
 #include <algorithm>
 
-#include "SampleSceneTest.h"
+//#include "SampleSceneTest.h"
+#include "TextRenderingTest.h"
 
 namespace
 {
@@ -87,8 +88,7 @@ int main( int argc, char* argv[] )
 
 	glfwSetScrollCallback( window, &scrollCallback );
 
-    RendererObjects objs;
-    addObjects( renderer, objs );
+    Test::addObjects( renderer );
 
 	while ( !glfwWindowShouldClose( window ) )
 	{
@@ -99,7 +99,7 @@ int main( int argc, char* argv[] )
 		processKey( window, renderer.getCamera() );
 		processMouse( window, renderer.getCamera() );
 
-        updateObjects(renderer, objs );
+        Test::updateObjects( renderer );
 
 		renderer.render();
 

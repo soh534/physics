@@ -10,5 +10,6 @@
   <ItemGroup>
     <ClInclude Include="RenderBridge.h" />
     <ClInclude Include="SampleSceneTest.h" />
+    <ClInclude Include="TextRenderingTest.h" />
   </ItemGroup>
 </Project>

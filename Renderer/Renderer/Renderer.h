@@ -107,9 +107,9 @@ public:
     int addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
     void removeDisplayCuboid( int index );
 
-    // Draw func for text
+    // Text
     void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
-    //void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
+    void drawText3d( const Vertex3 pos, const Color color, const char* string, ... );
 
     void setModel( int index, const glm::mat4& model );
 

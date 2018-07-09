@@ -115,10 +115,10 @@ void Renderer::DisplayCuboids::create()
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0 );
     glEnableVertexAttribArray( 0 ); // Position
 
-    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0,  );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices )) );
     glEnableVertexAttribArray( 1 ); // Normal
 
-    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, 0, nullptr );
+    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, 0, (void*)(m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ))) );
     glEnableVertexAttribArray( 2 ); // Color
 
     glBindVertexArray( 0 );
@@ -126,8 +126,6 @@ void Renderer::DisplayCuboids::create()
 
 int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color )
 {
-    //Assert( m_numCuboids < NUM_MAX_CUBOIDS, "Max # geometry exceeded." );
-
     Cuboid cuboid;
     cuboid.m_model = model;
     cuboid.set( trisAsVerts, normalsPerVert, color );
@@ -166,7 +164,8 @@ void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::m
     m_shader->setMat4( "view", view );
 
     m_shader->setVec3( "lightColor", lightSource.m_color );
-    m_shader->setVec3( "lightPos", lightSource.m_pos );
+    //m_shader->setVec3( "lightPos", lightSource.m_pos );
+    m_shader->setVec3( "lightPos", cameraPos );
     m_shader->setVec3( "viewPos", cameraPos );
 
     glBindVertexArray( m_vao );
@@ -342,7 +341,7 @@ void Renderer::drawText2d( const Vertex2 pos, const Color color, const char* str
     va_start( arg, string );
     ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
 
-    ImVec2 posImvec;
+    ImVec2 posImvec( pos.x, pos.y );
     ImGui::SetCursorPos( posImvec ); // Window-coordinate system (pixel-based, top-left origin)
 
     ImColor colorIm( color.r, color.g, color.b, color.a );
@@ -351,23 +350,32 @@ void Renderer::drawText2d( const Vertex2 pos, const Color color, const char* str
     va_end( arg );
 }
 
-/*
 void Renderer::drawText3d( const Vertex3 pos, const Color color, const char* string, ... )
 {
-va_list arg;
-va_start( arg, string );
-ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
+    va_list arg;
+    va_start( arg, string );
+    ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
 
-ImVec2 posIm;
-// TODO: project pos to screen to posIm
-ImGui::SetCursorPos( posIm ); // Window-coordinate system (pixel-based, top-left origin)
+    // TODO: make this into a function
 
-ImColor colorIm( color.r, color.g, color.b, color.a );
-ImGui::TextColoredV( colorIm, string, arg );
-ImGui::End();
-va_end( arg );
+    // Transform to clip-space
+    glm::vec4 posClip = m_projection * m_view * glm::vec4( pos.x, pos.y, pos.z, 1.f );
+
+    // Perspective division to NDC
+    posClip.x /= posClip.w;
+    posClip.y /= posClip.w;
+
+    // Viewport transformation to window-coordinates (pixel-based, top-left origin)
+    int width, height;
+    glfwGetFramebufferSize( m_window, &width, &height );
+    ImVec2 posW( (posClip.x + 1) * width / 2, (posClip.y - 1) * -height / 2 );
+    ImGui::SetCursorPos( posW );
+
+    ImColor colorIm( color.r, color.g, color.b, color.a );
+    ImGui::TextColoredV( colorIm, string, arg );
+    ImGui::End();
+    va_end( arg );
 }
-*/
 
 void Renderer::setModel( int index, const glm::mat4& model )
 {

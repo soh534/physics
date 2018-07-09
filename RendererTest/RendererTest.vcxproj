@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="RenderBridge.h" />
     <ClInclude Include="SampleSceneTest.h" />
+    <ClInclude Include="TextRenderingTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Renderer\Renderer.vcxproj">

@@ -14,8 +14,8 @@ out vec4 vertColor;
 
 void main()
 {
-	gl_Position = projection * view	* model	* vec4( position, 1.f );
+    gl_Position = projection * view	* model	* vec4( position, 1.f );
     fragPos = vec3( model * vec4( position, 1.f ) );
-    normVector = mat3(model) * normal; // Take just rotation (3x3)
-	vertColor = color;
+    normVector = mat3( model ) * normal; // Take just rotation (3x3)
+    vertColor = color;
 }
