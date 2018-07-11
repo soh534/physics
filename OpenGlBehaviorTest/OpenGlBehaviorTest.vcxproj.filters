@@ -45,5 +45,8 @@
     <ClInclude Include="TestMergeVbo.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestInterleaveVbo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

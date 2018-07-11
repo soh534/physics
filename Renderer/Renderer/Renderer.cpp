@@ -352,24 +352,28 @@ void Renderer::drawText2d( const Vertex2 pos, const Color color, const char* str
 
 void Renderer::drawText3d( const Vertex3 pos, const Color color, const char* string, ... )
 {
-    va_list arg;
-    va_start( arg, string );
-    ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
-
     // TODO: make this into a function
-
     // Transform to clip-space
     glm::vec4 posClip = m_projection * m_view * glm::vec4( pos.x, pos.y, pos.z, 1.f );
 
     // Perspective division to NDC
+    if ( posClip.w < 0.f )
+    {
+        return;
+    }
+
     posClip.x /= posClip.w;
     posClip.y /= posClip.w;
 
     // Viewport transformation to window-coordinates (pixel-based, top-left origin)
     int width, height;
     glfwGetFramebufferSize( m_window, &width, &height );
-    ImVec2 posW( (posClip.x + 1) * width / 2, (posClip.y - 1) * -height / 2 );
-    ImGui::SetCursorPos( posW );
+    ImVec2 posWindow( (posClip.x + 1) * width / 2, (posClip.y - 1) * -height / 2 );
+
+    va_list arg;
+    va_start( arg, string );
+    ImGui::Begin( "Overlay", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar );
+    ImGui::SetCursorPos( posWindow );
 
     ImColor colorIm( color.r, color.g, color.b, color.a );
     ImGui::TextColoredV( colorIm, string, arg );

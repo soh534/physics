@@ -3,27 +3,7 @@
 #include "Common.h"
 #include "Shader.h"
 
-GLuint getLargerVbo( GLuint origVbo, int origSize, int newSize )
-{
-    GLuint newVbo;
-
-    glGenBuffers( 1, &newVbo );
-
-    glBindBuffer( GL_ARRAY_BUFFER, newVbo );
-    glBufferData( GL_ARRAY_BUFFER, newSize, nullptr, GL_DYNAMIC_DRAW );
-
-    glBindBuffer( GL_COPY_READ_BUFFER, origVbo );
-    glBindBuffer( GL_COPY_WRITE_BUFFER, newVbo );
-    glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, origSize );
-
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    glBindBuffer( GL_COPY_READ_BUFFER, 0 );
-    glBindBuffer( GL_COPY_WRITE_BUFFER, 0 );
-
-    return newVbo;
-}
-
-int testExpandVbo()
+int testInterleaveVbo()
 {
     Assert( glfwInit() == GLFW_TRUE, "failed to initialize GLFW" );
 
@@ -43,7 +23,6 @@ int testExpandVbo()
         0.2f, -0.2f, 0.0f,  1.f, 0.f, 0.f, 1.f,
         0.6f, -0.2f, 0.0f,  1.f, 0.f, 0.f, 1.f,
         0.4f, 0.2f, 0.0f,   0.f, 0.f, 1.f, 1.f
-
     };
 
     float triB[] =
@@ -53,47 +32,37 @@ int testExpandVbo()
         -0.4f, 0.2f, 0.0f,   0.f, 1.f, 0.f, 1.f
     };
 
-    // Interleave vertex buffer, fill data
     GLuint vao;
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
+
     GLuint vbo;
     {
+        // Interleave
         glGenBuffers( 1, &vbo );
 
         glBindBuffer( GL_ARRAY_BUFFER, vbo );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( triA ), nullptr, GL_DYNAMIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( triA ) + sizeof( triB ), nullptr, GL_DYNAMIC_DRAW );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 7, (void*)0 );
         glEnableVertexAttribArray( 0 );
 
         glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( float ) * 7, (void*)(3 * sizeof( float )) );
         glEnableVertexAttribArray( 1 );
-
-        glBindBuffer( GL_ARRAY_BUFFER, vbo );
-        glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( triA ), triA );
     }
     glBindVertexArray( 0 );
 
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, vbo );
+
+        // triA
+        glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( triA ), triA );
+
+        // triB
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof( triA ), sizeof( triB ), triB );
+    }
+
     while ( !glfwWindowShouldClose( window ) )
     {
-        if ( 0 )
-        {
-            // Expand vbo
-            GLuint largerVbo = getLargerVbo( vbo, sizeof( triA ), sizeof( triA ) + sizeof( triB ) );
-
-            glBindVertexArray( vao );
-            glBindBuffer( GL_ARRAY_BUFFER, largerVbo );
-            glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 7, (void*)0 );
-            glEnableVertexAttribArray( 0 );
-
-            glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( float ) * 7, (void*)(3 * sizeof( float )) );
-            glEnableVertexAttribArray( 1 );
-
-            glBufferSubData( GL_ARRAY_BUFFER, sizeof( triA ), sizeof( triB ), triB );
-
-            glBindVertexArray( 0 );
-        }
-
         glClearColor( 0.f, 0.f, 0.f, 1.f ); // Black, full opacity
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 

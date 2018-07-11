@@ -25,12 +25,12 @@ namespace
 void processKey( GLFWwindow* window, Camera* camera )
 {
     // TODO: strange to be passing speed for amount
-    if ( glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS )       camera->dolly( cameraSpeed );
-    if ( glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS )		camera->truck( -cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS )		camera->dolly( -cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS )		camera->truck( cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS )		camera->pedestal( cameraSpeed );
-	if ( glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS )		camera->pedestal( -cameraSpeed );
+    if ( glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS )    camera->dolly( cameraSpeed );
+    if ( glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS )	 camera->truck( -cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS )    camera->dolly( -cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS )	 camera->truck( cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS )	 camera->pedestal( cameraSpeed );
+	if ( glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS )	 camera->pedestal( -cameraSpeed );
 }
 
 void processMouse( GLFWwindow* window, Camera* camera )
@@ -92,8 +92,6 @@ int main( int argc, char* argv[] )
 
 	while ( !glfwWindowShouldClose( window ) )
 	{
-		glfwPollEvents();
-
 		renderer.prestep();
 
 		processKey( window, renderer.getCamera() );
@@ -104,6 +102,7 @@ int main( int argc, char* argv[] )
 		renderer.render();
 
 		glfwSwapBuffers( window );
+        glfwPollEvents();
 	}
 
 	renderer.terminate();

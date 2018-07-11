@@ -168,9 +168,9 @@ private:
     // Specialized buffer for cuboids
     struct DisplayCuboids
     {
-        // Three buffers for vert, normal, color for all cuboids
+        // One vertex buffer for vert, normal, color for all cuboids
         // One draw call per cuboid for model matrix update
-        // TODO: Merge vert, normal, color to one buffer
+        // TODO: replace color floats /w uniforms
 
         enum { NUM_INITIAL_MAX_CUBOIDS = 256 };
 

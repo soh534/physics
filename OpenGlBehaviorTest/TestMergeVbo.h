@@ -87,8 +87,6 @@ int testMergeVbo()
 
     while ( !glfwWindowShouldClose( window ) )
     {
-        glfwPollEvents();
-
         glClearColor( 0.f, 0.f, 0.f, 1.f ); // Black, full opacity
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -112,6 +110,7 @@ int testMergeVbo()
         glBindVertexArray( 0 );
 
         glfwSwapBuffers( window );
+        glfwPollEvents();
     }
 
     glfwDestroyWindow( window );
