@@ -24,7 +24,7 @@ namespace Test
         std::uniform_real_distribution<float> axisDistr( -1.f, 1.f );
         std::uniform_real_distribution<float> piDivDistr( 30.f, 180.f );
 
-        for ( int i = 0; i < 256; i++ )
+        for ( int i = 0; i < 5000; i++ )
         {
             float length = sizeDistr( engine );
             Vertex3 min( -length, -length, -length );

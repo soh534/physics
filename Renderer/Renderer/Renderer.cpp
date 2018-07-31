@@ -108,41 +108,32 @@ void Renderer::DisplayCuboids::create()
     glBindVertexArray( m_vao );
 
     glGenBuffers( 1, &m_vbo );
-
     glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-    int szBuf = m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ) + sizeof( Cuboid::m_colors ));
-    glBufferData( GL_ARRAY_BUFFER, szBuf, nullptr, GL_DYNAMIC_DRAW );
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0 );
-    glEnableVertexAttribArray( 0 ); // Position
 
-    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices )) );
-    glEnableVertexAttribArray( 1 ); // Normal
+    const int numBytesVbo = m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices );
+    glBufferData( GL_ARRAY_BUFFER, numBytesVbo, nullptr, GL_DYNAMIC_DRAW );
 
-    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, 0, (void*)(m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ))) );
-    glEnableVertexAttribArray( 2 ); // Color
+    setVertexAttributes();
 
     glBindVertexArray( 0 );
 }
 
-int Renderer::DisplayCuboids::writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color )
+int Renderer::DisplayCuboids::writeBufferCuboid( const float* vertices, const glm::mat4& model )
 {
     Cuboid cuboid;
     cuboid.m_model = model;
-    cuboid.set( trisAsVerts, normalsPerVert, color );
+    cuboid.set( vertices );
+
+    if ( m_cuboids->isFull() )
+    {
+        expandBuffer();
+    }
 
     const int index = m_cuboids->add( cuboid );
-    
-    // Write vert positions to buffer
+
+    // Write positions, normals, colors interleaved
     glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-    glBufferSubData( GL_ARRAY_BUFFER, index * sizeof( Cuboid::m_vertices ), sizeof( Cuboid::m_vertices ), cuboid.getVerts() );
-
-    // Write normals
-    int normalOffset = m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices );
-    glBufferSubData( GL_ARRAY_BUFFER, normalOffset + index * sizeof( Cuboid::m_normals ), sizeof( Cuboid::m_normals ), cuboid.getNormals() );
-
-    // Write colors
-    int colorOffset = m_cuboids->getCapacity() * (sizeof( Cuboid::m_vertices ) + sizeof( Cuboid::m_normals ));
-    glBufferSubData( GL_ARRAY_BUFFER, colorOffset + index * sizeof( Cuboid::m_colors ), sizeof( Cuboid::m_colors ), cuboid.getColors() );
+    glBufferSubData( GL_ARRAY_BUFFER, index * sizeof( Cuboid::m_vertices ), sizeof( Cuboid::m_vertices ), cuboid.getVertices() );
 
     return index;
 }
@@ -152,9 +143,47 @@ void Renderer::DisplayCuboids::clearBufferCuboid( int index )
     m_cuboids->remove( index );
 }
 
+void Renderer::DisplayCuboids::setVertexAttributes()
+{
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, Cuboid::NUM_FLOATS_VERT * sizeof( float ), (void*)0 );
+    glEnableVertexAttribArray( 0 ); // Position
+
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, Cuboid::NUM_FLOATS_VERT * sizeof( float ), (void*)(3 * sizeof( float )) );
+    glEnableVertexAttribArray( 1 ); // Normal
+
+    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, Cuboid::NUM_FLOATS_VERT * sizeof( float ), (void*)(6 * sizeof( float )) );
+    glEnableVertexAttribArray( 2 ); // Color
+}
+
 void Renderer::DisplayCuboids::expandBuffer()
 {
+    // Expand array freelist, allocate new vertex buffer, copy old contents to new buffer
+    const int numBytesOriginalVbo = m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices );
 
+    m_cuboids->expand();
+    const int numBytesNewVbo = m_cuboids->getCapacity() * sizeof( Cuboid::m_vertices );
+
+    GLuint newVbo;
+    glGenBuffers( 1, &newVbo );
+
+    glBindBuffer( GL_ARRAY_BUFFER, newVbo );
+    glBufferData( GL_ARRAY_BUFFER, numBytesNewVbo, nullptr, GL_DYNAMIC_DRAW );
+
+    glBindBuffer( GL_COPY_READ_BUFFER, m_vbo );
+    glBindBuffer( GL_COPY_WRITE_BUFFER, newVbo );
+    glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, numBytesOriginalVbo );
+
+    glBindBuffer( GL_COPY_READ_BUFFER, 0 );
+    glBindBuffer( GL_COPY_WRITE_BUFFER, 0 );
+
+    glDeleteBuffers( 1, &m_vbo );
+
+    m_vbo = newVbo;
+
+    // Set attributes for newly allocated buffer
+    glBindVertexArray( m_vao );
+    setVertexAttributes();
+    glBindVertexArray( 0 );
 }
 
 void Renderer::DisplayCuboids::render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos )
@@ -277,10 +306,14 @@ m_displayCuboids.addDisplayCuboid( &tri, 1, glm::mat4( 1.f ), color );
 }
 */
 
+
 int Renderer::addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model, const Color color )
 {
-    // Prepare 8 verts from cube's min-max extents
-    Vertex3 verts[8] =
+    // TODO: add a function which just accepts an array of display cuboid vertices
+    // Leave the vertex preparation to user
+
+    // Prepare 8 corners from cube's min-max extents
+    Vertex3 corners[8] =
     {
         { min.x, min.y, min.z }, // A 0 ---
         { max.x, min.y, min.z }, // B 1 +--
@@ -292,41 +325,59 @@ int Renderer::addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm:
         { min.x, max.y, max.z }  // H 7 -++
     };
 
-    // Prepare 12 tris as verts from the 8 verts
-    Vertex3 trisAsVerts[36] =
+    // Prepare 36 positions forming 12 triangles forming cuboid
+    Vertex3 positions[DisplayCuboids::Cuboid::NUM_VERTS] =
     {
-        verts[0], verts[3], verts[2], // ADC 032
-        verts[2], verts[1], verts[0], // CBA 210
+        corners[0], corners[3], corners[2], // ADC 032
+        corners[2], corners[1], corners[0], // CBA 210
 
-        verts[4], verts[5], verts[6], // EFG 456
-        verts[6], verts[7], verts[4], // GHE 674
+        corners[4], corners[5], corners[6], // EFG 456
+        corners[6], corners[7], corners[4], // GHE 674
 
-        verts[7], verts[3], verts[0], // HDA 730
-        verts[0], verts[4], verts[7], // AEH 047
+        corners[7], corners[3], corners[0], // HDA 730
+        corners[0], corners[4], corners[7], // AEH 047
 
-        verts[6], verts[5], verts[1], // GFB 651
-        verts[1], verts[2], verts[6], // BCG 126
+        corners[6], corners[5], corners[1], // GFB 651
+        corners[1], corners[2], corners[6], // BCG 126
 
-        verts[0], verts[1], verts[5], // ABF 015
-        verts[5], verts[4], verts[0], // FEA 540
+        corners[0], corners[1], corners[5], // ABF 015
+        corners[5], corners[4], corners[0], // FEA 540
 
-        verts[6], verts[2], verts[3], // GCD 623
-        verts[3], verts[7], verts[6]  // DHG 376
+        corners[6], corners[2], corners[3], // GCD 623
+        corners[3], corners[7], corners[6]  // DHG 376
     };
 
-    // Prepare 36 normal vectors by AB x AC
-    Vertex3 normsPerVert[36];
+    // Prepare 36 normals for each positions
+    Vertex3 normals[DisplayCuboids::Cuboid::NUM_VERTS];
 
-    for ( int i = 0; i < 36; i += 3 )
+    for ( int vidx = 0; vidx < DisplayCuboids::Cuboid::NUM_VERTS; vidx += 3 )
     {
-        Vertex3 ab = trisAsVerts[i + 1] - trisAsVerts[i];
-        Vertex3 ac = trisAsVerts[i + 2] - trisAsVerts[i];
-        normsPerVert[i] = ab.cross( ac );
-        normsPerVert[i + 1] = ab.cross( ac );
-        normsPerVert[i + 2] = ab.cross( ac );
+        Vertex3 ab = positions[vidx + 1] - positions[vidx];
+        Vertex3 ac = positions[vidx + 2] - positions[vidx];
+        normals[vidx] = ab.cross( ac );
+        normals[vidx + 1] = ab.cross( ac );
+        normals[vidx + 2] = ab.cross( ac );
     }
 
-    const int index = m_displayCuboids.writeBufferCuboid( trisAsVerts, normsPerVert, model, color );
+    // Prepare interleaved floats
+    float vertices[DisplayCuboids::Cuboid::NUM_FLOATS] = { 0 };
+    for ( int vidx = 0; vidx < DisplayCuboids::Cuboid::NUM_VERTS; vidx++ )
+    {
+        int offset = vidx * DisplayCuboids::Cuboid::NUM_FLOATS_VERT;
+        vertices[offset] = positions[vidx].x;
+        vertices[offset + 1] = positions[vidx].y;
+        vertices[offset + 2] = positions[vidx].z;
+        vertices[offset + 3] = normals[vidx].x;
+        vertices[offset + 4] = normals[vidx].y;
+        vertices[offset + 5] = normals[vidx].z;
+        vertices[offset + 6] = color.r;
+        vertices[offset + 7] = color.g;
+        vertices[offset + 8] = color.b;
+        vertices[offset + 9] = color.a;
+    }
+
+    const int index = m_displayCuboids.writeBufferCuboid( vertices, model );
+
     return index;
 }
 

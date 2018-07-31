@@ -172,7 +172,7 @@ private:
         // One draw call per cuboid for model matrix update
         // TODO: replace color floats /w uniforms
 
-        enum { NUM_INITIAL_MAX_CUBOIDS = 256 };
+        enum { NUM_INITIAL_MAX_CUBOIDS = 64 };
 
         // Per-cuboid data
         struct Cuboid
@@ -180,96 +180,50 @@ private:
             enum
             {
                 NUM_VERTS = 36,
-                NUM_FLOATS_FOR_VERTICES = NUM_VERTS * Vertex3::NUM_FLOATS,
-                NUM_FLOATS_FOR_NORMALS = NUM_VERTS * Vertex3::NUM_FLOATS,
-                NUM_FLOATS_FOR_COLORS = NUM_VERTS * Color::NUM_FLOATS,
+                NUM_FLOATS_VERT = Vertex3::NUM_FLOATS + Vertex3::NUM_FLOATS + Color::NUM_FLOATS,
+                NUM_FLOATS = NUM_VERTS * NUM_FLOATS_VERT
             };
 
-            void set( const Vertex3* verts, const Vertex3* norms, const Color color )
+            void set( const float* vertsInterleaved )
             {
-                for ( int vIdx = 0; vIdx < Cuboid::NUM_VERTS; vIdx++ )
-                {
-                    int vertexOffset = vIdx * 3;
-                    m_vertices[vertexOffset] = verts[vIdx].x;
-                    m_vertices[vertexOffset + 1] = verts[vIdx].y;
-                    m_vertices[vertexOffset + 2] = verts[vIdx].z;
-
-                    int normalOffset = vIdx * 3;
-                    m_normals[normalOffset] = norms[vIdx].x;
-                    m_normals[normalOffset + 1] = norms[vIdx].y;
-                    m_normals[normalOffset + 2] = norms[vIdx].z;
-
-                    int colorOffset = vIdx * 4;
-                    m_colors[colorOffset] = color.r;
-                    m_colors[colorOffset + 1] = color.g;
-                    m_colors[colorOffset + 2] = color.b;
-                    m_colors[colorOffset + 3] = color.a;
-                }
+                memcpy( m_vertices, vertsInterleaved, NUM_FLOATS * sizeof( float ) );
             }
 
             void reset()
             {
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_VERTICES; fltIdx++ )
-                {
-                    m_vertices[fltIdx] = 0.f;
-                }
-
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_NORMALS; fltIdx++ )
-                {
-                    m_normals[fltIdx] = 0.f;
-                }
-
-                for ( int fltIdx = 0; fltIdx < Cuboid::NUM_FLOATS_FOR_COLORS; fltIdx++ )
-                {
-                    m_colors[fltIdx] = 0.f;
-                }
+                memset( m_vertices, 0, NUM_FLOATS * sizeof( float ) );
             }
 
-            float* getVerts()
-            {
-                return m_vertices;
-            }
-
-            float* getNormals()
-            {
-                return m_normals;
-            }
-
-            float* getColors()
-            {
-                return m_colors;
-            }
+            float* getVertices() { return m_vertices; }
 
             // Model matrix local->world
             glm::mat4 m_model;
 
-            // Vertices in cube-local space
-            float m_vertices[Cuboid::NUM_FLOATS_FOR_VERTICES];
-
-            // Unnormalized normals from cube-face
-            float m_normals[Cuboid::NUM_FLOATS_FOR_NORMALS];
-
-            // Color per vertex, r, g, b, a
-            float m_colors[Cuboid::NUM_FLOATS_FOR_COLORS];
+            // Interleaved vertices PPPNNNCCCC
+            float m_vertices[Cuboid::NUM_FLOATS];
         };
- 
+
         void create();
-        int writeBufferCuboid( const Vertex3* trisAsVerts, const Vertex3* normalsPerVert, const glm::mat4& model, const Color color );
+        int writeBufferCuboid( const float* vertices, const glm::mat4& model );
         void clearBufferCuboid( int index );
-        void expandBuffer();
         void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
         void setModel( int index, const glm::mat4& model );
 
+    private:
+        
+        // Set vertex attributes for cuboid (PPPNNNCCCC), assumes bound to VAO and VBO
+        void setVertexAttributes();
+
+        // Expand freelist array and vertex buffer
+        // Vertex buffer handle (m_vbo) will be updated to a new value
+        void expandBuffer();
+        
         Shader* m_shader;
 
         GLuint m_vao;
         GLuint m_vbo;
 
         ArrayFreeList<Cuboid>* m_cuboids;
-
-        int m_numCuboids;
-
-        int m_nextFreeCuboid;
     };
 
     // Buffer generalized for convex /w variable # of vertices

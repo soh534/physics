@@ -32,7 +32,11 @@ struct ArrayFreeList
     // Get number of allocated spaces for elements
     int getCapacity() { return m_capacity; }
 
+    // Return if particular index is used
     bool isUsed( int index ) { return (m_nextFreeIds[index] == -1); }
+
+    // Return if buffer is currently full and requires expansion
+    bool isFull() { return (m_firstFreeId == m_capacity); }
 
     T& operator()( int index )
     {
@@ -42,10 +46,8 @@ struct ArrayFreeList
 
     int add( const T& t )
     {
-        if ( m_firstFreeId == m_capacity )
-        {
-            expand();
-        }
+        // Not expanding automatically here for renderer to handle
+        assert( !isFull() );
 
         int thisId = m_firstFreeId;
 
@@ -67,8 +69,6 @@ struct ArrayFreeList
 
         m_numElements--;
     }
-
-private:
 
     void expand()
     {
@@ -92,6 +92,8 @@ private:
 
         m_capacity *= 2;
     }
+
+private:
 
     T * m_elements;
     int* m_nextFreeIds;
