@@ -215,7 +215,7 @@ private:
         {
             enum
             {
-                NUM_VERTS = 36,
+                NUM_VERTS = 24,
                 NUM_FLOATS_VERT = Vertex3::NUM_FLOATS + Vertex3::NUM_FLOATS + Color::NUM_FLOATS,
                 NUM_FLOATS = NUM_VERTS * NUM_FLOATS_VERT
             };
@@ -258,22 +258,9 @@ private:
 
         GLuint m_vao;
         GLuint m_vbo;
+        GLuint m_ebo;
 
         ArrayFreeList<Cuboid>* m_cuboids;
-    };
-
-    struct TestCuboids
-    {
-        void create();
-        void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
-
-    private:
-
-        Shader * m_shader;
-
-        GLuint m_vao;
-        GLuint m_vbo;
-        GLuint m_ibo;
     };
 
     // Buffer generalized for convex /w variable # of vertices
@@ -295,7 +282,6 @@ private:
 
     DisplayLines m_displayLines;
     DisplayCuboids m_displayCuboids;
-    TestCuboids m_testCuboids;
 
     LightSource m_lightSource;
 };

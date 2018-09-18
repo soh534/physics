@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-//#include "SampleSceneTest.h"
-#include "TextRenderingTest.h"
+#include "SampleSceneTest.h"
+//#include "TextRenderingTest.h"
 
 namespace
 {

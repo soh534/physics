@@ -56,7 +56,7 @@ int testIbo()
         -1.f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 0.f, 0.f, 1.f
     };
 
-    unsigned int indices[36] = 
+    GLushort indices[36] =
     { 
         0, 1, 2, 0, 2, 3,       //front
         4, 5, 6, 4, 6, 7,       //right
@@ -126,7 +126,7 @@ int testIbo()
         glm::mat4 model = glm::translate( glm::mat4(), glm::vec3( 0.f, 0.f, 0.f ) );
         model = glm::rotate( model, glm::pi<float>() / 4.f, glm::vec3( 1.f, 1.f, 1.f ) );
         shader->setMat4( "model", model );
-        glDrawElements( GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0 );
+        glDrawElements( GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0 );
         glBindVertexArray( 0 );
 
         glfwSwapBuffers( window );
