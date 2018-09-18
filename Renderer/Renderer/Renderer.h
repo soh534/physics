@@ -64,11 +64,22 @@ struct RendererCinfo
         m_farPlane = 100.f;
     }
 
+    // Defaults (0.f, 0.f, -3.f)
     glm::vec3 m_cameraPos;
+
+    // Defaults (0.f, 0.f, 1.f)
     glm::vec3 m_cameraDir;
+
+    // Defaults (0.f, 1.f, 0.f)
     glm::vec3 m_cameraUp;
+
+    // Defaults (1.f, 1.f, 1.f)
     glm::vec3 m_lightColor;
+
+    // Defaults (0.f, 1.f, 0.f)
     glm::vec3 m_lightPos;
+
+    // Defaults (0.f, 0.f, 0.f)
     glm::vec3 m_backColor;
 
     // Defaults 45.f
@@ -104,8 +115,14 @@ public:
     Camera* getCamera() { return m_camera; }
 
     void addDisplayLine( const Vertex3 a, const Vertex3 b, const Color color = Color() );
+
+    // Cuboids
     int addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
     void removeDisplayCuboid( int index );
+
+    // Spheres
+    int addDisplaySphere( const Vertex3 center, const float radius, const glm::mat4& model = glm::mat4( 1.f ), const Color color = Color() );
+    void removeDisplaySphere( int index );
 
     // Text
     void drawText2d( const Vertex2 pos, const Color color, const char* string, ... );
@@ -163,6 +180,25 @@ private:
             float m_vertices[NUM_MAX_TRIS * Triangle::NUM_FLOATS_FOR_VERTICES];
             float m_colors[NUM_MAX_TRIS * Triangle::NUM_FLOATS_FOR_COLORS];
         };
+    };
+
+    // Specialized buffer for spheres
+    struct DisplaySpheres
+    {
+        enum { NUM_INITIAL_MAX_SPHERES = 32 };
+
+        struct Sphere
+        {
+
+            glm::mat4 m_model;
+            float radius;
+        };
+
+        Shader* m_shader;
+
+        GLuint m_vao;
+        GLuint m_vbo;
+        ArrayFreeList<Sphere>* m_spheres;
     };
 
     // Specialized buffer for cuboids
@@ -226,6 +262,20 @@ private:
         ArrayFreeList<Cuboid>* m_cuboids;
     };
 
+    struct TestCuboids
+    {
+        void create();
+        void render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos );
+
+    private:
+
+        Shader * m_shader;
+
+        GLuint m_vao;
+        GLuint m_vbo;
+        GLuint m_ibo;
+    };
+
     // Buffer generalized for convex /w variable # of vertices
 
     // Buffer generalized for meshes
@@ -245,6 +295,7 @@ private:
 
     DisplayLines m_displayLines;
     DisplayCuboids m_displayCuboids;
+    TestCuboids m_testCuboids;
 
     LightSource m_lightSource;
 };

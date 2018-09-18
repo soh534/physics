@@ -4,6 +4,7 @@
 #include "TestMergeVbo.h"
 #include "TestInterleaveVbo.h"
 #include "TestExpandVbo.h"
+#include "TestIbo.h"
 
 int main( int argc, char* argv[] )
 {
@@ -12,7 +13,8 @@ int main( int argc, char* argv[] )
     //testShareVboDynUpdate();
     //testMergeVbo();
     //testInterleaveVbo();
-    testExpandVbo();
+    //testExpandVbo();
+    testIbo();
     
     return 0;
 }

@@ -1,9 +1,10 @@
 #pragma once
 
-// This must be included after everything in renderer test main
-
 #include <vector>
 #include <random>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Test
 {

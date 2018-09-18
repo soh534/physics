@@ -27,6 +27,13 @@ public:
 		glUniform3f( glGetUniformLocation( m_id, name.c_str() ), x, y, z );
 	}
 
+
+    void setVec3( const std::string& name, const glm::vec3 vec ) const
+    {
+        GLuint id = glGetUniformLocation( m_id, name.c_str() );
+        glUniform3f( id, vec.x, vec.y, vec.z );
+    }
+
 	void setMat4( const std::string& name, const glm::mat4& mat ) const
 	{
 		GLuint id = glGetUniformLocation( m_id, name.c_str() );

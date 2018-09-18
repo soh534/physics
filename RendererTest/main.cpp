@@ -2,13 +2,11 @@
 #include <Renderer/Renderer/Camera.h>
 
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <algorithm>
 
-#include "SampleSceneTest.h"
-//#include "TextRenderingTest.h"
+//#include "SampleSceneTest.h"
+#include "TextRenderingTest.h"
 
 namespace
 {

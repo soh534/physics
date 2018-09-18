@@ -245,6 +245,7 @@ int Renderer::init( GLFWwindow* window, const RendererCinfo& cinfo )
 
     m_displayLines.create();
     m_displayCuboids.create();
+    m_testCuboids.create();
 
     m_lightSource.m_color = cinfo.m_lightColor;
     m_lightSource.m_pos = cinfo.m_lightPos;
@@ -281,6 +282,7 @@ void Renderer::render()
 
     m_displayLines.render( m_projection, m_view );
     m_displayCuboids.render( m_projection, m_view, m_lightSource, m_camera->getPos() );
+    m_testCuboids.render( m_projection, m_view, m_lightSource, m_camera->getPos() );
 
     ImGui::Render();
     ImGui_ImplGlfwGL3_RenderDrawData( ImGui::GetDrawData() );
@@ -298,14 +300,6 @@ void Renderer::addDisplayLine( const Vertex3 a, const Vertex3 b, const Color col
 {
     m_displayLines.writeBufferLine( a, b, color );
 }
-
-/*
-void Renderer::drawTriangle( const Triangle& tri, const Color color )
-{
-m_displayCuboids.addDisplayCuboid( &tri, 1, glm::mat4( 1.f ), color );
-}
-*/
-
 
 int Renderer::addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm::mat4& model, const Color color )
 {
@@ -376,14 +370,118 @@ int Renderer::addDisplayCuboid( const Vertex3 min, const Vertex3 max, const glm:
         vertices[offset + 9] = color.a;
     }
 
-    const int index = m_displayCuboids.writeBufferCuboid( vertices, model );
-
-    return index;
+    return m_displayCuboids.writeBufferCuboid( vertices, model );
 }
 
 void Renderer::removeDisplayCuboid( int index )
 {
     m_displayCuboids.clearBufferCuboid( index );
+}
+
+int Renderer::addDisplaySphere( const Vertex3 center, const float radius, const glm::mat4& model, const Color color )
+{
+    return 0;
+}
+
+void Renderer::removeDisplaySphere( int index )
+{
+
+}
+
+void Renderer::TestCuboids::create()
+{
+    m_shader = new Shader(
+        "../Renderer/Renderer/shaders/Geometry/GeomVert.shader",
+        "../Renderer/Renderer/shaders/Geometry/GeomFrag.shader"
+    );
+
+    float verts[(3 + 3 + 4) * 24] =
+    {
+        // Vertices           // Normals           // Colors
+        -1.f, -1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f, 0.f, 1.f,
+        1.f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f, 0.f, 1.f,
+
+        1.f,  1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f,  1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+
+        -1.f, -1.f, -1.f,     0.f,  0.f, -1.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f, -1.f,     0.f,  0.f, -1.f,     1.f, 0.f, 0.f, 1.f,
+        1.f,  1.f, -1.f,     0.f,  0.f, -1.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f, -1.f,     0.f,  0.f, -1.f,     1.f, 0.f, 0.f, 1.f,
+
+        -1.f, -1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f, -1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+
+        1.f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+
+        -1.f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        1.f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 0.f, 0.f, 1.f,
+        -1.f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 0.f, 0.f, 1.f
+    };
+
+    unsigned int indices[36] =
+    {
+        0, 1, 2, 0, 2, 3,         // Front
+        4, 5, 6, 4, 6, 7,         // Right
+        8, 9, 10, 8, 10, 11,      // Back
+        12, 13, 14, 12, 14, 15,   // Left
+        16, 17, 18, 16, 18, 19,   // Upper
+        20, 21, 22, 20, 22, 23    // Bottom
+    };
+
+    // Interleave vertex buffer, fill data
+    glGenVertexArrays( 1, &m_vao );
+    glBindVertexArray( m_vao );
+
+    glGenBuffers( 1, &m_vbo );
+    glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( verts ), &verts[0], GL_STATIC_DRAW );
+
+    glGenBuffers( 1, &m_ibo );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_ibo );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indices ), &indices[0], GL_STATIC_DRAW );
+
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 10, (void*)0 );
+    glEnableVertexAttribArray( 0 ); // Position
+
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 10, (void*)(3 * sizeof( float )) );
+    glEnableVertexAttribArray( 1 ); // Normal
+
+    glVertexAttribPointer( 2, 4, GL_FLOAT, GL_FALSE, sizeof( float ) * 10, (void*)(6 * sizeof( float )) );
+    glEnableVertexAttribArray( 2 ); // Color
+
+    glBindVertexArray( 0 );
+}
+
+void Renderer::TestCuboids::render( const glm::mat4& projection, const glm::mat4& view, const LightSource& lightSource, const glm::vec3 cameraPos )
+{
+    m_shader->use();
+    m_shader->setMat4( "projection", projection );
+    m_shader->setMat4( "view", view );
+
+    m_shader->setVec3( "lightColor", lightSource.m_color );
+    //m_shader->setVec3( "lightPos", lightSource.m_pos );
+    m_shader->setVec3( "lightPos", cameraPos );
+    m_shader->setVec3( "viewPos", cameraPos );
+
+    glBindVertexArray( m_vao );
+
+    glm::mat4 model = glm::translate( glm::mat4(), glm::vec3( 0.f, 0.f, 0.f ) );
+    model = glm::rotate( model, glm::pi<float>() / 4.f, glm::vec3( 1.f, 1.f, 1.f ) );
+    m_shader->setMat4( "model", model );
+    glDrawElements( GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0 );
+
+    glBindVertexArray( 0 );
 }
 
 void Renderer::drawText2d( const Vertex2 pos, const Color color, const char* string, ... )
